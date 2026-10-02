@@ -1,7 +1,7 @@
 ## Pet Clinic Appointment & Vaccination System
 **ระบบบริหารจัดการนัดหมายและประวัติการฉีดวัคซีนสำหรับคลินิกสัตว์เลี้ยง**
 
-เว็บแอปพลิเคชันบริหารจัดการคลินิกสัตว์เลี้ยงพัฒนาด้วย Java 17 และ Spring Boot ตามสถาปัตยกรรมแบบ Layered Architecture ระบบได้ออกแบบเพื่อรองรับการทำงานของเจ้าของสัตว์เลี้ยงในการบันทึกข้อมูลสัตว์เลี้ยงและการจองคิวนัดหมายตรวจรักษาหรือฉีดวัคซีน ตลอดจนสนับสนุนการปฏิบัติงานของสัตวแพทย์และเจ้าหน้าที่ในการบริหารจัดการตารางเวลา การบันทึกประวัติการรักษา และการประมวลผลรายงานสรุปผลการบริการ
+ระบบจัดการข้อมูลและการนัดหมายสำหรับคลินิกสัตว์เลี้ยงที่พัฒนาด้วย Java 17 และ Spring Boot ตามสถาปัตยกรรมแบบ Layered Architecture เพื่อช่วยให้เจ้าของสัตว์เลี้ยงสามารถจัดการข้อมูลสัตว์เลี้ยง นัดหมายกับสัตวแพทย์ และตรวจสอบประวัติการรักษาและการฉีดวัคซีนได้อย่างสะดวก ตลอดจนช่วยสัตวแพทย์ให้จัดการตารางนัดและบันทึกประวัติได้อย่างเป็นระบบ เพื่อลดความซ้ำซ้อนของข้อมูลและเพิ่มประสิทธิภาพในการบริการ
 
 ---
 
@@ -17,16 +17,53 @@
 
 ---
 
+## วัตถุประสงค์ (Objectives)
+1. เพื่อพัฒนาระบบจัดการข้อมูลเจ้าของสัตว์เลี้ยงและสัตว์เลี้ยง
+2. เพื่ออำนวยความสะดวกในการนัดหมายระหว่างเจ้าของสัตว์เลี้ยงกับสัตวแพทย์
+3. เพื่อให้สัตวแพทย์สามารถจัดการข้อมูลการนัดหมายและบันทึกประวัติการรักษาได้
+4. เพื่อจัดเก็บประวัติการรักษาและการฉีดวัคซีนของสัตว์เลี้ยงอย่างเป็นระบบ
+5. เพื่อประยุกต์ใช้ Design Patterns ในการออกแบบและพัฒนาซอฟต์แวร์
+
+## ฟังก์ชันและโครงสร้างหน้าเว็บ (Core Screens & Features)
+ระบบกำหนดโครงสร้างหน้าจอหลักไว้ 4 หน้า ได้แก่:
+
+**หน้าจอหลักของระบบ (4 Core Screens)**
+หน้าหลัก / แดชบอร์ด (Home / Dashboard): หน้าต้อนรับ ค้นหาสัตวแพทย์ และแสดงข่าวสาร/บริการของคลินิก
+
+**หน้าจัดการข้อมูลสัตว์เลี้ยง (Pet Management Page):** หน้าสำหรับเพิ่ม แก้ไข และดูรายชื่อสัตว์เลี้ยงของเจ้าของ
+
+**หน้าระบบนัดหมาย (Appointment Page):** หน้าจองคิว เลือกสัตวแพทย์ เลือกวันเวลา และเลือกประเภทบริการ (ตรวจรักษา/ฉีดวัคซีน)
+
+**หน้าประวัติการรักษาและวัคซีน (Medical & Vaccination Record Page):** หน้าแสดงประวัติการรักษา บันทึกสัตวแพทย์ และตารางการรับวัคซีน
+
+## ขอบเขตฟังก์ชันแบ่งตามสิทธิ์ผู้ใช้
+**สำหรับเจ้าของสัตว์เลี้ยง (Pet Owner):**
+* จัดการข้อมูลส่วนตัวและข้อมูลติดต่อ
+* เพิ่มและจัดการข้อมูลสัตว์เลี้ยง
+* ค้นหาและดูข้อมูลสัตวแพทย์
+* ส่งคำขอนัดหมายและตรวจสอบสถานะการนัดหมาย
+* ดูประวัติการรักษาและประวัติการฉีดวัคซีนของสัตว์เลี้ยง
+
+**สำหรับสัตวแพทย์ (Doctor):**
+* ดูรายการนัดหมายและจัดการตารางนัดหมาย
+* ตรวจสอบ/อนุมัติคำขอนัดหมาย
+* ค้นหาข้อมูลและประวัติสัตว์เลี้ยง
+* บันทึกประวัติการรักษาและข้อมูลการฉีดวัคซีน
+
+หมายเหตุ: ฟังก์ชันและหน้าจอข้างต้นเป็นขอบเขตที่วางแผนไว้ และอยู่ระหว่างการพัฒนาอย่างเป็นขั้นตอน
+
 ## Tech Stack
 
-* **Backend Framework:** Java 17+, Spring Boot 3.x (Spring Data JPA, Spring Validation)
+* **Programming Language:** Java 17
+* **Backend Framework:** Spring Boot 3.x (Spring Data JPA, Spring Validation)
 * **Build Tool:** Gradle
-* **Database:** PostgreSQL / MySQL (Relational Database)
+* **Database:** PostgreSQL / MySQL (ประมวลผลผ่าน Spring Data JPA)
 * **ORM:** Spring Data JPA (Hibernate)
-* **Frontend Framework:** Thymeleaf
+* **Frontend Framework:** Thymeleaf + HTML5 / CSS3 (Bootstrap 5)
 * **API Documentation:** OpenAPI 3.0 / Swagger UI
 * **Testing Framework:** JUnit 5, Mockito, Spring Boot Test
-* **DevOps & Deployment:** Docker, Docker Compose, Render / Cloud Service
+* **Containerization:** Docker และ Docker Compose
+* **Development Environment:** Visual Studio Code (VS Code)
 
 ---
 
@@ -45,12 +82,13 @@ Domain / Entity Layer (Entities, Value Objects, Enums) + DTO Layer (Request/Resp
 
 ### กระบวนการทำงานของระบบแบ่งตามสิทธิ์ผู้ใช้งาน (Role-based Workflows):
 
-1. **กระบวนการสำหรับสัตวแพทย์และเจ้าหน้าที่ (Doctor Flow):** `Dashboard/Calendar` -> `Recent Requests` -> `Pet Profile Search` -> `Add Medical Record / Vaccine Update`
-2. **กระบวนการสำหรับเจ้าของสัตว์เลี้ยง (Pet Owner Flow):** `My Pets Management` -> `Search Doctor` -> `Send Appointment Request` -> `View Medical & Vaccination History`
+1. **กระบวนการสำหรับสัตวแพทย์และเจ้าหน้าที่ (Doctor Flow):** 
+2. **กระบวนการสำหรับเจ้าของสัตว์เลี้ยง (Pet Owner Flow):** 
 
+*(หมายเหตุ: มีการแก้ไขเพิ่มเติมภายหลัง)*
 ---
 
-## Database Design (ER Diagram)
+## Database Design
 
 โครงสร้างฐานข้อมูลเชิงสัมพันธ์ (Relational Database) ประกอบด้วย 6 ตารางหลัก รองรับความสัมพันธ์ประเภท **One-to-One** และ **One-to-Many** ดังนี้:
 
@@ -65,9 +103,9 @@ Domain / Entity Layer (Entities, Value Objects, Enums) + DTO Layer (Request/Resp
 
 ---
 
-## Design Patterns Applied
+## การนำ Design Patterns มาใช้งาน (Design Patterns Applied)
 
-ประยุกต์ใช้ **Creational Design Patterns** เพื่อแก้ปัญหาในการออกแบบเชิงวัตถุให้สอดคล้องกับข้อกำหนดทางเทคนิค:
+เพื่อแก้ปัญหาในการออกแบบเชิงวัตถุให้สอดคล้องกับข้อกำหนดทางเทคนิค:
 
 | Pattern | Group | วัตถุประสงค์และการประยุกต์ใช้งานในระบบ |
 | --- | --- | --- |
@@ -77,31 +115,33 @@ Domain / Entity Layer (Entities, Value Objects, Enums) + DTO Layer (Request/Resp
 
 ---
 
-## Installation & Setup
+## การติดตั้งและเริ่มต้นใช้งาน (Installation & Setup)
 
 ### เงื่อนไขเบื้องต้น (Prerequisites)
 
-* Java 17 JDK หรือเวอร์ชันที่สูงกว่า
-* Docker และ Docker Compose
-* Git Version Control
+**สิ่งที่ต้องติดตั้ง**
+* Java Development Kit (JDK) 17 หรือเวอร์ชันที่โครงการรองรับ
+* Visual Studio Code (VS Code)
+* Gradle หรือใช้ Gradle Wrapper ที่อยู่ในโครงการ
+* PostgreSQL หรือ MySQL ตามฐานข้อมูลที่โครงการเลือกใช้
+* Git
+
 
 ### ขั้นตอนที่ 1: การ Clone Repository
 ```bash
-git clone [https://github.com/pitchayasitthipan/vet-appointment.git](https://github.com/pitchayasitthipan/vet-appointment.git)
-cd vet-appointment
+1. Clone Repository จาก GitHub
+git clone [https://github.com/pitchayasitthipan/vet-appointment-system.git](https://github.com/pitchayasitthipan/vet-appointment-system.git)
+
+2. เข้าสู่โฟลเดอร์โปรเจกต์
+cd vet-appointment-system
 
 ```
 
 ### ขั้นตอนที่ 2: การกำหนดค่าฐานข้อมูล (Database Configuration)
 
-ปรับแต่งค่าการเชื่อมต่อฐานข้อมูลในไฟล์ `code/src/main/resources/application.yml` หรือผ่าน Environment Variables:
+สร้างฐานข้อมูลตามชื่อและการตั้งค่าที่กำหนดไว้ในไฟล์ application.properties หรือ application.yml 
 
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/vetcare_db
-    username: postgres
-    password: postgrespassword
+กำหนดข้อมูลการเชื่อมต่อฐานข้อมูลให้ตรงกับสภาพแวดล้อมที่ใช้งาน โดยไม่ควรเผยแพร่รหัสผ่านหรือข้อมูลสำคัญลงใน Repository
 
 ```
 
@@ -150,13 +190,6 @@ Unit Testin และ Integration Testing ดำเนินการผ่า�
 
 ---
 
-## Deployment URL
-
-* **Production App URL:** https://vetcare-clinic.onrender.com
-* **Database Server:** Cloud PostgreSQL (Supabase / Aiven / Railway)
-
----
-
 ## Project Structure
 
 ```text
@@ -180,3 +213,4 @@ Unit Testin และ Integration Testing ดำเนินการผ่า�
 └── img/                    # ไฟล์สื่อและภาพประกอบระบบ
 
 ```
+*(หมายเหตุ: อาจะมีการแก้ไขในภายหลัง)*
