@@ -3,7 +3,6 @@ package com.example.petclinic.dto.response;
 import java.time.LocalDateTime;
 
 public class PetOwnerResponseDTO {
-
     private Long ownerId;
     private String firstName;
     private String lastName;
@@ -11,7 +10,7 @@ public class PetOwnerResponseDTO {
     private String phone;
     private LocalDateTime createdAt;
 
-    // ข้อมูลส่วนรายละเอียดจาก PetOwnerDetail
+    private Long ownerDetailId;
     private String address;
     private String emergencyContactName;
     private String emergencyContactPhone;
@@ -65,6 +64,14 @@ public class PetOwnerResponseDTO {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Long getOwnerDetailId() {
+        return ownerDetailId;
+    }
+
+    public void setOwnerDetailId(Long ownerDetailId) {
+        this.ownerDetailId = ownerDetailId;
     }
 
     public String getAddress() {
