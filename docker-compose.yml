@@ -1,0 +1,63 @@
+services:
+  # =============================================================
+  # MySQL Database Container
+  # =============================================================
+  db:
+    image: mysql:8.0
+    container_name: vet-mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: petclinic_db
+      MYSQL_USER: petclinic_user
+      MYSQL_PASSWORD: petclinic_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./code/src/main/resources/data-doctor.sql:/docker-entrypoint-initdb.d/01-data-doctor.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - vet-network
+
+  # =============================================================
+  # Spring Boot Backend Container (PawCare System)
+  # =============================================================
+  app:
+    build:
+      context: ./code
+      dockerfile: Dockerfile
+    container_name: vet-appointment-app
+    restart: on-failure
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: petclinic_db
+      DB_USERNAME: root
+      DB_PASSWORD: rootpassword
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/petclinic_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=Asia/Bangkok&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: rootpassword
+    ports:
+      - "8080:8080"
+    networks:
+      - vet-network
+
+# =============================================================
+# Persistent Volumes & Custom Bridge Network
+# =============================================================
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  vet-network:
+    driver: bridge
