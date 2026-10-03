@@ -29,3 +29,22 @@
 
 ### 5. รายละเอียดการทำงานของ Unit Test
 ![Test Details](05-test-details.png)
+
+---
+
+# ClinicConfigService (Singleton Pattern) Unit Test Results
+
+เอกสารผลการทดสอบ Unit Test สำหรับการพิสูจน์ **Singleton Pattern** ผ่าน Spring Bean ด้วย **JUnit 5**, **SpringExtension** และ **AssertJ**
+
+## สรุปผลการทดสอบ
+
+- **Class ทดสอบ:** `com.example.petclinic.service.ClinicConfigServiceTest`
+- **จำนวน Test ทั้งหมด:** 3 Tests
+- **Failures:** 0
+- **Errors:** 0
+- **Skipped:** 0
+- **สถานะ:** `BUILD SUCCESS` (ผ่าน 100%)
+
+### 6. ผลการทดสอบ Singleton Pattern (BUILD SUCCESS)
+![Singleton Pattern Test Passed](06-singleton-test-passed.png)
+
