@@ -649,9 +649,7 @@ small,
 
 .doc-header-row {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  flex-wrap: wrap;
+  align-items: center;
   gap: 0.5rem;
 }
 
@@ -690,20 +688,6 @@ small,
   color: var(--text-muted);
   font-family: inherit;
   margin-top: -2px;
-}
-
-.doc-rating {
-  font-size: 0.82rem;
-  color: #d97706;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.doc-reviews {
-  color: var(--text-muted);
-  font-weight: 400;
 }
 
 /* Specialty Tags */

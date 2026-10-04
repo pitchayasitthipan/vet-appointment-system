@@ -12,8 +12,6 @@ const DEFAULT_DOCTORS = [
     email: "nichapa.w@pawcare.com",
     titlePrefix: "สพ.ญ.",
     isChief: true,
-    rating: 4.9,
-    reviews: 128,
     room: "ห้องตรวจ 1",
     experience: "8 ปี",
     education: "คณะสัตวแพทยศาสตร์ จุฬาฯ",
@@ -33,8 +31,6 @@ const DEFAULT_DOCTORS = [
     email: "kittiphat.s@pawcare.com",
     titlePrefix: "น.สพ.",
     isChief: false,
-    rating: 4.8,
-    reviews: 96,
     room: "ห้องผ่าตัด",
     experience: "7 ปี",
     education: "คณะสัตวแพทยศาสตร์ ม.เกษตรฯ",
@@ -54,8 +50,6 @@ const DEFAULT_DOCTORS = [
     email: "preeyaporn.t@pawcare.com",
     titlePrefix: "สพ.ญ.",
     isChief: false,
-    rating: 4.7,
-    reviews: 74,
     room: "ห้องตรวจ 2",
     experience: "6 ปี",
     education: "คณะสัตวแพทยศาสตร์ ม.มหิดล",
@@ -75,8 +69,6 @@ const DEFAULT_DOCTORS = [
     email: "thanawat.a@pawcare.com",
     titlePrefix: "น.สพ.",
     isChief: false,
-    rating: 4.6,
-    reviews: 58,
     room: "ห้องตรวจ 3",
     experience: "5 ปี",
     education: "คณะสัตวแพทยศาสตร์ ม.ขอนแก่น",
@@ -96,8 +88,6 @@ const DEFAULT_DOCTORS = [
     email: "ohanong.c@pawcare.com",
     titlePrefix: "สพ.ญ.",
     isChief: false,
-    rating: 4.8,
-    reviews: 82,
     room: "ห้องตรวจ 1",
     experience: "6 ปี",
     education: "คณะสัตวแพทยศาสตร์ ม.เชียงใหม่",
@@ -210,11 +200,6 @@ function renderDoctors(list) {
               ${doc.isChief ? '<span class="badge-chief">หัวหน้าแพทย์</span>' : ''}
               <h3 class="doc-name">${fullName}</h3>
             </div>
-            <div class="doc-rating">
-              <span>⭐</span>
-              <span>${doc.rating || '4.8'}</span>
-              <span class="doc-reviews">(${doc.reviews || '80'} รีวิว)</span>
-            </div>
           </div>
           
           <div class="doc-name-en">${nameEn}</div>
@@ -227,6 +212,7 @@ function renderDoctors(list) {
             <span class="meta-item"><span class="icon i-hospital icon-accent icon-sm"></span> ${doc.room || 'ห้องตรวจ 1'}</span>
             <span class="meta-item"><span class="icon i-stethoscope icon-accent icon-sm"></span> ประสบการณ์ ${doc.experience || '6 ปี'}</span>
             <span class="meta-item"><span class="icon i-identification-card icon-accent icon-sm"></span> ${doc.education || 'คณะสัตวแพทยศาสตร์'}</span>
+            ${doc.phone ? `<span class="meta-item"><span class="icon i-phone icon-accent icon-sm"></span> ${doc.phone}</span>` : ''}
           </div>
         </div>
         
@@ -391,15 +377,13 @@ async function handleAddDoctor(event) {
     const localNewDoc = {
       ...newDoctor,
       doctorId: Date.now(),
-      rating: 5.0,
-      reviews: 1,
       room: "ห้องตรวจ 1",
       experience: "1 ปี",
       education: "คณะสัตวแพทยศาสตร์",
       statusToday: "available",
       statusText: "ออกตรวจวันนี้",
       timeToday: "09:00 - 17:00 น.",
-      avatar: "/images/dr-nichapa.jpg"
+      avatar: "images/dr-nichapa.jpg"
     };
     doctorsList.unshift(localNewDoc);
     renderDoctors(doctorsList);
