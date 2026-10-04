@@ -18,7 +18,7 @@
       <a href="/" class="brand">
         <div class="brand-logo">🐾</div>
         <div class="brand-text">
-          <h1>PawCare</h1>
+          <span class="brand-name">PawCare</span>
           <small>Pet Clinic & Vaccination</small>
         </div>
       </a>
@@ -52,7 +52,7 @@
         <div class="badge-tag">
           <span>🐾</span> Our Veterinarians
         </div>
-        <h2>รายชื่อสัตวแพทย์</h2>
+        <h1 class="page-title">รายชื่อสัตวแพทย์</h1>
         <p>ทีมสัตวแพทย์ผู้เชี่ยวชาญ ดูแลด้วยความใส่ใจ เพื่อสุขภาพที่ดีของสัตว์เลี้ยงที่คุณรัก</p>
       </div>
 
@@ -171,9 +171,9 @@
       <!-- Clinic Service Info Card -->
       <div class="clinic-info-card">
         <div>
-          <div class="info-box-title">
+          <h3 class="info-box-title">
             <span>🕒</span> ช่วงเวลาการให้บริการ
-          </div>
+          </h3>
           <ul class="opening-hours-list">
             <li>
               <span class="hours-day">วันจันทร์ - ศุกร์</span>
@@ -191,9 +191,9 @@
         </div>
 
         <div>
-          <div class="info-box-title">
+          <h3 class="info-box-title">
             <span>🐾</span> หมายเหตุ
-          </div>
+          </h3>
           <ul class="notes-list">
             <li>ตารางเวรอาจมีการเปลี่ยนแปลง</li>
             <li>กรุณาจองคิวล่วงหน้า</li>
@@ -224,27 +224,27 @@
   <div class="modal-overlay" id="scheduleModal">
     <div class="modal-box">
       <div class="modal-header">
-        <div class="modal-title">
+        <h2 class="modal-title">
           <span>📅</span> ข้อมูลตารางเวรสัตวแพทย์
-        </div>
+        </h2>
         <button class="modal-close" onclick="closeModal('scheduleModal')">&times;</button>
       </div>
-      <div style="margin-bottom: 1.25rem;">
-        <h3 id="modalDocName" style="color: #ff2d62; font-size: 1.3rem; margin-bottom: 0.25rem;">-</h3>
-        <p id="modalDocSpec" style="color: #64748b; font-size: 0.9rem; margin-bottom: 0.8rem;">-</p>
+      <div class="modal-doctor-profile">
+        <h3 id="modalDocName" class="modal-doc-name">-</h3>
+        <p id="modalDocSpec" class="modal-doc-spec">-</p>
         
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem; margin-bottom: 1rem;">
-          <div style="font-weight: 700; color: #1e293b; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.4rem;">
-            <span>🏥</span> ประจำห้องตรวจ: <span id="modalDocRoom" style="font-weight: 500; color: #475569;">-</span>
+        <div class="modal-doc-details">
+          <div class="modal-doc-field">
+            <span>🏥</span> ประจำห้องตรวจ: <span id="modalDocRoom" class="modal-doc-value">-</span>
           </div>
-          <div style="font-weight: 700; color: #1e293b; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.4rem;">
-            <span>🕒</span> ตารางเวร: <span id="modalDocSchedule" style="font-weight: 500; color: #475569;">-</span>
+          <div class="modal-doc-field">
+            <span>🕒</span> ตารางเวร: <span id="modalDocSchedule" class="modal-doc-value">-</span>
           </div>
-          <div style="font-weight: 700; color: #1e293b; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.4rem;">
-            <span>📞</span> เบอร์โทรศัพท์: <span id="modalDocPhone" style="font-weight: 500; color: #475569;">-</span>
+          <div class="modal-doc-field">
+            <span>📞</span> เบอร์โทรศัพท์: <span id="modalDocPhone" class="modal-doc-value">-</span>
           </div>
-          <div style="font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.4rem;">
-            <span>✉️</span> อีเมล: <span id="modalDocEmail" style="font-weight: 500; color: #475569;">-</span>
+          <div class="modal-doc-field">
+            <span>✉️</span> อีเมล: <span id="modalDocEmail" class="modal-doc-value">-</span>
           </div>
         </div>
       </div>
@@ -261,9 +261,9 @@
   <div class="modal-overlay" id="addDoctorModal">
     <div class="modal-box">
       <div class="modal-header">
-        <div class="modal-title">
+        <h2 class="modal-title">
           <span>➕</span> เพิ่มข้อมูลสัตวแพทย์ใหม่
-        </div>
+        </h2>
         <button class="modal-close" onclick="closeModal('addDoctorModal')">&times;</button>
       </div>
       <form onsubmit="handleAddDoctor(event)">
