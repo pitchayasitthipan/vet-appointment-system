@@ -32,7 +32,9 @@
       </ul>
 
       <div class="nav-actions">
-        <button class="icon-btn" title="ค้นหา" aria-label="Search">🔍</button>
+        <button class="icon-btn" title="ค้นหา" aria-label="Search">
+          <span class="icon i-magnifying-glass icon-accent"></span>
+        </button>
         <button class="btn-book" onclick="alert('ระบบการจองนัดหมายกำลังเปิดให้บริการ!')">
           จองนัดหมาย
         </button>
@@ -50,7 +52,7 @@
     <div class="hero-banner">
       <div class="hero-content">
         <div class="badge-tag">
-          <span>🐾</span> Our Veterinarians
+          <span class="icon i-paw-print icon-accent icon-sm"></span> Our Veterinarians
         </div>
         <h1 class="page-title">รายชื่อสัตวแพทย์</h1>
         <p>ทีมสัตวแพทย์ผู้เชี่ยวชาญ ดูแลด้วยความใส่ใจ เพื่อสุขภาพที่ดีของสัตว์เลี้ยงที่คุณรัก</p>
@@ -65,19 +67,19 @@
 
       <div class="features-grid">
         <div class="feature-card">
-          <div class="feature-icon-circle">🩺</div>
+          <div class="feature-icon-circle"><span class="icon i-stethoscope icon-accent"></span></div>
           <p>ทีมสัตวแพทย์<br>ผู้เชี่ยวชาญ</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon-circle">📅</div>
+          <div class="feature-icon-circle"><span class="icon i-calendar-blank icon-accent"></span></div>
           <p>ตารางเวรชัดเจน<br>ตรวจสอบได้</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon-circle">💖</div>
+          <div class="feature-icon-circle"><span class="icon i-heart icon-accent"></span></div>
           <p>จองนัดหมายง่าย<br>เลือกแพทย์ได้</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon-circle">🛡️</div>
+          <div class="feature-icon-circle"><span class="icon i-shield-check icon-accent"></span></div>
           <p>หมายมั่น<br>ในคุณภาพการรักษา</p>
         </div>
       </div>
@@ -92,7 +94,7 @@
       <!-- Search Toolbar -->
       <div class="search-toolbar">
         <div class="search-input-wrap">
-          <span>🔍</span>
+          <span class="icon i-magnifying-glass icon-accent"></span>
           <input type="text" id="searchInput" placeholder="ค้นหาชื่อสัตวแพทย์, ความเชี่ยวชาญ, หรือชื่อเฉพาะทาง..." autocomplete="off">
         </div>
 
@@ -117,14 +119,16 @@
           <option value="อาทิตย์">อาทิตย์</option>
         </select>
 
-        <button class="btn-search" type="button">ค้นหา</button>
+        <button class="btn-search" type="button">
+          <span class="icon i-magnifying-glass icon-sm"></span> ค้นหา
+        </button>
       </div>
 
       <!-- Action Bar -->
       <div class="action-bar-top">
         <span class="doctor-count" id="doctorCount">กำลังโหลดข้อมูลสัตวแพทย์...</span>
         <button class="btn-add-doctor" onclick="openAddDoctorModal()">
-          <span>➕</span> เพิ่มข้อมูลสัตวแพทย์
+          <span class="icon i-plus icon-sm"></span> เพิ่มข้อมูลสัตวแพทย์
         </button>
       </div>
 
@@ -140,10 +144,10 @@
       <div class="schedule-panel">
         <div class="tab-switch-row">
           <button class="btn-tab active" id="tabSchedule">
-            <span>📅</span> ตารางเวรสัตวแพทย์
+            <span class="icon i-calendar-blank icon-sm"></span> ตารางเวรสัตวแพทย์
           </button>
           <button class="btn-tab" id="tabList" onclick="alert('แสดงตารางแบบรายการภาพรวมของทั้งสัปดาห์')">
-            <span>📋</span> ตารางแบบรายการ
+            <span class="icon i-list icon-sm"></span> ตารางแบบรายการ
           </button>
         </div>
 
@@ -172,7 +176,7 @@
       <div class="clinic-info-card">
         <div>
           <h3 class="info-box-title">
-            <span>🕒</span> ช่วงเวลาการให้บริการ
+            <span class="icon i-clock icon-accent icon-sm"></span> ช่วงเวลาการให้บริการ
           </h3>
           <ul class="opening-hours-list">
             <li>
@@ -192,7 +196,7 @@
 
         <div>
           <h3 class="info-box-title">
-            <span>🐾</span> หมายเหตุ
+            <span class="icon i-paw-print icon-accent icon-sm"></span> หมายเหตุ
           </h3>
           <ul class="notes-list">
             <li>ตารางเวรอาจมีการเปลี่ยนแปลง</li>
@@ -200,7 +204,7 @@
             <li>กรณีฉุกเฉินติดต่อได้ตลอด 24 ชั่วโมง</li>
           </ul>
           <button class="btn-emergency" onclick="alert('โทรติดต่อแผนกฉุกเฉิน 24 ชม.: 02-123-4567')">
-            <span>📞</span> 02-123-4567
+            <span class="icon i-phone icon-sm"></span> 02-123-4567
           </button>
         </div>
       </div>
@@ -212,10 +216,10 @@
   <footer class="footer">
     <div class="footer-content">
       <div class="footer-quote">
-        <span>🐾</span> Healthy Pets • Happy Lives
+        <span class="icon i-paw-print icon-accent icon-sm"></span> Healthy Pets • Happy Lives
       </div>
       <div class="footer-brand">
-        <span>🐾</span> PawCare
+        <span class="icon i-paw-print icon-pink icon-sm"></span> PawCare
       </div>
     </div>
   </footer>
@@ -225,7 +229,7 @@
     <div class="modal-box">
       <div class="modal-header">
         <h2 class="modal-title">
-          <span>📅</span> ข้อมูลตารางเวรสัตวแพทย์
+          <span class="icon i-calendar-blank icon-accent"></span> ข้อมูลตารางเวรสัตวแพทย์
         </h2>
         <button class="modal-close" onclick="closeModal('scheduleModal')">&times;</button>
       </div>
@@ -235,16 +239,16 @@
         
         <div class="modal-doc-details">
           <div class="modal-doc-field">
-            <span>🏥</span> ประจำห้องตรวจ: <span id="modalDocRoom" class="modal-doc-value">-</span>
+            <span class="icon i-hospital icon-accent icon-sm"></span> ประจำห้องตรวจ: <span id="modalDocRoom" class="modal-doc-value">-</span>
           </div>
           <div class="modal-doc-field">
-            <span>🕒</span> ตารางเวร: <span id="modalDocSchedule" class="modal-doc-value">-</span>
+            <span class="icon i-clock icon-accent icon-sm"></span> ตารางเวร: <span id="modalDocSchedule" class="modal-doc-value">-</span>
           </div>
           <div class="modal-doc-field">
-            <span>📞</span> เบอร์โทรศัพท์: <span id="modalDocPhone" class="modal-doc-value">-</span>
+            <span class="icon i-phone icon-accent icon-sm"></span> เบอร์โทรศัพท์: <span id="modalDocPhone" class="modal-doc-value">-</span>
           </div>
           <div class="modal-doc-field">
-            <span>✉️</span> อีเมล: <span id="modalDocEmail" class="modal-doc-value">-</span>
+            <span class="icon i-envelope icon-accent icon-sm"></span> อีเมล: <span id="modalDocEmail" class="modal-doc-value">-</span>
           </div>
         </div>
       </div>
@@ -262,7 +266,7 @@
     <div class="modal-box">
       <div class="modal-header">
         <h2 class="modal-title">
-          <span>➕</span> เพิ่มข้อมูลสัตวแพทย์ใหม่
+          <span class="icon i-plus icon-accent"></span> เพิ่มข้อมูลสัตวแพทย์ใหม่
         </h2>
         <button class="modal-close" onclick="closeModal('addDoctorModal')">&times;</button>
       </div>

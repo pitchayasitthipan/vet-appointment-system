@@ -224,9 +224,9 @@ function renderDoctors(list) {
           </div>
           
           <div class="doc-meta-row">
-            <span class="meta-item">🏥 ${doc.room || 'ห้องตรวจ 1'}</span>
-            <span class="meta-item">💼 ประสบการณ์ ${doc.experience || '6 ปี'}</span>
-            <span class="meta-item">🎓 ${doc.education || 'คณะสัตวแพทยศาสตร์'}</span>
+            <span class="meta-item"><span class="icon i-hospital icon-accent icon-sm"></span> ${doc.room || 'ห้องตรวจ 1'}</span>
+            <span class="meta-item"><span class="icon i-stethoscope icon-accent icon-sm"></span> ประสบการณ์ ${doc.experience || '6 ปี'}</span>
+            <span class="meta-item"><span class="icon i-identification-card icon-accent icon-sm"></span> ${doc.education || 'คณะสัตวแพทยศาสตร์'}</span>
           </div>
         </div>
         
@@ -240,7 +240,7 @@ function renderDoctors(list) {
           </div>
           
           <button class="btn-schedule" onclick="viewDoctorSchedule(${doc.doctorId})">
-            📅 ดูตารางเวร
+            <span class="icon i-calendar-blank icon-sm"></span> ดูตารางเวร
           </button>
         </div>
       </div>
@@ -287,7 +287,7 @@ function renderScheduleSlots(dayIdx) {
         <div class="slot-doc-name">${slot.name}</div>
         <div class="slot-spec">${slot.spec}</div>
       </div>
-      <div class="slot-room">🏥 ${slot.room}</div>
+      <div class="slot-room"><span class="icon i-hospital icon-accent icon-sm"></span> ${slot.room}</div>
       <div class="slot-status-pill ${slot.status}">
         ${slot.status === 'on' ? 'ออกตรวจ' : 'ไม่ออกตรวจ'}
       </div>
