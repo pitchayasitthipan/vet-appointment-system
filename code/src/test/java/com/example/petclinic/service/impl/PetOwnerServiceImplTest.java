@@ -1,0 +1,196 @@
+package com.example.petclinic.service.impl;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.*;
+import org.mockito.MockitoAnnotations;
+
+import com.example.petclinic.domain.entity.PetOwner;
+import com.example.petclinic.domain.entity.PetOwnerDetail;
+import com.example.petclinic.dto.request.PetOwnerRequestDTO;
+import com.example.petclinic.dto.response.PetOwnerResponseDTO;
+import com.example.petclinic.repository.PetOwnerRepository;
+
+class PetOwnerServiceImplTest {
+
+    @Mock
+    private PetOwnerRepository petOwnerRepository;
+
+    @InjectMocks
+    private PetOwnerServiceImpl petOwnerService;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    @DisplayName("สร้างข้อมูลเจ้าของสัตว์เลี้ยง: สำเร็จ")
+    void testCreatePetOwner_Success() {
+        PetOwnerRequestDTO request = new PetOwnerRequestDTO();
+        request.setFirstName("John");
+        request.setLastName("Doe");
+        request.setEmail("test@example.com");
+        request.setPhone("0876543210");
+        request.setAddress("Khon Kaen");
+        request.setEmergencyContactName("familyMember");
+        request.setEmergencyContactPhone("0987654321");
+
+        when(petOwnerRepository.existsByEmail("test@example.com")).thenReturn(false);
+
+        PetOwner saved = new PetOwner();
+        saved.setOwnerId(1L);
+        saved.setFirstName("John");
+        saved.setLastName("Doe");
+        saved.setEmail("test@example.com");
+        saved.setPhone("0876543210");
+
+        PetOwnerDetail detail = new PetOwnerDetail();
+        detail.setAddress("Khon Kaen");
+        detail.setEmergencyContactName("familyMember");
+        detail.setEmergencyContactPhone("0987654321");
+        saved.setPetOwnerDetail(detail);
+
+        when(petOwnerRepository.save(any(PetOwner.class))).thenReturn(saved);
+
+        PetOwnerResponseDTO result = petOwnerService.createPetOwner(request);
+
+        assertNotNull(result);
+        assertEquals("John", result.getFirstName());
+        assertEquals("Khon Kaen", result.getAddress());
+        verify(petOwnerRepository, times(1)).save(any(PetOwner.class));
+    }
+
+    @Test
+    @DisplayName("สร้างข้อมูลเจ้าของสัตว์เลี้ยง: อีเมลซ้ำ")
+    void testCreatePetOwner_DuplicateEmail() {
+        PetOwnerRequestDTO request = new PetOwnerRequestDTO();
+        request.setEmail("test@example.com");
+
+        when(petOwnerRepository.existsByEmail("test@example.com")).thenReturn(true);
+
+        assertThrows(IllegalArgumentException.class, () -> petOwnerService.createPetOwner(request));
+        verify(petOwnerRepository, never()).save(any(PetOwner.class));
+    }
+
+    @Test
+    @DisplayName("ดึงข้อมูลเจ้าของสัตว์เลี้ยงทั้งหมด: สำเร็จ")
+    void testGetAllPetOwners() {
+        PetOwner owner = new PetOwner();
+        owner.setOwnerId(1L);
+        owner.setFirstName("John");
+        owner.setLastName("Test");
+        owner.setEmail("test@example.com");
+        owner.setPhone("0876543210");
+
+        when(petOwnerRepository.findAll()).thenReturn(List.of(owner));
+
+        List<PetOwnerResponseDTO> result = petOwnerService.getAllPetOwners();
+
+        assertEquals(1, result.size());
+        assertEquals("John", result.get(0).getFirstName());
+        verify(petOwnerRepository, times(1)).findAll();
+    }
+
+    @Test
+    @DisplayName("ค้นหาเจ้าของสัตว์เลี้ยงด้วย Id: พบข้อมูล")
+    void testGetPetOwnerById_Found() {
+        PetOwner owner = new PetOwner();
+        owner.setOwnerId(1L);
+        owner.setFirstName("John");
+
+        when(petOwnerRepository.findById(1L)).thenReturn(Optional.of(owner));
+
+        Optional<PetOwnerResponseDTO> result = petOwnerService.getPetOwnerById(1L);
+
+        assertTrue(result.isPresent());
+        assertEquals("John", result.get().getFirstName());
+        verify(petOwnerRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    @DisplayName("ค้นหาเจ้าของสัตว์เลี้ยงด้วย Id: ไม่พบข้อมูล")
+    void testGetPetOwnerById_NotFound() {
+        when(petOwnerRepository.findById(99L)).thenReturn(Optional.empty());
+
+        Optional<PetOwnerResponseDTO> result = petOwnerService.getPetOwnerById(99L);
+
+        assertFalse(result.isPresent());
+        verify(petOwnerRepository, times(1)).findById(99L);
+    }
+
+    @Test
+    @DisplayName("แก้ไขข้อมูลเจ้าของสัตว์เลี้ยง: สำเร็จ")
+    void testUpdatePetOwner_Success() {
+        PetOwner existing = new PetOwner();
+        existing.setOwnerId(1L);
+        existing.setFirstName("OldName");
+        existing.setLastName("OldLast");
+        existing.setEmail("old@example.com");
+
+        PetOwnerDetail oldDetail = new PetOwnerDetail();
+        existing.setPetOwnerDetail(oldDetail);
+
+        PetOwnerRequestDTO request = new PetOwnerRequestDTO();
+        request.setFirstName("John");
+        request.setLastName("Updated");
+        request.setEmail("test@example.com");
+        request.setPhone("0876543210");
+        request.setAddress("Khon Kaen");
+        request.setEmergencyContactName("familyMember");
+        request.setEmergencyContactPhone("0987654321");
+
+        when(petOwnerRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(petOwnerRepository.existsByEmail("test@example.com")).thenReturn(false);
+        when(petOwnerRepository.save(existing)).thenReturn(existing);
+
+        PetOwnerResponseDTO result = petOwnerService.updatePetOwner(1L, request);
+
+        assertNotNull(result);
+        assertEquals("John", result.getFirstName());
+        assertEquals("Updated", result.getLastName());
+        assertEquals("Khon Kaen", result.getAddress());
+        verify(petOwnerRepository, times(1)).save(existing);
+    }
+
+    @Test
+    @DisplayName("แก้ไขข้อมูลเจ้าของสัตว์เลี้ยง: ไม่พบ Id")
+    void testUpdatePetOwner_NotFound() {
+        PetOwnerRequestDTO request = new PetOwnerRequestDTO();
+        request.setEmail("new@example.com");
+
+        when(petOwnerRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> petOwnerService.updatePetOwner(99L, request));
+        verify(petOwnerRepository, times(1)).findById(99L);
+        verify(petOwnerRepository, never()).save(any(PetOwner.class));
+    }
+
+    @Test
+    @DisplayName("ลบข้อมูลเจ้าของสัตว์เลี้ยง: สำเร็จ")
+    void testDeletePetOwner_Success() {
+        when(petOwnerRepository.existsById(1L)).thenReturn(true);
+
+        petOwnerService.deletePetOwner(1L);
+
+        verify(petOwnerRepository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("ลบข้อมูลเจ้าของสัตว์เลี้ยง: ไม่พบ Id")
+    void testDeletePetOwner_NotFound() {
+        when(petOwnerRepository.existsById(99L)).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class, () -> petOwnerService.deletePetOwner(99L));
+        verify(petOwnerRepository, times(1)).existsById(99L);
+        verify(petOwnerRepository, never()).deleteById(any());
+    }
+}
