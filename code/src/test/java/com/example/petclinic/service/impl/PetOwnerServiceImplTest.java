@@ -175,6 +175,29 @@ class PetOwnerServiceImplTest {
     }
 
     @Test
+    @DisplayName("แก้ไขข้อมูลเจ้าของสัตว์เลี้ยง: อีเมลซ้ำแบบ Case-sensitive")
+    void testUpdatePetOwner_DuplicateEmailCaseSensitive() {
+        PetOwner existing = new PetOwner();
+        existing.setOwnerId(1L);
+        existing.setEmail("abc@gmail.com");
+
+        PetOwnerRequestDTO request = new PetOwnerRequestDTO();
+        request.setEmail("ABC@gmail.com");
+
+        when(petOwnerRepository.findById(1L))
+                .thenReturn(Optional.of(existing));
+        when(petOwnerRepository.existsByEmail("ABC@gmail.com"))
+                .thenReturn(true);
+
+        assertThrows(IllegalArgumentException.class, () -> petOwnerService.updatePetOwner(1L, request));
+
+        verify(petOwnerRepository, times(1))
+                .existsByEmail("ABC@gmail.com");
+        verify(petOwnerRepository, never())
+                .save(any(PetOwner.class));
+    }
+
+    @Test
     @DisplayName("ลบข้อมูลเจ้าของสัตว์เลี้ยง: สำเร็จ")
     void testDeletePetOwner_Success() {
         when(petOwnerRepository.existsById(1L)).thenReturn(true);

@@ -84,7 +84,7 @@ public class PetOwnerServiceImpl implements PetOwnerService {
                 .orElseThrow(() -> new IllegalArgumentException("ไม่พบข้อมูลเจ้าของสัตว์เลี้ยงรหัส: " + id));
 
         // ถ้าเปลี่ยนอีเมลใหม่ ตรวจสอบว่าไม่ซ้ำกับที่มีอยู่แล้ว
-        if (!petOwner.getEmail().equalsIgnoreCase(requestDTO.getEmail()) &&
+        if (!petOwner.getEmail().equals(requestDTO.getEmail()) &&
                 petOwnerRepository.existsByEmail(requestDTO.getEmail())) {
             throw new IllegalArgumentException("อีเมลนี้ถูกใช้งานในระบบแล้ว: " + requestDTO.getEmail());
         }

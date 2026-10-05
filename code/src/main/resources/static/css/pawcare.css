@@ -868,7 +868,6 @@ button:disabled {
 .segmented {
   display: flex;
   background: var(--color-border);
-  background: #f1eee4;
   border-radius: var(--radius-pill);
   padding: 4px;
   gap: 4px;

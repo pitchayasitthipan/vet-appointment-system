@@ -8,7 +8,7 @@
 | `ownerId` | `Long` / `BIGINT` | Primary Key (`IDENTITY`) | รหัสประจำตัวเจ้าของสัตว์เลี้ยง |
 | `firstName` | `String` / `VARCHAR(50)` | Max 50 | ชื่อจริง |
 | `lastName` | `String` / `VARCHAR(50)` | Max 50 | นามสกุล |
-| `email` | `String` / `VARCHAR(100)` | Unique, Max 100, Email Format | อีเมล |
+| `email` | `String` / `VARCHAR(100)` | Unique, Max 100, Email Format, Case-sensitive | อีเมล |
 | `phone` | `String` / `VARCHAR(20)` | Max 20, Thai Phone Regex | เบอร์โทรศัพท์ |
 | `createdAt` | `LocalDateTime` / `TIMESTAMP` | Auto Generate | วันเวลาที่สร้างข้อมูล ||
 
