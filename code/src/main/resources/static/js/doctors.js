@@ -100,34 +100,103 @@ const DEFAULT_DOCTORS = [
 ];
 
 let doctorsList = [];
-let activeDayIndex = 2; // Default to Wednesday (พ. 25)
-const daysData = [
-  { name: "จ.", num: 23, fullDay: "MONDAY", thDay: "จันทร์" },
-  { name: "อ.", num: 24, fullDay: "TUESDAY", thDay: "อังคาร" },
-  { name: "พ.", num: 25, fullDay: "WEDNESDAY", thDay: "พุธ" },
-  { name: "พฤ.", num: 26, fullDay: "THURSDAY", thDay: "พฤหัสบดี" },
-  { name: "ศ.", num: 27, fullDay: "FRIDAY", thDay: "ศุกร์" },
-  { name: "ส.", num: 28, fullDay: "SATURDAY", thDay: "เสาร์" },
-  { name: "อา.", num: 29, fullDay: "SUNDAY", thDay: "อาทิตย์" }
+let currentWeekOffset = 0; // 0 = current week, -1 = last week, +1 = next week
+let activeDayIndex = 2; // Default to Wednesday or today's day
+
+const THAI_MONTHS = [
+  "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+  "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
 ];
 
-// Schedule slots data for days
-const dailyScheduleSlots = {
-  2: [ // Wednesday (พ. 25)
-    { time: "09:00 - 12:00", name: "สพ.ญ. ณิชาภา วงศ์วิริยะ", spec: "อายุรศาสตร์ / โรคผิวหนัง", room: "ห้องตรวจ 1", status: "on", avatar: "images/dr-nichapa.jpg" },
-    { time: "09:00 - 16:00", name: "สพ.ญ. ปรียาภรณ์ ตั้งพงษ์ศิริ", spec: "สัตว์เลี้ยงพิเศษ", room: "ห้องตรวจ 2", status: "on", avatar: "images/dr-preeyaporn.jpg" },
-    { time: "10:00 - 13:00", name: "น.สพ. กิตติภัทร สินธวรกุล", spec: "ศัลยกรรม / กระดูกและข้อ", room: "ห้องผ่าตัด", status: "on", avatar: "images/dr-kittiphat.jpg" },
-    { time: "13:00 - 17:00", name: "สพ.ญ. อรอนงค์ จันทร์ไพศาล", spec: "ทันตกรรม / วัคซีน", room: "ห้องตรวจ 1", status: "on", avatar: "images/dr-ohanong.jpg" },
-    { time: "13:00 - 16:00", name: "น.สพ. ธนวัฒน์ อภิญญากุล", spec: "อายุรศาสตร์ / หัวใจ", room: "ห้องตรวจ 3", status: "off", avatar: "images/dr-thanawat.jpg" }
-  ]
-};
+function getWeekDates(offsetWeeks = 0) {
+  const now = new Date();
+  const base = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (offsetWeeks * 7));
+  
+  // Calculate Monday (Sunday is 0, Monday is 1, ..., Saturday is 6)
+  const day = base.getDay();
+  const diffToMonday = (day + 6) % 7;
+  const monday = new Date(base.getFullYear(), base.getMonth(), base.getDate() - diffToMonday);
+
+  const days = [];
+  const shortNames = ["จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส.", "อา."];
+  const fullNames = ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์", "อาทิตย์"];
+  const fullEnDays = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
+    days.push({
+      name: shortNames[i],
+      num: d.getDate(),
+      fullDay: fullEnDays[i],
+      thDay: fullNames[i],
+      dateObj: d,
+      isToday: d.toDateString() === now.toDateString()
+    });
+  }
+
+  return { monday, sunday: days[6].dateObj, days };
+}
+
+function formatDateRange(monday, sunday) {
+  const mDay = monday.getDate();
+  const mMonth = THAI_MONTHS[monday.getMonth()];
+  const mYear = monday.getFullYear() + 543;
+
+  const sDay = sunday.getDate();
+  const sMonth = THAI_MONTHS[sunday.getMonth()];
+  const sYear = sunday.getFullYear() + 543;
+
+  if (monday.getMonth() === sunday.getMonth() && mYear === sYear) {
+    return `${mDay} - ${sDay} ${mMonth} ${mYear}`;
+  } else if (mYear === sYear) {
+    return `${mDay} ${mMonth} - ${sDay} ${sMonth} ${mYear}`;
+  } else {
+    return `${mDay} ${mMonth} ${mYear} - ${sDay} ${sMonth} ${sYear}`;
+  }
+}
+
+let weekInfo = getWeekDates(currentWeekOffset);
+let daysData = weekInfo.days;
+
+// Helper: Check if a doctor works on a given day (e.g. "จันทร์", "อังคาร")
+function doctorWorksOnDay(scheduleText, targetDay) {
+  if (!scheduleText || !targetDay) return true;
+  
+  const daysOrder = ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์", "อาทิตย์"];
+  const targetIdx = daysOrder.indexOf(targetDay);
+  if (targetIdx === -1) return true;
+
+  // Direct match
+  if (scheduleText.includes(targetDay)) return true;
+
+  // Match range (e.g. "จันทร์ - ศุกร์", "อังคาร - เสาร์", "ศุกร์ - อังคาร")
+  const rangeMatch = scheduleText.match(/(จันทร์|อังคาร|พุธ|พฤหัสบดี|ศุกร์|เสาร์|อาทิตย์)\s*[-–—ถึง]+\s*(จันทร์|อังคาร|พุธ|พฤหัสบดี|ศุกร์|เสาร์|อาทิตย์)/);
+  if (rangeMatch) {
+    const startIdx = daysOrder.indexOf(rangeMatch[1]);
+    const endIdx = daysOrder.indexOf(rangeMatch[2]);
+    if (startIdx !== -1 && endIdx !== -1) {
+      if (startIdx <= endIdx) {
+        return targetIdx >= startIdx && targetIdx <= endIdx;
+      } else {
+        // Wraps over weekend (e.g. ศุกร์ - อังคาร)
+        return targetIdx >= startIdx || targetIdx <= endIdx;
+      }
+    }
+  }
+  return false;
+}
 
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
-  renderDaysStrip();
+  // If today is in the current week, select today by default
+  const todayIdx = daysData.findIndex(d => d.isToday);
+  if (todayIdx !== -1) {
+    activeDayIndex = todayIdx;
+  }
+
+  updateCalendarView();
   loadDoctors();
   setupEventListeners();
-  renderScheduleSlots(activeDayIndex);
 });
 
 // Load Doctors from REST API /api/doctors (or fallback)
@@ -159,6 +228,7 @@ async function loadDoctors() {
 
   renderDoctors(doctorsList);
   updateDoctorCount(doctorsList.length);
+  renderScheduleSlots(activeDayIndex);
 }
 
 // Render Doctor Cards
@@ -234,13 +304,45 @@ function renderDoctors(list) {
   }).join("");
 }
 
+// Calendar Navigation & Update
+function updateCalendarView() {
+  weekInfo = getWeekDates(currentWeekOffset);
+  daysData = weekInfo.days;
+
+  const rangeEl = document.getElementById("currentDateRange");
+  if (rangeEl) {
+    rangeEl.innerText = formatDateRange(weekInfo.monday, weekInfo.sunday);
+  }
+
+  renderDaysStrip();
+  renderScheduleSlots(activeDayIndex);
+}
+
+function changeWeek(direction) {
+  currentWeekOffset += direction;
+  updateCalendarView();
+}
+
+function goToCurrentWeekAndToday() {
+  currentWeekOffset = 0;
+  weekInfo = getWeekDates(0);
+  daysData = weekInfo.days;
+  
+  const todayIdx = daysData.findIndex(d => d.isToday);
+  activeDayIndex = todayIdx !== -1 ? todayIdx : 2;
+  
+  updateCalendarView();
+}
+
 // Render Days Strip
 function renderDaysStrip() {
   const container = document.getElementById("daysStrip");
   if (!container) return;
 
   container.innerHTML = daysData.map((d, idx) => `
-    <div class="day-pill ${idx === activeDayIndex ? 'active' : ''}" onclick="selectDay(${idx})">
+    <div class="day-pill ${idx === activeDayIndex ? 'active' : ''} ${d.isToday ? 'is-today' : ''}" 
+         onclick="selectDay(${idx})" 
+         title="${d.thDay}ที่ ${d.num} ${d.isToday ? '(วันนี้)' : ''}">
       <span class="day-name">${d.name}</span>
       <span class="day-number">${d.num}</span>
     </div>
@@ -254,19 +356,48 @@ function selectDay(index) {
   renderScheduleSlots(index);
 }
 
-// Render Slots for Right Column
+// Render Slots for Right Column (Derived dynamically from doctorsList)
 function renderScheduleSlots(dayIdx) {
   const container = document.getElementById("timeSlotsContainer");
   if (!container) return;
 
-  const slots = dailyScheduleSlots[dayIdx] || [
-    { time: "09:00 - 12:00", name: "สพ.ญ. ณิชาภา วงศ์วิริยะ", spec: "อายุรศาสตร์ / โรคผิวหนัง", room: "ห้องตรวจ 1", status: "on", avatar: "images/dr-nichapa.jpg" },
-    { time: "10:00 - 13:00", name: "น.สพ. กิตติภัทร สินธวรกุล", spec: "ศัลยกรรม / กระดูกและข้อ", room: "ห้องผ่าตัด", status: "on", avatar: "images/dr-kittiphat.jpg" },
-    { time: "13:00 - 17:00", name: "สพ.ญ. อรอนงค์ จันทร์ไพศาล", spec: "ทันตกรรม / วัคซีน", room: "ห้องตรวจ 1", status: "on", avatar: "images/dr-ohanong.jpg" }
-  ];
+  const currentDay = daysData[dayIdx] || daysData[0];
+  const targetDayName = currentDay.thDay;
+
+  const listToUse = (doctorsList && doctorsList.length > 0) ? doctorsList : DEFAULT_DOCTORS;
+
+  const slots = listToUse.map(doc => {
+    const isOn = doctorWorksOnDay(doc.workSchedule, targetDayName);
+    
+    let time = "09:00 - 17:00 น.";
+    if (doc.workSchedule) {
+      const match = doc.workSchedule.match(/\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\s*(?:น\.)?/);
+      if (match) time = match[0];
+    } else if (doc.timeToday) {
+      time = doc.timeToday;
+    }
+
+    return {
+      doctorId: doc.doctorId,
+      name: `${doc.titlePrefix || 'สพ.'} ${doc.firstName} ${doc.lastName}`,
+      spec: doc.specialization || "สัตวแพทย์ทั่วไป",
+      room: doc.room || "ห้องตรวจ 1",
+      avatar: doc.avatar || "images/dr-nichapa.jpg",
+      time: time,
+      status: isOn ? "on" : "off"
+    };
+  });
+
+  // Sort: on duty doctors first
+  slots.sort((a, b) => (b.status === "on" ? 1 : 0) - (a.status === "on" ? 1 : 0));
+
+  if (slots.length === 0) {
+    container.innerHTML = `<div style="text-align: center; padding: 2rem; color: #94a3b8;">ไม่มีข้อมูลตารางเวรในวันนี้</div>`;
+    return;
+  }
 
   container.innerHTML = slots.map(slot => `
-    <div class="slot-item">
+    <div class="slot-item" onclick="viewDoctorSchedule(${slot.doctorId})" title="คลิกเพื่อดูรายละเอียดตารางเวร ${slot.name}" style="cursor: pointer;">
       <div class="slot-time">${slot.time}</div>
       <img src="${slot.avatar}" alt="${slot.name}" class="slot-avatar" onerror="this.src='images/dr-nichapa.jpg'">
       <div class="slot-info">
@@ -286,10 +417,12 @@ function setupEventListeners() {
   const searchInput = document.getElementById("searchInput");
   const specFilter = document.getElementById("specFilter");
   const dayFilter = document.getElementById("dayFilter");
+  const btnSearch = document.querySelector(".btn-search");
 
   const filterHandler = () => {
     const query = (searchInput ? searchInput.value : "").trim().toLowerCase();
     const spec = specFilter ? specFilter.value : "";
+    const day = dayFilter ? dayFilter.value : "";
 
     const filtered = doctorsList.filter(doc => {
       const matchQuery = !query || 
@@ -299,8 +432,9 @@ function setupEventListeners() {
         (doc.nameEn && doc.nameEn.toLowerCase().includes(query));
 
       const matchSpec = !spec || (doc.specialization && doc.specialization.includes(spec));
+      const matchDay = !day || doctorWorksOnDay(doc.workSchedule, day);
 
-      return matchQuery && matchSpec;
+      return matchQuery && matchSpec && matchDay;
     });
 
     renderDoctors(filtered);
@@ -310,6 +444,7 @@ function setupEventListeners() {
   if (searchInput) searchInput.addEventListener("input", filterHandler);
   if (specFilter) specFilter.addEventListener("change", filterHandler);
   if (dayFilter) dayFilter.addEventListener("change", filterHandler);
+  if (btnSearch) btnSearch.addEventListener("click", filterHandler);
 }
 
 function updateDoctorCount(count) {

@@ -154,11 +154,11 @@
         <!-- Date Navigator -->
         <div class="date-nav-bar">
           <div class="date-nav-controls">
-            <button class="btn-arrow" title="สัปดาห์ก่อนหน้า">&lt;</button>
-            <span class="current-date-range">23 - 29 กันยายน 2568</span>
-            <button class="btn-arrow" title="สัปดาห์ถัดไป">&gt;</button>
+            <button class="btn-arrow" id="btnPrevWeek" title="สัปดาห์ก่อนหน้า" onclick="changeWeek(-1)">&lt;</button>
+            <span class="current-date-range" id="currentDateRange">23 - 29 กันยายน 2568</span>
+            <button class="btn-arrow" id="btnNextWeek" title="สัปดาห์ถัดไป" onclick="changeWeek(1)">&gt;</button>
           </div>
-          <button class="btn-today" onclick="selectDay(2)">วันนี้</button>
+          <button class="btn-today" id="btnToday" onclick="goToCurrentWeekAndToday()">วันนี้</button>
         </div>
 
         <!-- Days Strip (จ. 23 - อา. 29) -->

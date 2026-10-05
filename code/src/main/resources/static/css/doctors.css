@@ -989,6 +989,15 @@ small,
   transform: translateY(-2px);
 }
 
+.day-pill.is-today:not(.active) {
+  border-color: var(--color-pink);
+  background-color: var(--color-accent-soft);
+}
+
+.day-pill.is-today:not(.active) .day-number {
+  color: var(--color-pink);
+}
+
 .day-pill:active {
   transform: translateY(0);
 }
