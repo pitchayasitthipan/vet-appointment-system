@@ -52,12 +52,12 @@
 
 # Docker Containerization Test Results
 
-เอกสารผลการทดสอบการรันระบบแบบ Containerization ด้วย **Docker** และ **Docker Compose** ร่วมกับฐานข้อมูล MySQL 8.0
+เอกสารผลการทดสอบการรันระบบแบบ Containerization ด้วย **Docker** และ **Docker Compose** ร่วมกับฐานข้อมูล PostgreSQL 15
 
 ## สรุปผลการทดสอบ
 
 - **Container Services:** 
-  - `vet-mysql-db` (MySQL 8.0 - Port 3306) -> สถานะ: `Healthy`
+  - `vet-postgres-db` (PostgreSQL 15 - Port 5432) -> สถานะ: `Healthy`
   - `vet-appointment-app` (Spring Boot Java 17 - Port 8080) -> สถานะ: `Up (running)`
 - **ผลการทดสอบ HTTP Endpoints:**
   - `http://localhost:8080/doctors.html` -> `200 OK` (Web UI แสดงผลครบถ้วนสมบูรณ์)
@@ -69,7 +69,7 @@
 ## ภาพหลักฐานผลการทดสอบ Docker
 
 ### 7. สถานะ Containers ใน Docker Desktop และ Database Logs
-แสดงสถานะ `vet-mysql-db` (Port 3306) และ `vet-appointment-app` (Port 8080) รันทำงานพร้อมกัน และ Hibernate ดำเนินการคิวรี่ตาราง `doctor` อัตโนมัติ:
+แสดงสถานะ Containers และ `vet-appointment-app` (Port 8080) รันทำงานพร้อมกัน และ Hibernate ดำเนินการคิวรี่ตาราง `doctor` อัตโนมัติ:
 ![Docker Desktop Containers Running](07-docker-desktop-containers-running.png)
 
 ### 8. ผลการเรียกใช้งานหน้าเว็บ UI ผ่าน Docker (Port 8080)

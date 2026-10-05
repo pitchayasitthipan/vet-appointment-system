@@ -1,27 +1,26 @@
 services:
   # =============================================================
-  # MySQL Database Container
+  # PostgreSQL Database Container
   # =============================================================
   db:
-    image: mysql:8.0
-    container_name: vet-mysql-db
+    image: postgres:15-alpine
+    container_name: vet-postgres-db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: petclinic_db
-      MYSQL_USER: petclinic_user
-      MYSQL_PASSWORD: petclinic_pass
+      POSTGRES_DB: petclinic_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
       - ./code/src/main/resources/data-doctor.sql:/docker-entrypoint-initdb.d/01-data-doctor.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d petclinic_db"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 20s
+      start_period: 10s
     networks:
       - vet-network
 
@@ -39,13 +38,13 @@ services:
         condition: service_healthy
     environment:
       DB_HOST: db
-      DB_PORT: 3306
+      DB_PORT: 5432
       DB_NAME: petclinic_db
-      DB_USERNAME: root
-      DB_PASSWORD: rootpassword
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/petclinic_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=Asia/Bangkok&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: rootpassword
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/petclinic_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
     ports:
       - "8080:8080"
     networks:
@@ -55,7 +54,7 @@ services:
 # Persistent Volumes & Custom Bridge Network
 # =============================================================
 volumes:
-  mysql_data:
+  postgres_data:
     driver: local
 
 networks:

@@ -11,8 +11,8 @@
    - **Stage 1 (Builder):** ใช้ `maven:3.9-eclipse-temurin-17-alpine` ในการคอมไพล์และสร้างไฟล์ `.jar`
    - **Stage 2 (Runtime):** ใช้ `eclipse-temurin:17-jre-alpine` ซึ่งเป็น JRE ขนาดเล็ก (~150MB) รันแอปพลิเคชันอย่างปลอดภัยและมีประสิทธิภาพ
 2. **`docker-compose.yml`:**
-   - **Service `db` (MySQL 8.0):** ฐานข้อมูลหลักของระบบ พร้อมตั้งค่า Persistent Volume (`mysql_data`) และโหลดข้อมูลเริ่มต้นจาก `data-doctor.sql` อัตโนมัติผ่าน `/docker-entrypoint-initdb.d/`
-   - **Service `app` (Spring Boot):** แอปพลิเคชันหลัก รอให้ MySQL พร้อมใช้งาน (`service_healthy`) ก่อนเริ่มทำงาน
+   - **Service `db` (PostgreSQL 15):** ฐานข้อมูลหลักของระบบ พร้อมตั้งค่า Persistent Volume (`postgres_data`) และโหลดข้อมูลเริ่มต้นจาก `data-doctor.sql` อัตโนมัติผ่าน `/docker-entrypoint-initdb.d/`
+   - **Service `app` (Spring Boot):** แอปพลิเคชันหลัก รอให้ PostgreSQL พร้อมใช้งาน (`service_healthy`) ก่อนเริ่มทำงาน
    - มี **Healthcheck** ป้องกันปัญหา App เริ่มทำงานก่อน Database พร้อม
 
 ---
@@ -57,12 +57,12 @@ docker-compose down -v
 - **REST API Singleton Config (การตั้งค่าคลินิก):**
   👉 `http://localhost:8080/api/config`
   👉 `http://localhost:8080/api/config/singleton-check`
-- **ฐานข้อมูล MySQL (เชื่อมต่อผ่าน DBeaver / DataGrip):**
+- **ฐานข้อมูล PostgreSQL (เชื่อมต่อผ่าน DBeaver / pgAdmin / DataGrip):**
   - Host: `localhost`
-  - Port: `3306`
+  - Port: `5432`
   - Database: `petclinic_db`
-  - Username: `root`
-  - Password: `rootpassword`
+  - Username: `postgres`
+  - Password: `postgres`
 
 ---
 
