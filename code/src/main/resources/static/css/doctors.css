@@ -1107,6 +1107,168 @@ small,
   border: 1px solid var(--color-border);
 }
 
+/* ==========================================================
+   WEEKLY SCHEDULE MATRIX TABLE (ตารางภาพรวมแบบรายการ)
+   ========================================================== */
+.weekly-schedule-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  animation: fadeIn 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.weekly-table-header {
+  margin-bottom: 0.25rem;
+}
+
+.weekly-table-title {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--color-navy);
+  margin: 0;
+}
+
+.weekly-table-subtitle {
+  font-size: 13px;
+  line-height: 18px;
+  color: #64748b;
+}
+
+.weekly-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+
+.weekly-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.weekly-matrix-table th {
+  background-color: #fdf3f5;
+  color: var(--color-navy);
+  font-weight: 600;
+  text-align: center;
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 12px;
+}
+
+.weekly-matrix-table th:first-child {
+  text-align: left;
+  padding-left: 12px;
+}
+
+.weekly-matrix-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.weekly-matrix-table td:first-child {
+  text-align: left;
+  padding-left: 12px;
+}
+
+.weekly-matrix-table tr:hover {
+  background-color: #fff9fb;
+}
+
+.weekly-doc-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.weekly-doc-cell:hover .weekly-doc-name {
+  color: var(--color-pink);
+}
+
+.weekly-doc-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--color-secondary);
+}
+
+.weekly-doc-name {
+  font-weight: 600;
+  color: var(--color-navy);
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.weekly-doc-room {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.duty-pill {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  min-width: 24px;
+}
+
+.duty-pill.on {
+  background-color: var(--color-success-soft);
+  color: #15803d;
+  border: 1px solid rgba(76, 175, 127, 0.3);
+}
+
+.duty-pill.off {
+  color: #cbd5e1;
+  font-weight: 400;
+}
+
+/* Booking Doc Summary Banner */
+.booking-doc-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fdf3f5;
+  border: 1px solid rgba(230, 160, 179, 0.5);
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+}
+
+.booking-doc-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.booking-doc-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-navy);
+}
+
+.booking-doc-sub {
+  font-size: 12.5px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
 /* Info Panel (Bottom Right) */
 .clinic-info-card {
   background: var(--color-surface);

@@ -35,7 +35,7 @@
         <button class="icon-btn" title="ค้นหา" aria-label="Search">
           <span class="icon i-magnifying-glass icon-accent"></span>
         </button>
-        <button class="btn-book" onclick="alert('ระบบการจองนัดหมายกำลังเปิดให้บริการ!')">
+        <button class="btn-book" onclick="openBookingModal()">
           จองนัดหมาย
         </button>
         <button class="icon-btn" title="การแจ้งเตือน" aria-label="Notification">
@@ -143,32 +143,62 @@
       <!-- Schedule Card -->
       <div class="schedule-panel">
         <div class="tab-switch-row">
-          <button class="btn-tab active" id="tabSchedule">
+          <button class="btn-tab active" id="tabSchedule" onclick="switchScheduleView('daily')">
             <span class="icon i-calendar-blank icon-sm"></span> ตารางเวรสัตวแพทย์
           </button>
-          <button class="btn-tab" id="tabList" onclick="alert('แสดงตารางแบบรายการภาพรวมของทั้งสัปดาห์')">
+          <button class="btn-tab" id="tabList" onclick="switchScheduleView('weekly')">
             <span class="icon i-list icon-sm"></span> ตารางแบบรายการ
           </button>
         </div>
 
-        <!-- Date Navigator -->
-        <div class="date-nav-bar">
-          <div class="date-nav-controls">
-            <button class="btn-arrow" id="btnPrevWeek" title="สัปดาห์ก่อนหน้า" onclick="changeWeek(-1)">&lt;</button>
-            <span class="current-date-range" id="currentDateRange">23 - 29 กันยายน 2568</span>
-            <button class="btn-arrow" id="btnNextWeek" title="สัปดาห์ถัดไป" onclick="changeWeek(1)">&gt;</button>
+        <!-- View 1: Daily Timeline View -->
+        <div id="dailyScheduleView">
+          <!-- Date Navigator -->
+          <div class="date-nav-bar">
+            <div class="date-nav-controls">
+              <button class="btn-arrow" id="btnPrevWeek" title="สัปดาห์ก่อนหน้า" onclick="changeWeek(-1)">&lt;</button>
+              <span class="current-date-range" id="currentDateRange">23 - 29 กันยายน 2568</span>
+              <button class="btn-arrow" id="btnNextWeek" title="สัปดาห์ถัดไป" onclick="changeWeek(1)">&gt;</button>
+            </div>
+            <button class="btn-today" id="btnToday" onclick="goToCurrentWeekAndToday()">วันนี้</button>
           </div>
-          <button class="btn-today" id="btnToday" onclick="goToCurrentWeekAndToday()">วันนี้</button>
+
+          <!-- Days Strip (จ. 23 - อา. 29) -->
+          <div class="days-strip" id="daysStrip">
+            <!-- Rendered by doctors.js -->
+          </div>
+
+          <!-- Time Slots for Selected Day -->
+          <div class="time-slots-list" id="timeSlotsContainer">
+            <!-- Rendered by doctors.js -->
+          </div>
         </div>
 
-        <!-- Days Strip (จ. 23 - อา. 29) -->
-        <div class="days-strip" id="daysStrip">
-          <!-- Rendered by doctors.js -->
-        </div>
-
-        <!-- Time Slots for Selected Day -->
-        <div class="time-slots-list" id="timeSlotsContainer">
-          <!-- Rendered by doctors.js -->
+        <!-- View 2: Weekly Overview Matrix Table View -->
+        <div id="weeklyScheduleView" style="display: none;" class="weekly-schedule-container">
+          <div class="weekly-table-header">
+            <h4 class="weekly-table-title">ภาพรวมตารางเวรประจำสัปดาห์</h4>
+            <span class="weekly-table-subtitle">วันปฏิบัติงานและห้องตรวจของทีมสัตวแพทย์</span>
+          </div>
+          <div class="weekly-table-wrap">
+            <table class="weekly-matrix-table">
+              <thead>
+                <tr>
+                  <th>สัตวแพทย์</th>
+                  <th>จ.</th>
+                  <th>อ.</th>
+                  <th>พ.</th>
+                  <th>พฤ.</th>
+                  <th>ศ.</th>
+                  <th>ส.</th>
+                  <th>อา.</th>
+                </tr>
+              </thead>
+              <tbody id="weeklyTableBody">
+                <!-- Rendered by doctors.js -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -203,7 +233,7 @@
             <li>กรุณาจองคิวล่วงหน้า</li>
             <li>กรณีฉุกเฉินติดต่อได้ตลอด 24 ชั่วโมง</li>
           </ul>
-          <button class="btn-emergency" onclick="alert('โทรติดต่อแผนกฉุกเฉิน 24 ชม.: 02-123-4567')">
+          <button class="btn-emergency" onclick="window.location.href='tel:021234567'">
             <span class="icon i-phone icon-sm"></span> 02-123-4567
           </button>
         </div>
@@ -254,10 +284,91 @@
       </div>
       <div class="form-actions">
         <button class="btn-secondary" onclick="closeModal('scheduleModal')">ปิด</button>
-        <button class="btn-primary" onclick="alert('เข้าสู่ขั้นตอนการเลือกเวลาเพื่อจองนัดหมาย'); closeModal('scheduleModal');">
+        <button class="btn-primary" onclick="proceedToBookingFromModal()">
           จองนัดหมายกับแพทย์ท่านนี้
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: APPOINTMENT BOOKING (FLOW FORWARDING) ==================== -->
+  <div class="modal-overlay" id="bookingModal">
+    <div class="modal-box" style="max-width: 520px;">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          <span class="icon i-calendar-blank icon-accent"></span> นัดหมายสัตวแพทย์
+        </h2>
+        <button class="modal-close" onclick="closeModal('bookingModal')">&times;</button>
+      </div>
+      <form onsubmit="handleBookingSubmit(event)">
+        <!-- Selected Doctor Info Summary -->
+        <div class="booking-doc-banner" id="bookingDocBanner">
+          <img src="images/dr-nichapa.jpg" alt="doctor" id="bookingDocAvatar" class="booking-doc-avatar" onerror="this.src='images/dr-nichapa.jpg'">
+          <div>
+            <div class="booking-doc-name" id="bookingDocName">สพ.ญ. ณิชาภา วงศ์วิริยะ</div>
+            <div class="booking-doc-sub" id="bookingDocSpec">อายุรศาสตร์, โรคผิวหนัง • ห้องตรวจ 1</div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 1rem;">
+          <label class="form-label">เลือกสัตวแพทย์</label>
+          <select id="bookingDoctorSelect" class="form-input" onchange="onBookingDoctorChange(this.value)" required>
+            <!-- Populated dynamically by doctors.js -->
+          </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label">ประเภทบริการ</label>
+            <select id="bookingServiceType" class="form-input" required>
+              <option value="ตรวจรักษาทั่วไป">ตรวจรักษาทั่วไป</option>
+              <option value="ฉีดวัคซีน / ถ่ายพยาธิ">ฉีดวัคซีน / ถ่ายพยาธิ</option>
+              <option value="ศัลยกรรม / ผ่าตัด">ศัลยกรรม / ผ่าตัด</option>
+              <option value="ตรวจฟัน / ขูดหินปูน">ตรวจฟัน / ขูดหินปูน</option>
+              <option value="สัตว์พิเศษ (Exotic)">สัตว์พิเศษ (Exotic)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">วันที่ต้องการนัด</label>
+            <input type="date" id="bookingDate" class="form-input" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label">ช่วงเวลา</label>
+            <select id="bookingTimeSlot" class="form-input" required>
+              <option value="09:00 - 10:00 น.">09:00 - 10:00 น.</option>
+              <option value="10:00 - 11:00 น.">10:00 - 11:00 น.</option>
+              <option value="11:00 - 12:00 น.">11:00 - 12:00 น.</option>
+              <option value="13:00 - 14:00 น.">13:00 - 14:00 น.</option>
+              <option value="14:00 - 15:00 น.">14:00 - 15:00 น.</option>
+              <option value="15:00 - 16:00 น.">15:00 - 16:00 น.</option>
+              <option value="16:00 - 17:00 น.">16:00 - 17:00 น.</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ชื่อสัตว์เลี้ยง</label>
+            <input type="text" id="bookingPetName" class="form-input" placeholder="เช่น น้องม็อคค่า" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">อาการเบื้องต้น / รายละเอียดเพิ่มเติม</label>
+          <textarea id="bookingNotes" class="form-input" rows="2" placeholder="ระบุอาการเบื้องต้น เช่น มีไข้ ซึม ไม่ทานอาหาร"></textarea>
+        </div>
+
+        <!-- Success Toast Alert Container inside Modal -->
+        <div id="bookingSuccessBox" style="display: none; background: var(--color-success-soft); border: 1px solid var(--color-success); color: #166534; padding: 0.75rem; border-radius: 8px; font-size: 0.88rem; margin-bottom: 0.75rem;">
+          <strong>✓ บันทึกคำขอนัดหมายเรียบร้อยแล้ว!</strong>
+          <p style="margin: 0.25rem 0 0; font-size: 0.8rem;">ระบบเตรียมส่งข้อมูลไปยังระบบนัดหมาย (Appointments) เรียบร้อย</p>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" onclick="closeModal('bookingModal')">ยกเลิก</button>
+          <button type="submit" class="btn-primary" id="btnSubmitBooking">ยืนยันการนัดหมาย</button>
+        </div>
+      </form>
     </div>
   </div>
 

@@ -229,6 +229,7 @@ async function loadDoctors() {
   renderDoctors(doctorsList);
   updateDoctorCount(doctorsList.length);
   renderScheduleSlots(activeDayIndex);
+  renderWeeklyMatrixTable();
 }
 
 // Render Doctor Cards
@@ -452,8 +453,11 @@ function updateDoctorCount(count) {
   if (el) el.innerText = `พบสัตวแพทย์ทั้งหมด ${count} ท่าน`;
 }
 
+let currentSelectedDoctorId = 1;
+
 // View Doctor Schedule Modal
 function viewDoctorSchedule(id) {
+  currentSelectedDoctorId = id;
   const doc = doctorsList.find(d => d.doctorId === id) || DEFAULT_DOCTORS[0];
   const modal = document.getElementById("scheduleModal");
   if (!modal) return;
@@ -466,6 +470,145 @@ function viewDoctorSchedule(id) {
   document.getElementById("modalDocEmail").innerText = doc.email || "-";
 
   modal.classList.add("show");
+}
+
+function proceedToBookingFromModal() {
+  closeModal('scheduleModal');
+  openBookingModal(currentSelectedDoctorId);
+}
+
+// Switch between Daily Timeline View and Weekly Matrix Table View
+function switchScheduleView(viewType) {
+  const tabSchedule = document.getElementById("tabSchedule");
+  const tabList = document.getElementById("tabList");
+  const dailyView = document.getElementById("dailyScheduleView");
+  const weeklyView = document.getElementById("weeklyScheduleView");
+
+  if (viewType === 'weekly') {
+    if (tabSchedule) tabSchedule.classList.remove("active");
+    if (tabList) tabList.classList.add("active");
+    if (dailyView) dailyView.style.display = "none";
+    if (weeklyView) weeklyView.style.display = "block";
+    renderWeeklyMatrixTable();
+  } else {
+    if (tabList) tabList.classList.remove("active");
+    if (tabSchedule) tabSchedule.classList.add("active");
+    if (weeklyView) weeklyView.style.display = "none";
+    if (dailyView) dailyView.style.display = "block";
+  }
+}
+
+// Render Weekly Overview Matrix Table
+function renderWeeklyMatrixTable() {
+  const tbody = document.getElementById("weeklyTableBody");
+  if (!tbody) return;
+
+  const list = (doctorsList && doctorsList.length > 0) ? doctorsList : DEFAULT_DOCTORS;
+  const days = ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์", "อาทิตย์"];
+
+  tbody.innerHTML = list.map(doc => {
+    const fullName = `${doc.titlePrefix || 'สพ.'} ${doc.firstName} ${doc.lastName}`;
+    const avatarSrc = doc.avatar || "images/dr-nichapa.jpg";
+
+    const dayCells = days.map(day => {
+      const works = doctorWorksOnDay(doc.workSchedule, day);
+      if (works) {
+        return `<td><span class="duty-pill on" title="${day}: ออกตรวจ (${doc.workSchedule || ''})">ตรวจ</span></td>`;
+      } else {
+        return `<td><span class="duty-pill off" title="${day}: ไม่ออกตรวจ">-</span></td>`;
+      }
+    }).join("");
+
+    return `
+      <tr>
+        <td>
+          <div class="weekly-doc-cell" onclick="viewDoctorSchedule(${doc.doctorId})" title="คลิกเพื่อดูรายละเอียดตารางเวร ${fullName}">
+            <img src="${avatarSrc}" alt="${fullName}" class="weekly-doc-avatar" onerror="this.src='images/dr-nichapa.jpg'">
+            <div>
+              <div class="weekly-doc-name">${fullName}</div>
+              <div class="weekly-doc-room">${doc.room || 'ห้องตรวจ'}</div>
+            </div>
+          </div>
+        </td>
+        ${dayCells}
+      </tr>
+    `;
+  }).join("");
+}
+
+// Open Appointment Booking Modal
+function openBookingModal(doctorId) {
+  const modal = document.getElementById("bookingModal");
+  if (!modal) return;
+
+  const list = (doctorsList && doctorsList.length > 0) ? doctorsList : DEFAULT_DOCTORS;
+  const targetId = doctorId || currentSelectedDoctorId || list[0].doctorId;
+
+  const selectEl = document.getElementById("bookingDoctorSelect");
+  if (selectEl) {
+    selectEl.innerHTML = list.map(d => `
+      <option value="${d.doctorId}" ${d.doctorId == targetId ? 'selected' : ''}>
+        ${d.titlePrefix || 'สพ.'} ${d.firstName} ${d.lastName} (${d.specialization})
+      </option>
+    `).join("");
+  }
+
+  onBookingDoctorChange(targetId);
+
+  const dateInput = document.getElementById("bookingDate");
+  if (dateInput && !dateInput.value) {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    dateInput.value = tomorrow.toISOString().split("T")[0];
+    dateInput.min = new Date().toISOString().split("T")[0];
+  }
+
+  const successBox = document.getElementById("bookingSuccessBox");
+  if (successBox) successBox.style.display = "none";
+
+  const submitBtn = document.getElementById("btnSubmitBooking");
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.innerText = "ยืนยันการนัดหมาย";
+  }
+
+  modal.classList.add("show");
+}
+
+function onBookingDoctorChange(docId) {
+  const list = (doctorsList && doctorsList.length > 0) ? doctorsList : DEFAULT_DOCTORS;
+  const doc = list.find(d => d.doctorId == docId) || list[0];
+  if (!doc) return;
+
+  const nameEl = document.getElementById("bookingDocName");
+  const specEl = document.getElementById("bookingDocSpec");
+  const avatarEl = document.getElementById("bookingDocAvatar");
+
+  if (nameEl) nameEl.innerText = `${doc.titlePrefix || 'สพ.'} ${doc.firstName} ${doc.lastName}`;
+  if (specEl) specEl.innerText = `${doc.specialization} • ${doc.room || 'ห้องตรวจ 1'}`;
+  if (avatarEl) avatarEl.src = doc.avatar || "images/dr-nichapa.jpg";
+}
+
+function handleBookingSubmit(event) {
+  event.preventDefault();
+  const successBox = document.getElementById("bookingSuccessBox");
+  const submitBtn = document.getElementById("btnSubmitBooking");
+
+  if (successBox) successBox.style.display = "block";
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerText = "บันทึกเรียบร้อย ✓";
+  }
+
+  setTimeout(() => {
+    closeModal("bookingModal");
+    if (event.target) event.target.reset();
+    if (successBox) successBox.style.display = "none";
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerText = "ยืนยันการนัดหมาย";
+    }
+  }, 1600);
 }
 
 function closeModal(modalId) {
