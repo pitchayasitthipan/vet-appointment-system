@@ -5,16 +5,18 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.example.petclinic.domain.entity.PetOwner;
+
 @Repository
-public interface PetOwnerRepository extends JpaRepository {
+public interface PetOwnerRepository extends JpaRepository<PetOwner, Long> {
 
     // ตรวจสอบว่ามีอีเมลนี้ในระบบแล้วหรือยัง (ใช้ตอน Validation
     // ก่อนสร้างเจ้าของใหม่)
     boolean existsByEmail(String email);
 
     // ค้นหาข้อมูลเจ้าของด้วยอีเมล
-    Optional findByEmail(String email);
+    Optional<PetOwner> findByEmail(String email);
 
     // ค้นหาข้อมูลเจ้าของด้วยเบอร์
-    Optional findByPhone(String phone);
+    Optional<PetOwner> findByPhone(String phone);
 }
