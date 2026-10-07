@@ -26,7 +26,8 @@ public class PetOwnerRequestDTO {
     private String address;
     private String emergencyContactName;
 
-    @Pattern(regexp = "^\\(|^0[0-9]{8,9}\\)", message = "เบอร์โทรศัพท์ที่กรอกต้องไม่เกิน 10 หลัก (เช่น 0812345678)")
+    @NotBlank(message = "กรุณากรอกเบอร์ติดต่อฉุกเฉิน")
+    @Pattern(regexp = "^0[0-9]{8,9}$", message = "เบอร์โทรศัพท์ที่กรอกต้องไม่เกิน 10 หลัก (เช่น 0812345678)")
     private String emergencyContactPhone;
 
     public PetOwnerRequestDTO() {

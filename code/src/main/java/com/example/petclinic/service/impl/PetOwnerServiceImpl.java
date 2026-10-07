@@ -1,9 +1,9 @@
 package com.example.petclinic.service.impl;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,11 +59,10 @@ public class PetOwnerServiceImpl implements PetOwnerService {
     // Read all: ดึงข้อมูลเจ้าของสัตว์เลี้ยงทั้งหมด
     @Override
     @Transactional(readOnly = true) // readOnly = true -> query only, ไม่แก้ DB
-    public List<PetOwnerResponseDTO> getAllPetOwners() {
-        // ดึงข้อมูลทั้งหมด แล้วแปลงเป็น DTO ทีละตัว
-        return petOwnerRepository.findAll().stream()
-                .map(this::mapToResponseDTO)
-                .collect(Collectors.toList());
+    public Page<PetOwnerResponseDTO> getAllPetOwners(Pageable pageable) {
+        // ดึงข้อมูลทั้งหมดแบบแบ่งหน้า แล้วแปลงเป็น DTO ทีละตัว
+        return petOwnerRepository.findAll(pageable)
+                .map(this::mapToResponseDTO);
     }
 
     // Read by Id: ค้นหาข้อมูลเจ้าของสัตว์เลี้ยงด้วย Id

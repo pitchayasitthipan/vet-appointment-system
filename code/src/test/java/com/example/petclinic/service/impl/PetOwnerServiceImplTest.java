@@ -3,15 +3,26 @@ package com.example.petclinic.service.impl;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import com.example.petclinic.domain.entity.PetOwner;
 import com.example.petclinic.domain.entity.PetOwnerDetail;
@@ -82,8 +93,23 @@ class PetOwnerServiceImplTest {
     }
 
     @Test
-    @DisplayName("ดึงข้อมูลเจ้าของสัตว์เลี้ยงทั้งหมด: สำเร็จ")
-    void testGetAllPetOwners() {
+    @DisplayName("สร้างข้อมูลเจ้าของสัตว์เลี้ยง: อีเมลซ้ำแบบ Case-sensitive")
+    void testCreatePetOwner_DuplicateEmailCaseSensitive() {
+        PetOwnerRequestDTO request = new PetOwnerRequestDTO();
+        request.setEmail("ABC@gmail.com");
+
+        // จำลองว่ามีคนใช้อีเมลนี้แล้ว, mock existsByEmail()
+        when(petOwnerRepository.existsByEmail("ABC@gmail.com")).thenReturn(true);
+
+        assertThrows(IllegalArgumentException.class, () -> petOwnerService.createPetOwner(request));
+
+        verify(petOwnerRepository, times(1)).existsByEmail("ABC@gmail.com");
+        verify(petOwnerRepository, never()).save(any(PetOwner.class));
+    }
+
+    @Test
+    @DisplayName("ดึงข้อมูลเจ้าของสัตว์เลี้ยงทั้งหมด: สำเร็จ (Pagination)")
+    void testGetAllPetOwners_Pagination() {
         PetOwner owner = new PetOwner();
         owner.setOwnerId(1L);
         owner.setFirstName("John");
@@ -91,13 +117,17 @@ class PetOwnerServiceImplTest {
         owner.setEmail("test@example.com");
         owner.setPhone("0876543210");
 
-        when(petOwnerRepository.findAll()).thenReturn(List.of(owner));
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<PetOwner> pageResult = new PageImpl<>(List.of(owner), pageable, 1);
 
-        List<PetOwnerResponseDTO> result = petOwnerService.getAllPetOwners();
+        when(petOwnerRepository.findAll(pageable)).thenReturn(pageResult);
 
-        assertEquals(1, result.size());
-        assertEquals("John", result.get(0).getFirstName());
-        verify(petOwnerRepository, times(1)).findAll();
+        Page<PetOwnerResponseDTO> result = petOwnerService.getAllPetOwners(pageable);
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(1, result.getTotalPages());
+        assertEquals("John", result.getContent().get(0).getFirstName());
+        verify(petOwnerRepository, times(1)).findAll(pageable);
     }
 
     @Test
@@ -174,7 +204,8 @@ class PetOwnerServiceImplTest {
         verify(petOwnerRepository, never()).save(any(PetOwner.class));
     }
 
-    @Test
+    // ต้อง mock ทั้ง findById() และ existsByEmail() เชคกับข้อมูลเดิมที่มีในระบบ
+    @Test 
     @DisplayName("แก้ไขข้อมูลเจ้าของสัตว์เลี้ยง: อีเมลซ้ำแบบ Case-sensitive")
     void testUpdatePetOwner_DuplicateEmailCaseSensitive() {
         PetOwner existing = new PetOwner();

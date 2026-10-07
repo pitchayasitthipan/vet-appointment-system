@@ -2,6 +2,8 @@ package com.example.petclinic.controller.api;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -39,8 +41,8 @@ public class PetOwnerController {
 
     // Get ดึงข้อมูลเจ้าของสัตว์เลี้ยงทั้งหมด
     @GetMapping
-    public ResponseEntity<List<PetOwnerResponseDTO>> getAllPetOwners() {
-        List<PetOwnerResponseDTO> owners = petOwnerService.getAllPetOwners();
+    public ResponseEntity<Page<PetOwnerResponseDTO>> getAllPetOwners(Pageable pageable) {
+        Page<PetOwnerResponseDTO> owners = petOwnerService.getAllPetOwners(pageable);
         return ResponseEntity.ok(owners);
     }
 
