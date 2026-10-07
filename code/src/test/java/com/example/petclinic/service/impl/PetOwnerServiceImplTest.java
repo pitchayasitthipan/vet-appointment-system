@@ -4,10 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +17,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -28,12 +27,19 @@ import com.example.petclinic.domain.entity.PetOwner;
 import com.example.petclinic.domain.entity.PetOwnerDetail;
 import com.example.petclinic.dto.request.PetOwnerRequestDTO;
 import com.example.petclinic.dto.response.PetOwnerResponseDTO;
+import com.example.petclinic.exception.DuplicateResourceException;
+import com.example.petclinic.exception.ResourceNotFoundException;
+import com.example.petclinic.mapper.PetOwnerMapper;
 import com.example.petclinic.repository.PetOwnerRepository;
 
 class PetOwnerServiceImplTest {
 
     @Mock
     private PetOwnerRepository petOwnerRepository;
+
+    // Mapper ใช้ของจริง (@Spy) เพราะแค่แปลงข้อมูล ไม่ต้องต่อ db
+    @Spy
+    private PetOwnerMapper petOwnerMapper = new PetOwnerMapper();
 
     @InjectMocks
     private PetOwnerServiceImpl petOwnerService;
@@ -88,7 +94,7 @@ class PetOwnerServiceImplTest {
 
         when(petOwnerRepository.existsByEmail("test@example.com")).thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class, () -> petOwnerService.createPetOwner(request));
+        assertThrows(DuplicateResourceException.class, () -> petOwnerService.createPetOwner(request));
         verify(petOwnerRepository, never()).save(any(PetOwner.class));
     }
 
@@ -101,7 +107,7 @@ class PetOwnerServiceImplTest {
         // จำลองว่ามีคนใช้อีเมลนี้แล้ว, mock existsByEmail()
         when(petOwnerRepository.existsByEmail("ABC@gmail.com")).thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class, () -> petOwnerService.createPetOwner(request));
+        assertThrows(DuplicateResourceException.class, () -> petOwnerService.createPetOwner(request));
 
         verify(petOwnerRepository, times(1)).existsByEmail("ABC@gmail.com");
         verify(petOwnerRepository, never()).save(any(PetOwner.class));
@@ -139,10 +145,9 @@ class PetOwnerServiceImplTest {
 
         when(petOwnerRepository.findById(1L)).thenReturn(Optional.of(owner));
 
-        Optional<PetOwnerResponseDTO> result = petOwnerService.getPetOwnerById(1L);
+        PetOwnerResponseDTO result = petOwnerService.getPetOwnerById(1L);
 
-        assertTrue(result.isPresent());
-        assertEquals("John", result.get().getFirstName());
+        assertEquals("John", result.getFirstName());
         verify(petOwnerRepository, times(1)).findById(1L);
     }
 
@@ -151,9 +156,8 @@ class PetOwnerServiceImplTest {
     void testGetPetOwnerById_NotFound() {
         when(petOwnerRepository.findById(99L)).thenReturn(Optional.empty());
 
-        Optional<PetOwnerResponseDTO> result = petOwnerService.getPetOwnerById(99L);
-
-        assertFalse(result.isPresent());
+        // ไม่พบข้อมูล -> Service โยน ResourceNotFoundException (404)
+        assertThrows(ResourceNotFoundException.class, () -> petOwnerService.getPetOwnerById(99L));
         verify(petOwnerRepository, times(1)).findById(99L);
     }
 
@@ -199,7 +203,7 @@ class PetOwnerServiceImplTest {
 
         when(petOwnerRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> petOwnerService.updatePetOwner(99L, request));
+        assertThrows(ResourceNotFoundException.class, () -> petOwnerService.updatePetOwner(99L, request));
         verify(petOwnerRepository, times(1)).findById(99L);
         verify(petOwnerRepository, never()).save(any(PetOwner.class));
     }
@@ -220,7 +224,7 @@ class PetOwnerServiceImplTest {
         when(petOwnerRepository.existsByEmail("ABC@gmail.com"))
                 .thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class, () -> petOwnerService.updatePetOwner(1L, request));
+        assertThrows(DuplicateResourceException.class, () -> petOwnerService.updatePetOwner(1L, request));
 
         verify(petOwnerRepository, times(1))
                 .existsByEmail("ABC@gmail.com");
@@ -243,7 +247,7 @@ class PetOwnerServiceImplTest {
     void testDeletePetOwner_NotFound() {
         when(petOwnerRepository.existsById(99L)).thenReturn(false);
 
-        assertThrows(IllegalArgumentException.class, () -> petOwnerService.deletePetOwner(99L));
+        assertThrows(ResourceNotFoundException.class, () -> petOwnerService.deletePetOwner(99L));
         verify(petOwnerRepository, times(1)).existsById(99L);
         verify(petOwnerRepository, never()).deleteById(any());
     }

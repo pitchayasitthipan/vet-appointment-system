@@ -17,7 +17,7 @@ public interface PetOwnerService {
     Page<PetOwnerResponseDTO> getAllPetOwners(Pageable pageable);
 
     // Read by Id: ดึงข้อมูลเจ้าของสัตว์เลี้ยงตามรหัส (อาจไม่เจอ -> Optional)
-    Optional<PetOwnerResponseDTO> getPetOwnerById(Long id);
+    PetOwnerResponseDTO getPetOwnerById(Long id);
 
     // Update: แก้ไขข้อมูลเจ้าของสัตว์เลี้ยง
     PetOwnerResponseDTO updatePetOwner(Long id, PetOwnerRequestDTO requestDTO);

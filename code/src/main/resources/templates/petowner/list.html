@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>เจ้าของสัตว์เลี้ยง | PawCare</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/pawcare.css}">
+  <link rel="stylesheet" th:href="@{/css/icons.css}">
+</head>
+<body>
+<!-- แถบเมนูด้านบน -->
+<nav class="navbar">
+  <a th:href="@{/}" class="brand">
+    <span class="brand-logo"><span class="icon i-paw-print icon-white"></span></span>
+    <span>PawCare<small>Pet Clinic &amp; Vaccination</small></span>
+  </a>
+  <div class="nav-links">
+    <a th:href="@{/}">Home</a>
+    <a th:href="@{/owners}" class="active">Owners</a>
+    <a th:href="@{/pets}">My Pets</a>
+    <a th:href="@{/appointments}">Appointments</a>
+    <a th:href="@{/about}">About</a>
+  </div>
+</nav>
+
+<main class="container section">
+  <div class="row-between">
+    <div>
+      <h1 class="text-navy">เจ้าของสัตว์เลี้ยง</h1>
+      <p class="text-muted">ทั้งหมด <b th:text="${totalItems}">0</b> คน</p>
+    </div>
+    <a th:href="@{/owners/new}" class="btn-primary"><span class="icon i-plus"></span> เพิ่มเจ้าของ</a>
+  </div>
+
+  <!-- ข้อความแสดงผลหลังเพิ่ม แก้ไข ลบ -->
+  <div th:if="${successMessage}" class="alert" th:text="${successMessage}"></div>
+  <div th:if="${errorMessage}" class="alert alert-warning" th:text="${errorMessage}"></div>
+
+  <div class="card table-wrap">
+    <table>
+      <thead>
+      <tr>
+        <!-- หัวตารางเรียง น้อยไปมาก หรือว่า มากไปน้อย -->
+        <th><a th:href="@{/owners(page=${currentPage}, sortBy='ownerId', sortDir=${reverseSortDir})}">รหัส</a></th>
+        <th><a th:href="@{/owners(page=${currentPage}, sortBy='firstName', sortDir=${reverseSortDir})}">ชื่อ-นามสกุล</a></th>
+        <th>อีเมล</th>
+        <th>เบอร์โทร</th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:if="${#lists.isEmpty(owners)}">
+        <td colspan="5" class="text-muted">ยังไม่มีข้อมูล</td>
+      </tr>
+      <tr th:each="owner : ${owners}">
+        <td th:text="${owner.ownerId}">1</td>
+        <td th:text="${owner.firstName + ' ' + owner.lastName}">พิชยา สิทธิพันธ์</td>
+        <td th:text="${owner.email}">a@b.com</td>
+        <td th:text="${owner.phone}">0812345678</td>
+        <td class="row">
+          <a th:href="@{/owners/{id}(id=${owner.ownerId})}" class="btn-text btn-sm">ดู</a>
+          <a th:href="@{/owners/{id}/edit(id=${owner.ownerId})}" class="btn-secondary btn-sm">แก้ไข</a>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="row" th:if="${totalPages > 1}">
+    <a th:if="${currentPage > 0}" class="btn-text btn-sm"
+       th:href="@{/owners(page=${currentPage - 1}, sortBy=${sortBy}, sortDir=${sortDir})}">&laquo; ก่อนหน้า</a>
+    <span class="text-small" th:text="'หน้า ' + ${currentPage + 1} + ' / ' + ${totalPages}"></span>
+    <a th:if="${currentPage < totalPages - 1}" class="btn-text btn-sm"
+       th:href="@{/owners(page=${currentPage + 1}, sortBy=${sortBy}, sortDir=${sortDir})}">ถัดไป &raquo;</a>
+  </div>
+</main>
+</body>
+</html>

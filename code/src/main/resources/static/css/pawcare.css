@@ -191,6 +191,11 @@ small,
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 }
 
+/* grid ช่องกว้างอย่างน้อย 260px (เหมาะกับฟอร์มกรอกข้อมูล) */
+.grid-form {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
 /* ==========================================================
    5. ICONS (วงกลมรองไอคอน)
    ตัวไอคอนเองอยู่ใน icons.css ส่วนนี้มีแค่วงกลมพื้นหลังไอคอน
@@ -222,6 +227,7 @@ small,
 .btn-secondary,
 .btn-text {
   font: inherit;
+  text-decoration: none; /* ปุ่มที่เป็นลิงก์ <a> ไม่ต้องมีขีดเส้นใต้ */
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
@@ -317,6 +323,7 @@ button:disabled {
 
 /* กลุ่มโลโก้ + ชื่อ PawCare */
 .brand {
+  text-decoration: none; /* โลโก้เป็นลิงก์ ไม่ต้องมีขีดเส้นใต้ */
   display: flex;
   align-items: center;
   gap: 10px;
@@ -433,6 +440,7 @@ button:disabled {
   border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-muted);
+  width: 100%; /* ยืดเต็มความกว้างของช่อง ไม่ล้นทับช่องข้าง ๆ */
 }
 
 /* ตอนคลิกพิมพ์: ขอบชมพู + เงาวงนอก */

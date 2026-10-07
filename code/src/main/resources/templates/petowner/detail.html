@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ข้อมูลเจ้าของ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/pawcare.css}">
+  <link rel="stylesheet" th:href="@{/css/icons.css}">
+</head>
+<body>
+<!-- แถบเมนูด้านบน -->
+<nav class="navbar">
+  <a th:href="@{/}" class="brand">
+    <span class="brand-logo"><span class="icon i-paw-print icon-white"></span></span>
+    <span>PawCare<small>Pet Clinic &amp; Vaccination</small></span>
+  </a>
+  <div class="nav-links">
+    <a th:href="@{/}">Home</a>
+    <a th:href="@{/owners}" class="active">Owners</a>
+    <a th:href="@{/pets}">My Pets</a>
+    <a th:href="@{/appointments}">Appointments</a>
+    <a th:href="@{/about}">About</a>
+  </div>
+</nav>
+
+<main class="container section">
+  <div th:if="${successMessage}" class="alert" th:text="${successMessage}"></div>
+
+  <div class="card profile">
+    <span class="avatar-lg"><span class="icon i-user-circle icon-lg icon-accent"></span></span>
+    <div>
+      <h1 class="text-navy" th:text="${owner.firstName + ' ' + owner.lastName}">ชื่อ</h1>
+      <dl class="dl">
+        <dt>อีเมล</dt><dd th:text="${owner.email}"></dd>
+        <dt>เบอร์โทร</dt><dd th:text="${owner.phone}"></dd>
+        <dt>ที่อยู่</dt><dd th:text="${owner.address} ?: '-'"></dd>
+        <dt>ผู้ติดต่อฉุกเฉิน</dt><dd th:text="${owner.emergencyContactName} ?: '-'"></dd>
+        <dt>เบอร์ฉุกเฉิน</dt><dd th:text="${owner.emergencyContactPhone}"></dd>
+      </dl>
+      <div class="row">
+        <a th:href="@{/owners/{id}/edit(id=${owner.ownerId})}" class="btn-primary">
+          <span class="icon i-pencil-simple"></span> แก้ไข</a>
+        <!-- ลบใช้ POST (ลิงก์ธรรมดาเป็น GET) และถามยืนยันก่อน -->
+        <form method="post" th:action="@{/owners/{id}/delete(id=${owner.ownerId})}"
+              onsubmit="return confirm('ยืนยันการลบข้อมูลนี้?');">
+          <button type="submit" class="btn-secondary"><span class="icon i-trash"></span> ลบ</button>
+        </form>
+        <a th:href="@{/owners}" class="btn-text">กลับ</a>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

@@ -1,7 +1,5 @@
 package com.example.petclinic.controller.api;
 
-import java.util.Optional;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,8 +10,9 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+// Spring Boot 4: WebMvcTest ย้าย package, @MockBean ถูกลบ -> ใช้ @MockitoBean แทน
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -25,12 +24,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.petclinic.dto.request.PetOwnerRequestDTO;
 import com.example.petclinic.dto.response.PetOwnerResponseDTO;
+import com.example.petclinic.exception.DuplicateResourceException;
+import com.example.petclinic.exception.ResourceNotFoundException;
 import com.example.petclinic.service.PetOwnerService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+import tools.jackson.databind.ObjectMapper;
 
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @WebMvcTest(PetOwnerController.class)
 class PetOwnerControllerTest {
@@ -38,7 +41,7 @@ class PetOwnerControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private PetOwnerService petOwnerService;
 
     @Autowired
@@ -72,11 +75,12 @@ class PetOwnerControllerTest {
     @Test
     @DisplayName("ดึงข้อมูลเจ้าของสัตว์เลี้ยงทั้งหมด: สำเร็จ")
     void testGetAllPetOwners_Success() throws Exception {
-        Pageable pageable = PageRequest.of(0, 5);
+        // Controller ใส่ค่า sort เริ่มต้น ownerId น้อยไปมาก ให้ เลยต้องสร้าง pageable ให้ตรงกัน
+        Pageable pageable = PageRequest.of(0, 5, Sort.by("ownerId"));
         given(petOwnerService.getAllPetOwners(pageable))
                 .willReturn(new PageImpl<>(java.util.List.of(responseDTO), pageable, 1));
 
-        mockMvc.perform(get("/api/petowners?page=0&size=5")
+        mockMvc.perform(get("/api/v1/owners?page=0&size=5")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].ownerId").value(1))
@@ -91,9 +95,9 @@ class PetOwnerControllerTest {
     @Test
     @DisplayName("ค้นหาเจ้าของสัตว์เลี้ยงด้วย Id: พบข้อมูล")
     void testGetPetOwnerById_Found() throws Exception {
-        given(petOwnerService.getPetOwnerById(1L)).willReturn(Optional.of(responseDTO));
+        given(petOwnerService.getPetOwnerById(1L)).willReturn(responseDTO);
 
-        mockMvc.perform(get("/api/petowners/1")
+        mockMvc.perform(get("/api/v1/owners/1")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.ownerId").value(1))
@@ -106,9 +110,10 @@ class PetOwnerControllerTest {
     @Test
     @DisplayName("ค้นหาเจ้าของสัตว์เลี้ยงด้วย Id: ไม่พบข้อมูล (404 Not Found)")
     void testGetPetOwnerById_NotFound() throws Exception {
-        given(petOwnerService.getPetOwnerById(99L)).willReturn(Optional.empty());
+        given(petOwnerService.getPetOwnerById(99L))
+                .willThrow(new ResourceNotFoundException("ไม่พบข้อมูลเจ้าของสัตว์เลี้ยงรหัส: 99"));
 
-        mockMvc.perform(get("/api/petowners/99")
+        mockMvc.perform(get("/api/v1/owners/99")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
 
@@ -120,7 +125,7 @@ class PetOwnerControllerTest {
     void testCreatePetOwner_Success() throws Exception {
         given(petOwnerService.createPetOwner(any(PetOwnerRequestDTO.class))).willReturn(responseDTO);
 
-        mockMvc.perform(post("/api/petowners")
+        mockMvc.perform(post("/api/v1/owners")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTO)))
                 .andExpect(status().isCreated())
@@ -136,7 +141,7 @@ class PetOwnerControllerTest {
     void testCreatePetOwner_InvalidEmail() throws Exception {
         requestDTO.setEmail("invalid-email");
 
-        mockMvc.perform(post("/api/petowners")
+        mockMvc.perform(post("/api/v1/owners")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTO)))
                 .andExpect(status().isBadRequest());
@@ -145,17 +150,17 @@ class PetOwnerControllerTest {
     }
 
     @Test
-    @DisplayName("สร้างข้อมูลเจ้าของสัตว์เลี้ยง: อีเมลซ้ำแบบ Case-sensitive")
+    @DisplayName("สร้างข้อมูลเจ้าของสัตว์เลี้ยง: อีเมลซ้ำแบบ Case-sensitive (409 Conflict)")
     void testCreatePetOwner_DuplicateEmailCaseSensitive() throws Exception {
         requestDTO.setEmail("ABC@gmail.com");
 
         given(petOwnerService.createPetOwner(any(PetOwnerRequestDTO.class)))
-                .willThrow(new IllegalArgumentException("อีเมลนี้ถูกใช้งานแล้ว"));
+                .willThrow(new DuplicateResourceException("อีเมลนี้ถูกใช้งานแล้ว"));
 
-        mockMvc.perform(post("/api/petowners")
+        mockMvc.perform(post("/api/v1/owners")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTO)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isConflict()); // 409 ข้อมูลซ้ำ
 
         verify(petOwnerService, times(1)).createPetOwner(any(PetOwnerRequestDTO.class));
     }
@@ -165,7 +170,7 @@ class PetOwnerControllerTest {
     void testUpdatePetOwner_Success() throws Exception {
         given(petOwnerService.updatePetOwner(eq(1L), any(PetOwnerRequestDTO.class))).willReturn(responseDTO);
 
-        mockMvc.perform(put("/api/petowners/1")
+        mockMvc.perform(put("/api/v1/owners/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTO)))
                 .andExpect(status().isOk())
@@ -179,9 +184,9 @@ class PetOwnerControllerTest {
     @DisplayName("แก้ไขข้อมูลเจ้าของสัตว์เลี้ยง: ไม่พบ Id (404 Not Found)")
     void testUpdatePetOwner_NotFound() throws Exception {
         given(petOwnerService.updatePetOwner(eq(99L), any(PetOwnerRequestDTO.class)))
-                .willThrow(new IllegalArgumentException("ไม่พบเจ้าของสัตว์เลี้ยงรหัส 99"));
+                .willThrow(new ResourceNotFoundException("ไม่พบเจ้าของสัตว์เลี้ยงรหัส 99"));
 
-        mockMvc.perform(put("/api/petowners/99")
+        mockMvc.perform(put("/api/v1/owners/99")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTO)))
                 .andExpect(status().isNotFound());
@@ -190,29 +195,38 @@ class PetOwnerControllerTest {
     }
 
     @Test
-    @DisplayName("แก้ไขข้อมูลเจ้าของสัตว์เลี้ยง: อีเมลซ้ำแบบ Case-sensitive")
+    @DisplayName("แก้ไขข้อมูลเจ้าของสัตว์เลี้ยง: อีเมลซ้ำแบบ Case-sensitive (409 Conflict)")
     void testUpdatePetOwner_DuplicateEmailCaseSensitive() throws Exception {
         requestDTO.setEmail("ABC@gmail.com");
 
         given(petOwnerService.updatePetOwner(eq(1L), any(PetOwnerRequestDTO.class)))
-                .willThrow(new IllegalArgumentException("อีเมลนี้ถูกใช้งานแล้ว"));
+                .willThrow(new DuplicateResourceException("อีเมลนี้ถูกใช้งานแล้ว"));
 
-        mockMvc.perform(put("/api/petowners/1")
+        mockMvc.perform(put("/api/v1/owners/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTO)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isConflict()); // 409 ข้อมูลซ้ำ
 
         verify(petOwnerService, times(1)).updatePetOwner(eq(1L), any(PetOwnerRequestDTO.class));
     }
 
     @Test
+    @DisplayName("ลบข้อมูลเจ้าของสัตว์เลี้ยง: สำเร็จ (204 No Content)")
+    void testDeletePetOwner_Success() throws Exception {
+        mockMvc.perform(delete("/api/v1/owners/1"))
+                .andExpect(status().isNoContent());
+
+        verify(petOwnerService, times(1)).deletePetOwner(1L);
+    }
+
+    @Test
     @DisplayName("ลบข้อมูลเจ้าของสัตว์เลี้ยง: ไม่พบ Id (404 Not Found)")
     void testDeletePetOwner_NotFound() throws Exception {
-        doThrow(new IllegalArgumentException("ไม่พบเจ้าของสัตว์เลี้ยงรหัส 99"))
+        doThrow(new ResourceNotFoundException("ไม่พบเจ้าของสัตว์เลี้ยงรหัส 99"))
                 .when(petOwnerService).deletePetOwner(99L);
 
-        mockMvc.perform(delete("/api/pet-owners/99"))
-                .andExpect(status().isBadRequest());
+        mockMvc.perform(delete("/api/v1/owners/99"))
+                .andExpect(status().isNotFound());
 
         verify(petOwnerService, times(1)).deletePetOwner(99L);
     }

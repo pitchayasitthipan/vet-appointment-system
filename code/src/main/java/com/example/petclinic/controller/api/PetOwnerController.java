@@ -1,9 +1,9 @@
 package com.example.petclinic.controller.api;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,10 +19,13 @@ import com.example.petclinic.dto.request.PetOwnerRequestDTO;
 import com.example.petclinic.dto.response.PetOwnerResponseDTO;
 import com.example.petclinic.service.PetOwnerService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+@Tag(name = "Pet Owners", description = "จัดการข้อมูลเจ้าของสัตว์เลี้ยง") // ชื่อกลุ่ม API ใน Swagger UI
 @RestController
-@RequestMapping("/api/petowners")
+@RequestMapping("/api/v1/owners") // Resource-based: /api/v1/{resource} 
 public class PetOwnerController {
 
     private final PetOwnerService petOwnerService;
@@ -31,7 +34,8 @@ public class PetOwnerController {
         this.petOwnerService = petOwnerService;
     }
 
-    // Post เพิ่มข้อมูลเจ้าของสัตว์เลี้ยง
+    // Post เพิ่มข้อมูลเจ้าของสัตว์เลี้ยง -> 201 Created
+    @Operation(summary = "เพิ่มข้อมูลเจ้าของสัตว์เลี้ยง")
     @PostMapping
     public ResponseEntity<PetOwnerResponseDTO> createPetOwner(
             @Valid @RequestBody PetOwnerRequestDTO requestDTO) {
@@ -39,22 +43,28 @@ public class PetOwnerController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
-    // Get ดึงข้อมูลเจ้าของสัตว์เลี้ยงทั้งหมด
+    // Get ดึงข้อมูลเจ้าของสัตว์เลี้ยงทั้งหมด (Pagination & Sorting)
+    // ตัวอย่าง: GET /api/v1/owners?page=0&size=10&sort=lastName,asc
+    // ถ้าไม่ส่งค่ามา ใช้ค่าเริ่มต้น เป็น หน้าละ 10 รายการ เรียงตาม Id เจ้าของจากน้อยไปมาก
+    @Operation(summary = "ดึงข้อมูลเจ้าของสัตว์เลี้ยงทั้งหมด (แบ่งหน้า + เรียงลำดับ)")
     @GetMapping
-    public ResponseEntity<Page<PetOwnerResponseDTO>> getAllPetOwners(Pageable pageable) {
+    public ResponseEntity<Page<PetOwnerResponseDTO>> getAllPetOwners(
+            @PageableDefault(size = 10, sort = "ownerId", direction = Sort.Direction.ASC) Pageable pageable) {
         Page<PetOwnerResponseDTO> owners = petOwnerService.getAllPetOwners(pageable);
         return ResponseEntity.ok(owners);
     }
 
     // Get by Id ดึงข้อมูลเจ้าของสัตว์เลี้ยงตาม Id
+    // ถ้าไม่เจอ Service จะโยน ResourceNotFoundException -> GlobalExceptionHandler ตอบ 404
+    @Operation(summary = "ดึงข้อมูลเจ้าของสัตว์เลี้ยงตาม Id")
     @GetMapping("/{id}")
     public ResponseEntity<PetOwnerResponseDTO> getPetOwnerById(@PathVariable Long id) {
-        return petOwnerService.getPetOwnerById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        PetOwnerResponseDTO owner = petOwnerService.getPetOwnerById(id);
+        return ResponseEntity.ok(owner);
     }
 
-    // Put แก้ไขข้อมูลเจ้าของสัตว์เลี้ยง
+    // Put แก้ไขข้อมูลเจ้าของสัตว์เลี้ยง -> 200 OK
+    @Operation(summary = "แก้ไขข้อมูลเจ้าของสัตว์เลี้ยง")
     @PutMapping("/{id}")
     public ResponseEntity<PetOwnerResponseDTO> updatePetOwner(
             @PathVariable Long id,
@@ -63,7 +73,8 @@ public class PetOwnerController {
         return ResponseEntity.ok(updatedOwner);
     }
 
-    // Delete ลบข้อมูลเจ้าของสัตว์เลี้ยง
+    // Delete ลบข้อมูลเจ้าของสัตว์เลี้ยง -> 204 No Content
+    @Operation(summary = "ลบข้อมูลเจ้าของสัตว์เลี้ยง")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePetOwner(@PathVariable Long id) {
         petOwnerService.deletePetOwner(id);
