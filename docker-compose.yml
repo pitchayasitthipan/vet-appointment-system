@@ -1,0 +1,62 @@
+services:
+  # =============================================================
+  # PostgreSQL Database Container
+  # =============================================================
+  db:
+    image: postgres:15-alpine
+    container_name: vet-postgres-db
+    restart: always
+    environment:
+      POSTGRES_DB: petclinic_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./code/src/main/resources/data-doctor.sql:/docker-entrypoint-initdb.d/01-data-doctor.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d petclinic_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - vet-network
+
+  # =============================================================
+  # Spring Boot Backend Container (PawCare System)
+  # =============================================================
+  app:
+    build:
+      context: ./code
+      dockerfile: Dockerfile
+    container_name: vet-appointment-app
+    restart: on-failure
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: petclinic_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/petclinic_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    ports:
+      - "8080:8080"
+    networks:
+      - vet-network
+
+# =============================================================
+# Persistent Volumes & Custom Bridge Network
+# =============================================================
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  vet-network:
+    driver: bridge
