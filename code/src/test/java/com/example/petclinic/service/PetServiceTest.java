@@ -115,4 +115,54 @@ class PetServiceTest {
 
         verify(petRepository).findById(1L);
     }
+
+    @Test
+    void updatePet_shouldUpdatePetSuccessfully() {
+
+        Pet existingPet = new Pet();
+        existingPet.setPetId(1L);
+        existingPet.setName("Milo");
+        existingPet.setSpecies("Dog");
+        existingPet.setBreed("Golden Retriever");
+        existingPet.setGender("Male");
+        existingPet.setBirthDate(LocalDate.of(2022, 5, 10));
+        existingPet.setWeight(20.5);
+        existingPet.setMicrochipNumber("MC123456");
+        existingPet.setPetOwner(petOwner);
+
+        PetRequestDTO updateRequest = new PetRequestDTO();
+        updateRequest.setName("Milo Updated");
+        updateRequest.setSpecies("Dog");
+        updateRequest.setBreed("Labrador");
+        updateRequest.setGender("Male");
+        updateRequest.setBirthDate(LocalDate.of(2022, 5, 10));
+        updateRequest.setWeight(22.0);
+        updateRequest.setMicrochipNumber("MC999999");
+        updateRequest.setOwnerId(1L);
+
+        when(petRepository.findById(1L))
+                .thenReturn(java.util.Optional.of(existingPet));
+
+        when(petOwnerRepository.findById(1L))
+                .thenReturn(java.util.Optional.of(petOwner));
+
+        when(petRepository.save(any(Pet.class)))
+                .thenReturn(existingPet);
+
+        PetResponseDTO result = petService.updatePet(1L, updateRequest);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getPetId());
+        assertEquals("Milo Updated", result.getName());
+        assertEquals("Dog", result.getSpecies());
+        assertEquals("Labrador", result.getBreed());
+        assertEquals("Male", result.getGender());
+        assertEquals(22.0, result.getWeight());
+        assertEquals("MC999999", result.getMicrochipNumber());
+        assertEquals(1L, result.getOwnerId());
+
+        verify(petRepository).findById(1L);
+        verify(petOwnerRepository).findById(1L);
+        verify(petRepository).save(any(Pet.class));
+    }
 }
