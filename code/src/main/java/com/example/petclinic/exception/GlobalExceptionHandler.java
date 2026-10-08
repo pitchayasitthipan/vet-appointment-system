@@ -25,6 +25,7 @@ import jakarta.servlet.http.HttpServletRequest;
 // timestamp, status, error, message, path [+ errors เมื่อ Validation ไม่ผ่าน]
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
         // 400: Validation ไม่ผ่าน (@Valid) -> ส่งกลับทุก field ที่ผิด
         @ExceptionHandler(MethodArgumentNotValidException.class)
         public ResponseEntity<Map<String, Object>> handleValidationException(
@@ -44,12 +45,12 @@ public class GlobalExceptionHandler {
         // HttpMessageNotReadableException: JSON ผิดรูปแบบ หรือว่า ไม่ครบ
         // MethodArgumentTypeMismatchException: ชนิดข้อมูลผิด เช่น id ไม่ใช่ตัวเลข
         // PropertyReferenceException: sort ด้วย field ที่ไม่มี
-        // MissingServletRequestParameterException: ไม่ส่งพารามิเตอร์ที่จำเป็น
+        // MissingServletRequestParameterException: ไม่ส่ง parameter ที่จำเป็น เช่น
+        // ?phone=
         @ExceptionHandler({ HttpMessageNotReadableException.class,
                         MethodArgumentTypeMismatchException.class,
                         PropertyReferenceException.class,
-                        MissingServletRequestParameterException.class
-        })
+                        MissingServletRequestParameterException.class })
         public ResponseEntity<Map<String, Object>> handleBadRequestFormat(
                         Exception ex, HttpServletRequest request) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -62,6 +63,14 @@ public class GlobalExceptionHandler {
                         IllegalArgumentException ex, HttpServletRequest request) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                                 .body(buildError(HttpStatus.BAD_REQUEST, ex.getMessage(), request));
+        }
+
+        // 403: ไม่มีสิทธิ์ เช่น เรียก API จัดการข้อมูลโดยยังไม่ได้ใส่รหัสเจ้าหน้าที่
+        @ExceptionHandler(ForbiddenException.class)
+        public ResponseEntity<Map<String, Object>> handleForbiddenException(
+                        ForbiddenException ex, HttpServletRequest request) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                .body(buildError(HttpStatus.FORBIDDEN, ex.getMessage(), request));
         }
 
         // 404: ไม่พบข้อมูลตาม Id

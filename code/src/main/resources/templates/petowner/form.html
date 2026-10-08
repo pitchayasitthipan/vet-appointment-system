@@ -12,17 +12,18 @@
 <nav th:replace="~{fragments/layout :: navbar('owners')}"></nav>
 
 <main class="container">
-  <!-- หัว: เพิ่มใหม่ -> กลับไปรายชื่อ, แก้ไข -> กลับไปแฟ้มเดิม -->
+  <!-- แก้ไข -> กลับไปแฟ้มเดิม, เพิ่มใหม่ -> เจ้าหน้าที่กลับไปรายชื่อ / ลูกค้ากลับหน้าค้นหา -->
   <div class="page-bar">
-    <a th:href="${isEdit} ? @{/owners/{id}(id=${ownerId})} : @{/owners}" class="back-btn">
+    <a th:href="${isEdit} ? @{/owners/{id}(id=${ownerId})} : (${isStaff} ? @{/owners/staff} : @{/owners})" class="back-btn">
       <span class="icon i-arrow-left icon-sm"></span>
-      <span th:text="${isEdit} ? 'กลับไปแฟ้ม' : 'กลับไปรายชื่อ'">กลับ</span></a>
+      <span th:text="${isEdit} ? 'กลับไปแฟ้ม' : (${isStaff} ? 'กลับไปรายชื่อ' : 'กลับหน้าค้นหา')">กลับ</span></a>
     <div class="titles">
       <div class="crumbs">
-        <a th:href="@{/owners}">เจ้าของสัตว์เลี้ยง</a>
+        <a th:if="${isStaff}" th:href="@{/owners/staff}">จัดการรายชื่อเจ้าของ</a>
+        <a th:unless="${isStaff}" th:href="@{/owners}">ค้นหาข้อมูลของฉัน</a>
         <span class="icon i-caret-right icon-sm"></span>
         <th:block th:if="${owner}">
-          <a th:href="@{/owners/{id}(id=${ownerId})}" th:text="${owner.firstName + ' ' + owner.lastName}">พิชยา สิทธิพันธ์</a>
+          <a th:href="@{/owners/{id}(id=${ownerId})}" th:text="${owner.firstName + ' ' + owner.lastName}">สมชาย ใจดี</a>
           <span class="icon i-caret-right icon-sm"></span>
         </th:block>
         <span th:text="${isEdit} ? 'แก้ไข' : 'ลงทะเบียนใหม่'">ลงทะเบียนใหม่</span>
@@ -48,7 +49,7 @@
   <form class="form-calm" method="post" th:object="${ownerRequest}"
         th:action="${isEdit} ? @{/owners/{id}(id=${ownerId})} : @{/owners}">
 
-    <!-- 1. ข้อมูลเจ้าของ -->
+    <!-- หมวด 1 ข้อมูลเจ้าของ -->
     <div class="sec">
       <div class="sec-h"><span class="no">1</span><h2>ข้อมูลเจ้าของ</h2>
         <span class="muted-note">ใช้ติดต่อและแจ้งเตือนนัดหมาย</span></div>
@@ -76,18 +77,24 @@
           <input id="email" type="email" class="input" th:field="*{email}" th:errorclass="is-invalid" placeholder="name@example.com">
           <small class="err" th:if="${#fields.hasErrors('email')}"><span class="icon i-warning icon-sm"></span> <span th:text="${#fields.errors('email')[0]}"></span></small>
         </div>
-        <!-- เบอร์ซ้ำ: บอกว่าเป็นของใคร + ลิงก์ไปแฟ้มเดิม (กันลงทะเบียนคนเดิมซ้ำ) -->
-        <div th:if="${duplicateOwner}" class="dup-box full">
+        <!-- เบอร์ซ้ำ (เจ้าหน้าที่): บอกว่าเป็นของใคร + ลิงก์ไปแฟ้มเดิม (กันลงทะเบียนคนเดิมซ้ำ) -->
+        <div th:if="${duplicateOwner != null and isStaff}" class="dup-box full">
           <span class="icon i-info icon-sm icon-navy"></span>
           <span>เบอร์ <span th:replace="~{fragments/layout :: phone(${duplicateOwner.phone})}"></span> มีในระบบแล้ว
-            (<span th:text="${duplicateOwner.firstName + ' ' + duplicateOwner.lastName}">พิชยา สิทธิพันธ์</span>
+            (<span th:text="${duplicateOwner.firstName + ' ' + duplicateOwner.lastName}">สมชาย ใจดี</span>
             #<span th:text="${#numbers.formatInteger(duplicateOwner.ownerId, 4)}">0001</span>)</span>
           <a th:href="@{/owners/{id}(id=${duplicateOwner.ownerId})}">เปิดแฟ้มเดิม</a>
+        </div>
+        <!-- เบอร์ซ้ำ (ลูกค้า): ไม่บอกชื่อเจ้าของเบอร์ ให้ไปค้นหาด้วยเบอร์นั้นแทน -->
+        <div th:if="${duplicateOwner != null and !isStaff}" class="dup-box full">
+          <span class="icon i-info icon-sm icon-navy"></span>
+          <span>เบอร์ <span th:replace="~{fragments/layout :: phone(${duplicateOwner.phone})}"></span> ลงทะเบียนไว้แล้ว</span>
+          <a th:href="@{/owners(phone=${duplicateOwner.phone})}">ค้นหาด้วยเบอร์นี้</a>
         </div>
       </div>
     </div>
 
-    <!-- 2. ที่อยู่ (ไม่บังคับ) -->
+    <!-- หมวด 2 ที่อยู่ (ไม่บังคับ) -->
     <div class="sec">
       <div class="sec-h"><span class="no">2</span><h2>ที่อยู่</h2><span class="muted-note">ไม่บังคับ</span></div>
       <div class="sec-b field">
@@ -97,10 +104,10 @@
       </div>
     </div>
 
-    <!-- 3. ผู้ติดต่อฉุกเฉิน -->
+    <!-- หมวด 3 ผู้ติดต่อฉุกเฉิน -->
     <div class="sec">
       <div class="sec-h"><span class="no">3</span><h2>ผู้ติดต่อฉุกเฉิน</h2>
-        <span class="muted-note">ติดต่อเมื่อติดต่อเจ้าของไม่ได้ หรือกรณีฉุกเฉิน</span></div>
+        <span class="muted-note">ติดต่อเมื่อติดต่อเจ้าของไม่ได้ หรือกรณีผ่าตัด</span></div>
       <div class="sec-b fields-2">
         <div class="field">
           <label for="emergencyContactName">ชื่อผู้ติดต่อ</label>
@@ -120,9 +127,9 @@
     <!-- แถบปุ่มท้ายฟอร์ม -->
     <div class="action-bar">
       <span class="muted-note" th:if="${isEdit}">ตรวจสอบข้อมูลก่อนบันทึก</span>
-      <span class="muted-note" th:unless="${isEdit}">ช่องที่มี <span class="req">*</span> ต้องกรอกให้ครบถ้วน</span>
+      <span class="muted-note" th:unless="${isEdit}">ช่องที่มี <span class="req">*</span> ต้องกรอก</span>
       <div class="row">
-        <a th:href="${isEdit} ? @{/owners/{id}(id=${ownerId})} : @{/owners}" class="btn-ghost">ยกเลิก</a>
+        <a th:href="${isEdit} ? @{/owners/{id}(id=${ownerId})} : (${isStaff} ? @{/owners/staff} : @{/owners})" class="btn-ghost">ยกเลิก</a>
         <!-- หน้าแก้ไข: ปุ่มเดียว -->
         <button th:if="${isEdit}" type="submit" class="btn-solid">
           <span class="icon i-check icon-sm icon-white"></span> บันทึกการแก้ไข</button>

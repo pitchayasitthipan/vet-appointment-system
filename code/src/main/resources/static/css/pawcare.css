@@ -534,12 +534,16 @@ button:disabled {
   place-items: center;
 }
 
-/* ก้อนสีชมพูโค้งมนเป็นพื้นหลังรูปสัตว์ */
+/* วงกลมสีชมพูเป็นพื้นหลังรูปสัตว์ */
 .hero-blob {
   position: absolute;
-  inset: 8% 4% 4% 12%;
+  top: 50%;
+  left: 50%;
+  width: min(300px, 90%);
+  aspect-ratio: 1; /* กว้าง = สูง จึงเป็นวงกลม */
+  transform: translate(-50%, -50%); /* จัดให้อยู่กึ่งกลาง */
   background: linear-gradient(135deg, var(--color-secondary), var(--color-accent));
-  border-radius: 58% 42% 50% 50%/48% 52% 48% 52%;
+  border-radius: 50%;
   opacity: 0.85;
 }
 
@@ -1087,8 +1091,8 @@ footer {
   .step span.lbl {
     font-size: 12px;
   }
+}
 
-  
 /* ==========================================================
    20. หน้าเจ้าของสัตว์เลี้ยง (Owner Pages)
    ใช้กับ templates/petowner/ : รายชื่อ, แฟ้มเจ้าของ, ฟอร์ม, กล่องยืนยันลบ
@@ -1614,6 +1618,11 @@ footer {
   color: #b23b2a;
 }
 
+/* คำอธิบายใต้ช่องค้นหาเบอร์ (หน้าค้นหาของลูกค้า) */
+.lookup-help {
+  padding: 4px 16px 16px;
+}
+
 /* "ทั้งหมด 24 คน · เรียงตามชื่อ" ใต้ช่องค้นหา */
 .list-count {
   font-size: 13px;
@@ -1659,6 +1668,25 @@ footer {
   box-shadow: var(--shadow-md);
 }
 
+/* ไอคอนแมว + สุนัขในหน้าแรก: วางข้างกันบนก้อนสีชมพู */
+.hero-icons {
+  position: relative;
+  display: flex;
+  gap: 2px;
+}
+
+.hero-icons .icon {
+  width: 104px;
+  height: 104px;
+}
+
+@media (max-width: 800px) {
+  .hero-icons .icon {
+    width: 96px;
+    height: 96px;
+  }
+}
+
 /* กล่อง About Us: ข้อความซ้าย / ข้อมูลคลินิกขวา */
 .about {
   display: grid;
@@ -1673,4 +1701,22 @@ footer {
   }
 }
 
+/* หน้ากรอกรหัสเจ้าหน้าที่: กล่องกลางจอ */
+.staff-lock {
+  max-width: 420px;
+  margin: 48px auto;
+  text-align: center;
+  display: grid;
+  gap: 12px;
+}
+
+.staff-lock form {
+  display: grid;
+  gap: 12px;
+}
+
+.staff-lock .input {
+  text-align: center;
+  font-size: 22px;
+  letter-spacing: 6px;
 }

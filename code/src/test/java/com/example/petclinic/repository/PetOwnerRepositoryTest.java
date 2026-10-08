@@ -100,6 +100,20 @@ class PetOwnerRepositoryTest {
     }
 
     @Test
+    @DisplayName("One-to-One: บันทึก PetOwner แล้ว PetOwnerDetail ถูกบันทึกตาม (Cascade)")
+    void testSave_CascadesPetOwnerDetail() {
+        PetOwner saved = petOwnerRepository.save(owner);
+        entityManager.flush();
+        entityManager.clear();
+
+        PetOwner found = petOwnerRepository.findById(saved.getOwnerId()).orElseThrow();
+
+        assertNotNull(found.getPetOwnerDetail());
+        assertEquals("Khon Kaen", found.getPetOwnerDetail().getAddress());
+        assertEquals("0987654321", found.getPetOwnerDetail().getEmergencyContactPhone());
+    }
+
+    @Test
     @DisplayName("One-to-One: ลบ PetOwner แล้ว PetOwnerDetail ถูกลบตาม (Cascade)")
     void testDelete_CascadesPetOwnerDetail() {
         PetOwner saved = petOwnerRepository.save(owner);

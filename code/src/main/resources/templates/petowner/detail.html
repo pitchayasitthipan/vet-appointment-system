@@ -14,25 +14,31 @@
 <main class="container">
   <!-- หัวหน้า: ปุ่มกลับ + breadcrumb + ปุ่มแก้ไข/ลบ -->
   <div class="page-bar">
-    <a th:href="@{/owners(selected=${owner.ownerId})}" class="back-btn">
-      <span class="icon i-arrow-left icon-sm"></span> กลับไปรายชื่อ</a>
+    <!-- เจ้าหน้าที่ -> กลับไปรายชื่อทั้งหมด, ลูกค้า -> กลับหน้าค้นหาด้วยเบอร์ -->
+    <a th:href="${isStaff} ? @{/owners/staff(selected=${owner.ownerId})} : @{/owners(phone=${owner.phone})}" class="back-btn">
+      <span class="icon i-arrow-left icon-sm"></span>
+      <span th:text="${isStaff} ? 'กลับไปรายชื่อ' : 'กลับหน้าค้นหา'">กลับหน้าค้นหา</span></a>
     <div class="titles">
       <div class="crumbs">
-        <a th:href="@{/owners}">เจ้าของสัตว์เลี้ยง</a>
+        <a th:if="${isStaff}" th:href="@{/owners/staff}">จัดการรายชื่อเจ้าของ</a>
+        <a th:unless="${isStaff}" th:href="@{/owners(phone=${owner.phone})}">ค้นหาข้อมูลของฉัน</a>
         <span class="icon i-caret-right icon-sm"></span>
         <span th:text="${owner.firstName + ' ' + owner.lastName}">พิชยา สิทธิพันธ์</span>
       </div>
       <h1>แฟ้มเจ้าของสัตว์เลี้ยง</h1>
     </div>
     <div class="actions">
-      <a th:href="@{/owners/{id}/edit(id=${owner.ownerId})}" class="btn-mini pink">
+      <!-- แก้ไข/ลบ เฉพาะเจ้าหน้าที่ ลูกค้าดูได้อย่างเดียว -->
+      <a th:if="${isStaff}" th:href="@{/owners/{id}/edit(id=${owner.ownerId})}" class="btn-mini pink">
         <span class="icon i-pencil-simple icon-sm"></span> แก้ไข</a>
       <!-- กดแล้วเปิดกล่องยืนยันการลบ (อยู่ท้ายหน้า) -->
-      <button type="button" class="btn-text delete-link"
+      <button th:if="${isStaff}" type="button" class="btn-text delete-link"
               onclick="document.getElementById('deleteDialog').showModal()">ลบ</button>
+      <span th:unless="${isStaff}" class="muted-note">ต้องการแก้ไขข้อมูล กรุณาติดต่อเจ้าหน้าที่คลินิก</span>
     </div>
   </div>
 
+  <div th:if="${errorMessage}" class="alert alert-warning" th:text="${errorMessage}"></div>
   <div th:if="${successMessage}" class="alert">
     <span class="icon i-check-circle icon-success"></span> <span th:text="${successMessage}"></span>
   </div>
@@ -59,7 +65,7 @@
 
   <div class="layout-2">
     <div>
-      <!-- หมวด 1 ข้อมูลติดต่อ -->
+      <!-- 1. ข้อมูลติดต่อ -->
       <div class="sec">
         <div class="sec-h"><span class="no">1</span><h2>ข้อมูลติดต่อ</h2></div>
         <div class="sec-b kv">
@@ -72,7 +78,7 @@
         </div>
       </div>
 
-      <!-- หมวด 2 ผู้ติดต่อฉุกเฉิน (โทนแดง) -->
+      <!-- 2. ผู้ติดต่อฉุกเฉิน (โทนแดง) -->
       <div class="sec danger">
         <div class="sec-h">
           <span class="no">2</span><h2>ผู้ติดต่อฉุกเฉิน</h2>
@@ -89,7 +95,7 @@
     </div>
 
     <div>
-    <!-- หมวด 3 สัตว์เลี้ยง: ข้อมูลมาจากโมดูล Pet -->
+    <!-- 3. สัตว์เลี้ยง: ข้อมูลมาจากโมดูล Pet -->
     <div class="sec">
       <div class="sec-h">
         <span class="no">3</span><h2>สัตว์เลี้ยง</h2>
@@ -102,7 +108,7 @@
       </div>
     </div>
 
-    <!-- หมวด 4 นัดหมายและประวัติ: ข้อมูลมาจากโมดูล Appointment -->
+    <!-- 4. นัดหมายและประวัติ: ข้อมูลมาจากโมดูล Appointment -->
     <div class="sec">
       <div class="sec-h">
         <span class="no">4</span><h2>นัดหมายและประวัติล่าสุด</h2>
@@ -118,7 +124,7 @@
 </main>
 
 <!-- กล่องยืนยันการลบ -->
-<dialog id="deleteDialog" class="confirm-dialog">
+<dialog th:if="${isStaff}" id="deleteDialog" class="confirm-dialog">
   <div class="body">
     <div class="icon-circle"><span class="icon i-trash icon-lg"></span></div>
     <h2>ลบแฟ้มเจ้าของนี้?</h2>

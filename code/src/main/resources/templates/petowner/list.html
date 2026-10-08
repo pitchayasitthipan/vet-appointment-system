@@ -3,22 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>เจ้าของสัตว์เลี้ยง - PawCare</title>
+  <title>จัดการรายชื่อเจ้าของ - PawCare</title>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" th:href="@{/css/pawcare.css}">
   <link rel="stylesheet" th:href="@{/css/icons.css}">
 </head>
 <body>
-<nav th:replace="~{fragments/layout :: navbar('owners')}"></nav>
+<nav th:replace="~{fragments/layout :: navbar('staff')}"></nav>
 
 <main class="container">
   <div class="page-bar">
     <div class="titles">
-      <div class="crumbs">Pet Owner</div>
-      <h1>เจ้าของสัตว์เลี้ยง</h1>
+      <div class="crumbs">สำหรับเจ้าหน้าที่</div>
+      <h1>จัดการรายชื่อเจ้าของสัตว์เลี้ยง</h1>
     </div>
     <div class="actions">
       <a th:href="@{/owners/new}" class="btn-primary"><span class="icon i-plus"></span> ลงทะเบียนเจ้าของใหม่</a>
+      <!-- ออกจากระบบเจ้าหน้าที่ -> กลับไปหน้ากรอกรหัส -->
+      <form method="post" th:action="@{/owners/staff/logout}">
+        <button type="submit" class="btn-ghost"><span class="icon i-sign-out icon-sm"></span> ออกจากระบบเจ้าหน้าที่</button>
+      </form>
     </div>
   </div>
 
@@ -29,8 +33,8 @@
   <div class="split">
     <!-- ซ้าย: ช่องค้นหา + รายชื่อ + เลขหน้า -->
     <div class="list-panel">
-      <!-- ค้นหาแบบ GET -> /owners?phone=0812345678 -->
-      <form method="get" th:action="@{/owners}" class="search-bar">
+      <!-- ค้นหาแบบ GET -> /owners/staff?phone=0812345678 -->
+      <form method="get" th:action="@{/owners/staff}" class="search-bar">
         <span class="icon i-magnifying-glass icon-sm"></span>
         <input type="tel" name="phone" th:value="${phone}" maxlength="10"
                placeholder="ค้นหาเจ้าของสัตว์เลี้ยงด้วยเบอร์โทรศัพท์">
@@ -40,7 +44,7 @@
          th:text="'ทั้งหมด ' + ${totalItems} + ' คน · เรียงตามชื่อ'">ทั้งหมด 24 คน · เรียงตามชื่อ</p>
       <p class="list-count" th:unless="${phone == null or phone.isBlank()}">
         ผลค้นหาเบอร์ <b th:text="${phone}">0812345678</b> ·
-        <a th:href="@{/owners}">ล้างการค้นหา</a>
+        <a th:href="@{/owners/staff}">ล้างการค้นหา</a>
       </p>
 
       <!-- ไม่พบข้อมูล: ถ้าค้นด้วยเบอร์ ให้ปุ่มลงทะเบียนด้วยเบอร์นั้น -->
@@ -53,7 +57,7 @@
       <!-- แถวรายชื่อ: กดแล้วแสดงข้อมูลย่อฝั่งขวา (selected = ownerId) -->
       <a th:each="owner : ${owners}" class="li"
          th:classappend="${selectedOwner != null and owner.ownerId == selectedOwner.ownerId} ? 'sel'"
-         th:href="@{/owners(page=${currentPage}, phone=${phone}, selected=${owner.ownerId})}">
+         th:href="@{/owners/staff(page=${currentPage}, phone=${phone}, selected=${owner.ownerId})}">
         <span class="initials"><span th:replace="~{fragments/layout :: initials(${owner})}"></span></span>
         <span>
           <b th:text="${owner.firstName + ' ' + owner.lastName}">พิชยา สิทธิพันธ์</b>
@@ -63,12 +67,12 @@
 
       <!-- เลขหน้า (Pagination) -->
       <div class="pager" th:if="${totalPages > 1}">
-        <a th:if="${currentPage > 0}" th:href="@{/owners(page=${currentPage - 1}, sortBy=${sortBy}, sortDir=${sortDir})}">
+        <a th:if="${currentPage > 0}" th:href="@{/owners/staff(page=${currentPage - 1}, sortBy=${sortBy}, sortDir=${sortDir})}">
           <span class="icon i-caret-left icon-sm"></span></a>
         <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:text="${i + 1}"
            th:classappend="${i == currentPage} ? 'active'"
-           th:href="@{/owners(page=${i}, sortBy=${sortBy}, sortDir=${sortDir})}">1</a>
-        <a th:if="${currentPage < totalPages - 1}" th:href="@{/owners(page=${currentPage + 1}, sortBy=${sortBy}, sortDir=${sortDir})}">
+           th:href="@{/owners/staff(page=${i}, sortBy=${sortBy}, sortDir=${sortDir})}">1</a>
+        <a th:if="${currentPage < totalPages - 1}" th:href="@{/owners/staff(page=${currentPage + 1}, sortBy=${sortBy}, sortDir=${sortDir})}">
           <span class="icon i-caret-right icon-sm"></span></a>
       </div>
     </div>

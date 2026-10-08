@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -48,8 +50,14 @@ class PetOwnerControllerTest {
         private PetOwnerResponseDTO responseDTO;
         private PetOwnerRequestDTO requestDTO;
 
+        // session ที่ใส่รหัสเจ้าหน้าที่แล้ว (API ดูทั้งหมด/ดูตาม Id/แก้ไข/ลบ ต้องใช้)
+        private MockHttpSession staffSession;
+
         @BeforeEach
         void setUp() {
+                staffSession = new MockHttpSession();
+                staffSession.setAttribute("isStaff", true);
+
                 requestDTO = new PetOwnerRequestDTO();
                 requestDTO.setFirstName("John");
                 requestDTO.setLastName("Doe");
@@ -73,13 +81,12 @@ class PetOwnerControllerTest {
         @Test
         @DisplayName("ดึงข้อมูลเจ้าของสัตว์เลี้ยงทั้งหมด: สำเร็จ")
         void testGetAllPetOwners_Success() throws Exception {
-                // Controller ใส่ค่า sort เริ่มต้น ownerId น้อยไปมาก ให้ เลยต้องสร้าง pageable
-                // ให้ตรงกัน
+                // Controller ใส่ค่า sort เริ่มต้น Id น้อยไปมาก เลยสร้าง pageable ให้ตรงกัน
                 Pageable pageable = PageRequest.of(0, 5, Sort.by("ownerId"));
                 given(petOwnerService.getAllPetOwners(pageable))
                                 .willReturn(new PageImpl<>(java.util.List.of(responseDTO), pageable, 1));
 
-                mockMvc.perform(get("/api/v1/owners?page=0&size=5")
+                mockMvc.perform(get("/api/v1/owners?page=0&size=5").session(staffSession)
                                 .contentType(MediaType.APPLICATION_JSON))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.content[0].ownerId").value(1))
@@ -96,7 +103,7 @@ class PetOwnerControllerTest {
         void testGetPetOwnerById_Found() throws Exception {
                 given(petOwnerService.getPetOwnerById(1L)).willReturn(responseDTO);
 
-                mockMvc.perform(get("/api/v1/owners/1")
+                mockMvc.perform(get("/api/v1/owners/1").session(staffSession)
                                 .contentType(MediaType.APPLICATION_JSON))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.ownerId").value(1))
@@ -112,7 +119,7 @@ class PetOwnerControllerTest {
                 given(petOwnerService.getPetOwnerById(99L))
                                 .willThrow(new ResourceNotFoundException("ไม่พบข้อมูลเจ้าของสัตว์เลี้ยงรหัส: 99"));
 
-                mockMvc.perform(get("/api/v1/owners/99")
+                mockMvc.perform(get("/api/v1/owners/99").session(staffSession)
                                 .contentType(MediaType.APPLICATION_JSON))
                                 .andExpect(status().isNotFound());
 
@@ -203,7 +210,7 @@ class PetOwnerControllerTest {
         void testUpdatePetOwner_Success() throws Exception {
                 given(petOwnerService.updatePetOwner(eq(1L), any(PetOwnerRequestDTO.class))).willReturn(responseDTO);
 
-                mockMvc.perform(put("/api/v1/owners/1")
+                mockMvc.perform(put("/api/v1/owners/1").session(staffSession)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(requestDTO)))
                                 .andExpect(status().isOk())
@@ -219,7 +226,7 @@ class PetOwnerControllerTest {
                 given(petOwnerService.updatePetOwner(eq(99L), any(PetOwnerRequestDTO.class)))
                                 .willThrow(new ResourceNotFoundException("ไม่พบเจ้าของสัตว์เลี้ยงรหัส 99"));
 
-                mockMvc.perform(put("/api/v1/owners/99")
+                mockMvc.perform(put("/api/v1/owners/99").session(staffSession)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(requestDTO)))
                                 .andExpect(status().isNotFound());
@@ -235,7 +242,7 @@ class PetOwnerControllerTest {
                 given(petOwnerService.updatePetOwner(eq(1L), any(PetOwnerRequestDTO.class)))
                                 .willThrow(new DuplicateResourceException("อีเมลนี้ถูกใช้งานแล้ว"));
 
-                mockMvc.perform(put("/api/v1/owners/1")
+                mockMvc.perform(put("/api/v1/owners/1").session(staffSession)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(requestDTO)))
                                 .andExpect(status().isConflict()); // 409 ข้อมูลซ้ำ
@@ -246,7 +253,7 @@ class PetOwnerControllerTest {
         @Test
         @DisplayName("ลบข้อมูลเจ้าของสัตว์เลี้ยง: สำเร็จ (204 No Content)")
         void testDeletePetOwner_Success() throws Exception {
-                mockMvc.perform(delete("/api/v1/owners/1"))
+                mockMvc.perform(delete("/api/v1/owners/1").session(staffSession))
                                 .andExpect(status().isNoContent());
 
                 verify(petOwnerService, times(1)).deletePetOwner(1L);
@@ -258,9 +265,47 @@ class PetOwnerControllerTest {
                 doThrow(new ResourceNotFoundException("ไม่พบเจ้าของสัตว์เลี้ยงรหัส 99"))
                                 .when(petOwnerService).deletePetOwner(99L);
 
-                mockMvc.perform(delete("/api/v1/owners/99"))
+                mockMvc.perform(delete("/api/v1/owners/99").session(staffSession))
                                 .andExpect(status().isNotFound());
 
                 verify(petOwnerService, times(1)).deletePetOwner(99L);
+        }
+
+        @Test
+        @DisplayName("ยังไม่ใส่รหัสเจ้าหน้าที่: ดึงข้อมูลทั้งหมดไม่ได้ (403 Forbidden)")
+        void testGetAllPetOwners_NotStaff() throws Exception {
+                mockMvc.perform(get("/api/v1/owners"))
+                                .andExpect(status().isForbidden());
+
+                verify(petOwnerService, never()).getAllPetOwners(any(Pageable.class));
+        }
+
+        @Test
+        @DisplayName("ยังไม่ใส่รหัสเจ้าหน้าที่: ดูข้อมูลตาม Id ไม่ได้ (403 Forbidden)")
+        void testGetPetOwnerById_NotStaff() throws Exception {
+                mockMvc.perform(get("/api/v1/owners/1"))
+                                .andExpect(status().isForbidden());
+
+                verify(petOwnerService, never()).getPetOwnerById(1L);
+        }
+
+        @Test
+        @DisplayName("ยังไม่ใส่รหัสเจ้าหน้าที่: แก้ไขข้อมูลไม่ได้ (403 Forbidden)")
+        void testUpdatePetOwner_NotStaff() throws Exception {
+                mockMvc.perform(put("/api/v1/owners/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(requestDTO)))
+                                .andExpect(status().isForbidden());
+
+                verify(petOwnerService, never()).updatePetOwner(eq(1L), any(PetOwnerRequestDTO.class));
+        }
+
+        @Test
+        @DisplayName("ยังไม่ใส่รหัสเจ้าหน้าที่: ลบข้อมูลไม่ได้ (403 Forbidden)")
+        void testDeletePetOwner_NotStaff() throws Exception {
+                mockMvc.perform(delete("/api/v1/owners/1"))
+                                .andExpect(status().isForbidden());
+
+                verify(petOwnerService, never()).deletePetOwner(1L);
         }
 }
