@@ -120,6 +120,40 @@ class PetOwnerControllerTest {
         }
 
         @Test
+        @DisplayName("ค้นหาเจ้าของสัตว์เลี้ยงด้วยเบอร์โทร: พบข้อมูล")
+        void testGetPetOwnerByPhone_Found() throws Exception {
+                given(petOwnerService.getPetOwnerByPhone("0876543210")).willReturn(responseDTO);
+
+                mockMvc.perform(get("/api/v1/owners/search?phone=0876543210")
+                                .contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.ownerId").value(1))
+                                .andExpect(jsonPath("$.phone").value("0876543210"));
+
+                verify(petOwnerService, times(1)).getPetOwnerByPhone("0876543210");
+        }
+
+        @Test
+        @DisplayName("ค้นหาเจ้าของสัตว์เลี้ยงด้วยเบอร์โทร: ไม่พบข้อมูล (404 Not Found)")
+        void testGetPetOwnerByPhone_NotFound() throws Exception {
+                given(petOwnerService.getPetOwnerByPhone("0800000000"))
+                                .willThrow(new ResourceNotFoundException(
+                                                "ไม่พบเจ้าของสัตว์เลี้ยงที่ใช้เบอร์: 0800000000"));
+
+                mockMvc.perform(get("/api/v1/owners/search?phone=0800000000")
+                                .contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("ค้นหาเจ้าของสัตว์เลี้ยงด้วยเบอร์โทร: ไม่ส่งเบอร์มา (400 Bad Request)")
+        void testGetPetOwnerByPhone_MissingPhone() throws Exception {
+                mockMvc.perform(get("/api/v1/owners/search")
+                                .contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isBadRequest());
+        }
+
+        @Test
         @DisplayName("สร้างข้อมูลเจ้าของสัตว์เลี้ยง: สำเร็จ")
         void testCreatePetOwner_Success() throws Exception {
                 given(petOwnerService.createPetOwner(any(PetOwnerRequestDTO.class))).willReturn(responseDTO);

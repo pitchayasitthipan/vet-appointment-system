@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.petclinic.dto.request.PetOwnerRequestDTO;
@@ -25,7 +26,7 @@ import jakarta.validation.Valid;
 
 @Tag(name = "Pet Owners", description = "จัดการข้อมูลเจ้าของสัตว์เลี้ยง") // ชื่อกลุ่ม API ใน Swagger UI
 @RestController
-@RequestMapping("/api/v1/owners") // Resource-based: /api/v1/{resource} 
+@RequestMapping("/api/v1/owners") // Resource-based: /api/v1/{resource}
 public class PetOwnerController {
 
     private final PetOwnerService petOwnerService;
@@ -45,7 +46,8 @@ public class PetOwnerController {
 
     // Get ดึงข้อมูลเจ้าของสัตว์เลี้ยงทั้งหมด (Pagination & Sorting)
     // ตัวอย่าง: GET /api/v1/owners?page=0&size=10&sort=lastName,asc
-    // ถ้าไม่ส่งค่ามา ใช้ค่าเริ่มต้น เป็น หน้าละ 10 รายการ เรียงตาม Id เจ้าของจากน้อยไปมาก
+    // ถ้าไม่ส่งค่ามา ใช้ค่าเริ่มต้น เป็น หน้าละ 10 รายการ เรียงตาม Id
+    // เจ้าของจากน้อยไปมาก
     @Operation(summary = "ดึงข้อมูลเจ้าของสัตว์เลี้ยงทั้งหมด (แบ่งหน้า + เรียงลำดับ)")
     @GetMapping
     public ResponseEntity<Page<PetOwnerResponseDTO>> getAllPetOwners(
@@ -54,8 +56,19 @@ public class PetOwnerController {
         return ResponseEntity.ok(owners);
     }
 
+    // Get by phone ค้นหาเจ้าของสัตว์เลี้ยงด้วยเบอร์โทร
+    // ตัวอย่าง: GET /api/v1/owners/search?phone=0812345678
+    // เจอ -> 200 พร้อม ownerId ให้โมดูลอื่นใช้ต่อ, ไม่เจอ -> 404
+    @Operation(summary = "ค้นหาเจ้าของสัตว์เลี้ยงด้วยเบอร์โทรศัพท์")
+    @GetMapping("/search")
+    public ResponseEntity<PetOwnerResponseDTO> getPetOwnerByPhone(@RequestParam String phone) {
+        PetOwnerResponseDTO owner = petOwnerService.getPetOwnerByPhone(phone);
+        return ResponseEntity.ok(owner);
+    }
+
     // Get by Id ดึงข้อมูลเจ้าของสัตว์เลี้ยงตาม Id
-    // ถ้าไม่เจอ Service จะโยน ResourceNotFoundException -> GlobalExceptionHandler ตอบ 404
+    // ถ้าไม่เจอ Service จะโยน ResourceNotFoundException -> GlobalExceptionHandler
+    // ตอบ 404
     @Operation(summary = "ดึงข้อมูลเจ้าของสัตว์เลี้ยงตาม Id")
     @GetMapping("/{id}")
     public ResponseEntity<PetOwnerResponseDTO> getPetOwnerById(@PathVariable Long id) {

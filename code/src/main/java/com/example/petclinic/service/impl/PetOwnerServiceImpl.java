@@ -34,6 +34,11 @@ public class PetOwnerServiceImpl implements PetOwnerService {
             throw new DuplicateResourceException("อีเมลนี้ถูกใช้งานในระบบแล้ว: " + requestDTO.getEmail());
         }
 
+        // ตรวจสอบว่า เบอร์โทร ซ้ำหรือไม่
+        if (petOwnerRepository.existsByPhone(requestDTO.getPhone())) {
+            throw new DuplicateResourceException("เบอร์โทรศัพท์นี้มีในระบบแล้ว: " + requestDTO.getPhone());
+        }
+
         // สร้าง Entity PetOwner + PetOwnerDetail จากข้อมูลใน RequestDTO
         // และเชื่อมความสัมพันธ์ One to One (ทำใน PetOwnerMapper)
         PetOwner petOwner = petOwnerMapper.toEntity(requestDTO);
@@ -62,6 +67,16 @@ public class PetOwnerServiceImpl implements PetOwnerService {
         return petOwnerMapper.toResponse(findOwnerOrThrow(id));
     }
 
+    // Read by phone: ค้นหาเจ้าของสัตว์เลี้ยงด้วยเบอร์โทร
+    @Override
+    @Transactional(readOnly = true)
+    public PetOwnerResponseDTO getPetOwnerByPhone(String phone) {
+        // ถ้าไม่เจอเบอร์ -> โยน ResourceNotFoundException (404)
+        PetOwner petOwner = petOwnerRepository.findByPhone(phone)
+                .orElseThrow(() -> new ResourceNotFoundException("ไม่พบเจ้าของสัตว์เลี้ยงที่ใช้เบอร์: " + phone));
+        return petOwnerMapper.toResponse(petOwner);
+    }
+
     // Update: แก้ไขข้อมูลเจ้าของสัตว์เลี้ยง
     @Override
     @Transactional // ถ้าเกิด error ระหว่างทำงาน จะ rollback ไม่ให้ข้อมูลเสียหาย
@@ -73,6 +88,12 @@ public class PetOwnerServiceImpl implements PetOwnerService {
         if (!petOwner.getEmail().equals(requestDTO.getEmail()) &&
                 petOwnerRepository.existsByEmail(requestDTO.getEmail())) {
             throw new DuplicateResourceException("อีเมลนี้ถูกใช้งานในระบบแล้ว: " + requestDTO.getEmail());
+        }
+
+        // ถ้าเปลี่ยนเบอร์ใหม่ ตรวจสอบว่าไม่ซ้ำกับของคนอื่น
+        if (!petOwner.getPhone().equals(requestDTO.getPhone()) &&
+                petOwnerRepository.existsByPhone(requestDTO.getPhone())) {
+            throw new DuplicateResourceException("เบอร์โทรศัพท์นี้มีในระบบแล้ว: " + requestDTO.getPhone());
         }
 
         // อัปเดตข้อมูลหลัก (PetOwner) และข้อมูลเพิ่มเติม (PetOwnerDetail)

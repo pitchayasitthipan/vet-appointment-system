@@ -1,6 +1,5 @@
 package com.example.petclinic.repository;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,6 +16,9 @@ public interface PetOwnerRepository extends JpaRepository<PetOwner, Long> {
     // ค้นหาข้อมูลเจ้าของด้วยอีเมล
     Optional<PetOwner> findByEmail(String email);
 
+    // ตรวจสอบว่ามีเบอร์นี้ในระบบแล้วหรือยัง
+    boolean existsByPhone(String phone);
+
     // ค้นหาข้อมูลเจ้าของด้วยเบอร์
-    List<PetOwner> findByPhone(String phone);
+    Optional<PetOwner> findByPhone(String phone);
 }

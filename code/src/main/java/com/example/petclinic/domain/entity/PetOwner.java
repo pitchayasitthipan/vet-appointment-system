@@ -30,7 +30,7 @@ public class PetOwner {
     @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
 
-    @Column(name = "phone", nullable = false, length = 20)
+    @Column(name = "phone", nullable = false, unique = true, length = 20)
     private String phone;
 
     @Column(name = "created_at", updatable = false)

@@ -114,6 +114,21 @@ class PetOwnerServiceImplTest {
     }
 
     @Test
+    @DisplayName("สร้างข้อมูลเจ้าของสัตว์เลี้ยง: เบอร์โทรซ้ำ (409)")
+    void testCreatePetOwner_DuplicatePhone() {
+        PetOwnerRequestDTO request = new PetOwnerRequestDTO();
+        request.setEmail("new@example.com");
+        request.setPhone("0876543210");
+
+        // อีเมลไม่ซ้ำ แต่เบอร์มีคนใช้แล้ว
+        when(petOwnerRepository.existsByEmail("new@example.com")).thenReturn(false);
+        when(petOwnerRepository.existsByPhone("0876543210")).thenReturn(true);
+
+        assertThrows(DuplicateResourceException.class, () -> petOwnerService.createPetOwner(request));
+        verify(petOwnerRepository, never()).save(any(PetOwner.class));
+    }
+
+    @Test
     @DisplayName("ดึงข้อมูลเจ้าของสัตว์เลี้ยงทั้งหมด: สำเร็จ (Pagination)")
     void testGetAllPetOwners_Pagination() {
         PetOwner owner = new PetOwner();
@@ -162,6 +177,31 @@ class PetOwnerServiceImplTest {
     }
 
     @Test
+    @DisplayName("ค้นหาเจ้าของสัตว์เลี้ยงด้วยเบอร์โทร: พบข้อมูล")
+    void testGetPetOwnerByPhone_Found() {
+        PetOwner owner = new PetOwner();
+        owner.setOwnerId(1L);
+        owner.setFirstName("John");
+        owner.setPhone("0876543210");
+
+        when(petOwnerRepository.findByPhone("0876543210")).thenReturn(Optional.of(owner));
+
+        PetOwnerResponseDTO result = petOwnerService.getPetOwnerByPhone("0876543210");
+
+        assertEquals(1L, result.getOwnerId());
+        assertEquals("John", result.getFirstName());
+    }
+
+    @Test
+    @DisplayName("ค้นหาเจ้าของสัตว์เลี้ยงด้วยเบอร์โทร: ไม่พบข้อมูล")
+    void testGetPetOwnerByPhone_NotFound() {
+        when(petOwnerRepository.findByPhone("0800000000")).thenReturn(Optional.empty());
+
+        // ไม่พบเบอร์ -> 404 หน้าเว็บจะพาไปลงทะเบียนใหม่
+        assertThrows(ResourceNotFoundException.class, () -> petOwnerService.getPetOwnerByPhone("0800000000"));
+    }
+
+    @Test
     @DisplayName("แก้ไขข้อมูลเจ้าของสัตว์เลี้ยง: สำเร็จ")
     void testUpdatePetOwner_Success() {
         PetOwner existing = new PetOwner();
@@ -169,6 +209,7 @@ class PetOwnerServiceImplTest {
         existing.setFirstName("OldName");
         existing.setLastName("OldLast");
         existing.setEmail("old@example.com");
+        existing.setPhone("0876543210");
 
         PetOwnerDetail oldDetail = new PetOwnerDetail();
         existing.setPetOwnerDetail(oldDetail);
@@ -238,6 +279,7 @@ class PetOwnerServiceImplTest {
         PetOwner existing = new PetOwner();
         existing.setOwnerId(1L);
         existing.setEmail("abc@gmail.com");
+        existing.setPhone("0876543210");
 
         PetOwnerRequestDTO request = new PetOwnerRequestDTO();
         request.setEmail("ABC@gmail.com");
@@ -258,6 +300,25 @@ class PetOwnerServiceImplTest {
                 .existsByEmail("ABC@gmail.com");
         verify(petOwnerRepository, times(1))
                 .save(existing);
+    }
+
+    @Test
+    @DisplayName("แก้ไขข้อมูลเจ้าของสัตว์เลี้ยง: เปลี่ยนเป็นเบอร์ที่มีคนใช้แล้ว (409)")
+    void testUpdatePetOwner_DuplicatePhone() {
+        PetOwner existing = new PetOwner();
+        existing.setOwnerId(1L);
+        existing.setEmail("test@example.com");
+        existing.setPhone("0876543210");
+
+        PetOwnerRequestDTO request = new PetOwnerRequestDTO();
+        request.setEmail("test@example.com");
+        request.setPhone("0811111111");
+
+        when(petOwnerRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(petOwnerRepository.existsByPhone("0811111111")).thenReturn(true);
+
+        assertThrows(DuplicateResourceException.class, () -> petOwnerService.updatePetOwner(1L, request));
+        verify(petOwnerRepository, never()).save(any(PetOwner.class));
     }
 
     @Test

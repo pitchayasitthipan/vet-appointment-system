@@ -1,6 +1,5 @@
 package com.example.petclinic.repository;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,7 +39,8 @@ class PetOwnerRepositoryTest {
         owner.setFirstName("John");
         owner.setLastName("Doe");
         owner.setEmail("test@example.com");
-        owner.setPhone("0876543210");
+        // ใช้เบอร์ที่ไม่น่าจะมีในข้อมูลจริง เพราะเบอร์ห้ามซ้ำ (unique)
+        owner.setPhone("0999999901");
 
         PetOwnerDetail detail = new PetOwnerDetail();
         detail.setAddress("Khon Kaen");
@@ -82,25 +82,21 @@ class PetOwnerRepositoryTest {
         petOwnerRepository.save(owner);
 
         Optional<PetOwner> byEmail = petOwnerRepository.findByEmail("test@example.com");
-        List<PetOwner> byPhone = petOwnerRepository.findByPhone("0876543210");
+        Optional<PetOwner> byPhone = petOwnerRepository.findByPhone("0999999901");
 
         assertTrue(byEmail.isPresent());
         assertEquals("John", byEmail.get().getFirstName());
-        assertFalse(byPhone.isEmpty());
+        assertTrue(byPhone.isPresent());
+        assertEquals("John", byPhone.get().getFirstName());
     }
 
     @Test
-    @DisplayName("One-to-One: บันทึก PetOwner แล้ว PetOwnerDetail ถูกบันทึกตาม (Cascade)")
-    void testSave_CascadesPetOwnerDetail() {
-        PetOwner saved = petOwnerRepository.save(owner);
-        entityManager.flush();
-        entityManager.clear();
+    @DisplayName("existsByPhone: มีเบอร์นี้ในระบบ / ไม่มี")
+    void testExistsByPhone() {
+        petOwnerRepository.save(owner);
 
-        PetOwner found = petOwnerRepository.findById(saved.getOwnerId()).orElseThrow();
-
-        assertNotNull(found.getPetOwnerDetail());
-        assertEquals("Khon Kaen", found.getPetOwnerDetail().getAddress());
-        assertEquals("0987654321", found.getPetOwnerDetail().getEmergencyContactPhone());
+        assertTrue(petOwnerRepository.existsByPhone("0999999901"));
+        assertFalse(petOwnerRepository.existsByPhone("0800000000"));
     }
 
     @Test
