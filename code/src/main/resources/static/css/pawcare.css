@@ -1087,4 +1087,590 @@ footer {
   .step span.lbl {
     font-size: 12px;
   }
+
+  
+/* ==========================================================
+   20. หน้าเจ้าของสัตว์เลี้ยง (Owner Pages)
+   ใช้กับ templates/petowner/ : รายชื่อ, แฟ้มเจ้าของ, ฟอร์ม, กล่องยืนยันลบ
+   ========================================================== */
+
+/* ----- 20.1 หัวหน้า: ปุ่มกลับ + breadcrumb + ชื่อหน้า + ปุ่มด้านขวา ----- */
+.page-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 22px 0 18px;
+  flex-wrap: wrap;
+}
+
+.page-bar .titles {
+  flex: 1;
+  min-width: 240px;
+}
+
+.page-bar h1 {
+  margin: 2px 0 0;
+  font-size: 26px;
+  line-height: 34px;
+}
+
+.page-bar .actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* breadcrumb: เจ้าของสัตว์เลี้ยง > สมชาย ใจดี */
+.crumbs {
+  font-size: 13px;
+  color: #6b6d76;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.crumbs a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+/* ปุ่ม "← กลับ" */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-navy);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.back-btn:hover {
+  background: var(--color-accent-soft);
+}
+
+/* ----- 20.2 กล่องหมวดข้อมูล (มีเลขหมวด) ----- */
+.sec {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 16px;
+}
+
+.sec-h {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sec-h h2 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--color-navy);
+  flex: 1;
+}
+
+/* วงกลมเลขหมวด 1, 2, 3 */
+.sec-h .no {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-navy);
+  font-size: 13px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+
+.sec-b {
+  padding: 16px 18px;
+}
+
+/* หมวดผู้ติดต่อฉุกเฉิน: โทนแดงให้เห็นชัด */
+.sec.danger .sec-h {
+  background: #fff6f4;
+  border-bottom-color: #f6d3cb;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.sec.danger .sec-h h2 {
+  color: #b23b2a;
+}
+
+.sec.danger .sec-h .no {
+  background: #fde2df;
+  color: #b23b2a;
+}
+
+/* รายการ "หัวข้อ : ค่า" เช่น เบอร์โทร : 081-234-5678 */
+.kv {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 10px 14px;
+  font-size: 15px;
+}
+
+.kv .k {
+  color: #6b6d76;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.kv .v {
+  font-weight: 500;
+}
+
+.muted-note {
+  font-size: 13px;
+  color: #8a8c94;
+}
+
+/* แบ่งหน้าเป็น 2 คอลัมน์ (หน้าแฟ้มเจ้าของ) */
+.layout-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+/* ----- 20.3 ตัวย่อชื่อในวงกลม (แทนรูปโปรไฟล์) ----- */
+.initials {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  flex: none;
+}
+
+.initials.lg {
+  width: 88px;
+  height: 88px;
+  font-size: 30px;
+  border: 4px solid var(--color-surface);
+  box-shadow: var(--shadow-md);
+}
+
+/* ปุ่มเล็กแบบแคปซูล เช่น ปุ่มโทร, เพิ่มสัตว์เลี้ยง */
+.btn-mini {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-muted);
+  background: var(--color-surface);
+  white-space: nowrap;
+}
+
+.btn-mini.pink {
+  background: var(--color-accent-soft);
+  border-color: transparent;
+  color: var(--color-accent);
+}
+
+.contact-strip {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* กล่องผู้ติดต่อฉุกเฉินแบบย่อ (ฝั่งขวาของหน้ารายชื่อ) */
+.emer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: #fff3f0;
+  border: 1px solid #f6c9bf;
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+}
+
+.emer b {
+  color: #b23b2a;
+}
+
+/* กล่องว่าง เช่น "ยังไม่มีสัตว์เลี้ยง" */
+.empty {
+  text-align: center;
+  padding: 24px;
+  color: #6b6d76;
+}
+
+/* ----- 20.4 หน้ารายชื่อ: รายชื่อซ้าย + ข้อมูลย่อขวา ----- */
+.split {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.list-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.list-panel .search-bar {
+  margin: 12px;
+}
+
+.list-panel .search-bar input {
+  border: none;
+  outline: none;
+  font: inherit;
+  width: 100%;
+  background: transparent;
+}
+
+/* แถวรายชื่อ 1 คน */
+.li {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+  border-top: 1px solid var(--color-border);
+  text-decoration: none;
+  color: inherit;
+}
+
+.li:hover {
+  background: #fffdf5;
+}
+
+/* แถวที่กำลังเลือกอยู่ */
+.li.sel {
+  background: var(--color-accent-soft);
+  box-shadow: inset 4px 0 0 var(--color-pink);
+}
+
+.li b {
+  color: var(--color-navy);
+  display: block;
+  font-size: 15px;
+}
+
+.li small {
+  color: #6b6d76;
+}
+
+/* ปุ่มเลขหน้า */
+.pager {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin: 12px;
+}
+
+/* ใช้ > เฉพาะลูกชั้นแรก ไม่ให้ไปโดนไอคอนลูกศรข้างใน */
+.pager > a,
+.pager > span {
+  min-width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0 10px;
+}
+
+.pager .active {
+  background: var(--gradient-brand);
+  color: #fff;
+  border-color: transparent;
+}
+
+/* ----- 20.5 ฟอร์มโทนสงบ (เพิ่ม/แก้ไขเจ้าของ) ----- */
+.form-calm .sec-h {
+  background: #fafaf7;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.form-calm .sec-h .no {
+  background: #eef0f4;
+  color: #45474f;
+}
+
+.form-calm .input,
+.form-calm .textarea {
+  border-color: #dcdcd6;
+  border-radius: 10px;
+}
+
+.form-calm .input:focus,
+.form-calm .textarea:focus {
+  border-color: var(--color-navy);
+  box-shadow: 0 0 0 3px rgba(23, 48, 107, 0.12);
+}
+
+/* ช่องที่กรอกผิด */
+.form-calm .input.is-invalid {
+  border-color: #d9776a;
+}
+
+/* ฟอร์ม 2 คอลัมน์, .full = กินเต็มแถว */
+.fields-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 16px;
+  align-items: start;
+}
+
+.fields-2 .full {
+  grid-column: 1 / -1;
+}
+
+.req {
+  color: #b23b2a;
+}
+
+.hint {
+  color: #8a8c94;
+  font-size: 13px;
+}
+
+.err {
+  color: #b23b2a;
+  font-size: 13px;
+}
+
+/* ข้อมูลที่แก้ไม่ได้ในหน้าแก้ไข (เลขแฟ้ม, วันลงทะเบียน) */
+.readonly-box {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  background: #fafaf7;
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #5b5d66;
+  margin-bottom: 16px;
+}
+
+.readonly-box b {
+  color: var(--color-navy);
+}
+
+/* แถบปุ่มท้ายฟอร์ม */
+.action-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--color-border);
+  padding: 14px 0;
+}
+
+/* ปุ่มหลักสีกรมท่า / ปุ่มรองสีขาว (ใช้ในฟอร์มและกล่องยืนยัน) */
+.btn-solid,
+.btn-ghost,
+.btn-danger {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-solid {
+  background: var(--color-navy);
+  color: #fff;
+  border: none;
+}
+
+.btn-ghost {
+  background: var(--color-surface);
+  color: #2f3138;
+  border: 1px solid #dcdcd6;
+}
+
+.btn-danger {
+  background: #c0392b;
+  color: #fff;
+  border: none;
+}
+
+/* ----- 20.6 กล่องยืนยันการลบ (<dialog>) ----- */
+.confirm-dialog {
+  width: 400px;
+  max-width: calc(100% - 32px);
+  border: none;
+  border-radius: 18px;
+  padding: 0;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+}
+
+/* พื้นหลังมืดตอนกล่องเปิด */
+.confirm-dialog::backdrop {
+  background: rgba(23, 30, 48, 0.45);
+}
+
+.confirm-dialog .body {
+  padding: 26px 24px 18px;
+  text-align: center;
+}
+
+.confirm-dialog .icon-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #fde2df;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 12px;
+}
+
+.confirm-dialog h2 {
+  margin: 0 0 6px;
+  color: #2f3138;
+  font-size: 20px;
+}
+
+.confirm-dialog p {
+  margin: 0;
+  color: #5b5d66;
+}
+
+/* พรีวิวเจ้าของที่จะลบ */
+.who-box {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  text-align: left;
+  background: #fafaf7;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 16px;
+}
+
+.confirm-dialog .footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 14px 24px;
+  background: #fafaf7;
+  border-top: 1px solid var(--color-border);
+}
+
+/* ----- 20.7 จอเล็ก: เรียงเป็นคอลัมน์เดียว ----- */
+@media (max-width: 800px) {
+  .split,
+  .layout-2,
+  .fields-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================
+   21. ส่วนเสริมหน้าเจ้าของ + หน้าแรก (Home / About)
+   ========================================================== */
+
+/* หัวการ์ดแฟ้มเจ้าของ: รูป | ชื่อ+ติดต่อ | ปุ่มนัดหมาย */
+.owner-head {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.owner-head .info {
+  flex: 1;
+  min-width: 220px;
+}
+
+.owner-head h2 {
+  margin: 0 0 8px;
+}
+
+/* ปุ่ม "ลบ" แบบตัวอักษรสีแดง */
+.delete-link {
+  color: #b23b2a;
+}
+
+/* "ทั้งหมด 24 คน · เรียงตามชื่อ" ใต้ช่องค้นหา */
+.list-count {
+  font-size: 13px;
+  color: #6b6d76;
+  margin: 0 16px 10px;
+}
+
+/* ระยะห่างด้านบนของหัวข้อหมวดในกล่องขวา */
+.gap-top {
+  margin-top: 16px;
+}
+
+/* ไอคอนในข้อความ error ใช้สีแดงตามตัวอักษร */
+.err .icon {
+  color: inherit;
+}
+
+/* กล่องแจ้งเบอร์ซ้ำ + ลิงก์ "เปิดแฟ้มเดิม" */
+.dup-box {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: #f1f5fb;
+  border: 1px solid #dbe4f1;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 14px;
+}
+
+.dup-box a {
+  margin-left: auto;
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+/* การ์ดทางเข้าหน้าแรกเป็นลิงก์ทั้งใบ */
+.home-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.home-link:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* กล่อง About Us: ข้อความซ้าย / ข้อมูลคลินิกขวา */
+.about {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 24px;
+  align-items: center;
+}
+
+@media (max-width: 800px) {
+  .about {
+    grid-template-columns: 1fr;
+  }
+}
+
 }

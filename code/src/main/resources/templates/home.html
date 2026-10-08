@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PawCare Pet Clinic</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/pawcare.css}">
+  <link rel="stylesheet" th:href="@{/css/icons.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar('home')}"></nav>
+
+<main class="container">
+  <!-- ส่วนต้อนรับ: ไม่มีปุ่ม Login/Register เพราะระบบใช้เบอร์โทรแทน -->
+  <section class="hero">
+    <div>
+      <span class="eyebrow"><span class="icon i-paw-print icon-pink icon-sm"></span> PawCare Pet Clinic</span>
+      <h1>ดูแลสัตว์เลี้ยงที่คุณรัก<br>ด้วยหัวใจ</h1>
+      <p>จองนัดหมาย ดูข้อมูลสัตว์เลี้ยง และประวัติการรักษา ได้ง่าย ๆ บนเว็บไซต์นี้</p>
+      <div class="row">
+        <a th:href="@{/appointments}" class="btn-primary"><span class="icon i-calendar-plus"></span> จองนัดหมาย</a>
+        <a th:href="@{/owners}" class="btn-secondary"><span class="icon i-magnifying-glass"></span> ค้นหาข้อมูลของฉัน</a>
+      </div>
+      <div class="feature-chips">
+        <span class="chip"><span class="icon-bubble"><span class="icon i-stethoscope icon-accent"></span></span>สัตวแพทย์<br>ผู้เชี่ยวชาญ</span>
+        <span class="chip"><span class="icon-bubble"><span class="icon i-syringe icon-accent"></span></span>วัคซีน<br>ครบถ้วน</span>
+        <span class="chip"><span class="icon-bubble"><span class="icon i-heartbeat icon-accent"></span></span>ตรวจรักษา<br>ครบวงจร</span>
+      </div>
+    </div>
+    <div class="hero-art">
+      <div class="hero-blob"></div>
+      <div class="hero-pets"><span>🐶</span><span>🐱</span></div>
+    </div>
+  </section>
+
+  <!-- ทางเข้าหลัก 3 ช่องทาง -->
+  <section class="section">
+    <h2>วันนี้ต้องการทำอะไร?</h2>
+    <div class="grid grid-4">
+      <a th:href="@{/appointments}" class="card card-center home-link">
+        <span class="icon-bubble"><span class="icon i-calendar-check icon-accent"></span></span>
+        <h3>จองนัดหมาย</h3>
+        <p class="text-small text-muted">เลือกวัน เวลา และสัตวแพทย์</p>
+      </a>
+      <a th:href="@{/pets}" class="card card-center home-link">
+        <span class="icon-bubble warm"><span class="icon i-paw-print icon-navy"></span></span>
+        <h3>สัตว์เลี้ยงของฉัน</h3>
+        <p class="text-small text-muted">ดูและเพิ่มข้อมูลสัตว์เลี้ยง</p>
+      </a>
+      <a th:href="@{/owners}" class="card card-center home-link">
+        <span class="icon-bubble"><span class="icon i-identification-card icon-accent"></span></span>
+        <h3>ข้อมูลเจ้าของ</h3>
+        <p class="text-small text-muted">ค้นหาหรือลงทะเบียนด้วยเบอร์โทร</p>
+      </a>
+      <a th:href="@{/doctors.html}" class="card card-center home-link">
+        <span class="icon-bubble warm"><span class="icon i-stethoscope icon-navy"></span></span>
+        <h3>สัตวแพทย์</h3>
+        <p class="text-small text-muted">รายชื่อและตารางเวร</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- About Us: ข้อมูลคลินิก -->
+  <section id="about" class="card about">
+    <div>
+      <span class="eyebrow">About Us</span>
+      <h2>เกี่ยวกับ PawCare</h2>
+      <p>PawCare Pet Clinic เป็นคลินิกรักษาสัตว์เลี้ยงขนาดเล็ก ให้บริการตรวจสุขภาพ ฉีดวัคซีน และรักษาโรคทั่วไปสำหรับสุนัขและแมว
+        เว็บนี้จัดทำเป็นโปรเจกต์รายวิชา CP353002 เพื่อช่วยให้เจ้าของจองนัดหมายและดูข้อมูลสัตว์เลี้ยงได้สะดวกขึ้น</p>
+    </div>
+    <div class="kv">
+      <span class="k"><span class="icon i-clock icon-sm icon-accent"></span> เวลาทำการ</span>
+      <span class="v">จ.-ศ. 09:00 - 20:00 น. · ส. 09:00 - 18:00 น. · อา. 09:00 - 17:00 น.</span>
+      <span class="k"><span class="icon i-map-pin icon-sm icon-accent"></span> ที่ตั้ง</span>
+      <span class="v">48/12 ซอยพหลโยธิน 32 ถนนพหลโยธิน แขวงเสนานิคม เขตจตุจักร กรุงเทพฯ 10900</span>
+      <span class="k"><span class="icon i-phone icon-sm icon-accent"></span> โทร</span>
+      <span class="v">02-123-4567 · ฉุกเฉิน 089-999-8888</span>
+    </div>
+  </section>
+</main>
+
+<footer>© 2026 PawCare Pet Clinic · CP353002</footer>
+</body>
+</html>

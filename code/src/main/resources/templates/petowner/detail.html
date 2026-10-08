@@ -3,53 +3,141 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ข้อมูลเจ้าของ</title>
+  <title>แฟ้มเจ้าของสัตว์เลี้ยง - PawCare</title>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" th:href="@{/css/pawcare.css}">
   <link rel="stylesheet" th:href="@{/css/icons.css}">
 </head>
 <body>
-<!-- แถบเมนูด้านบน -->
-<nav class="navbar">
-  <a th:href="@{/}" class="brand">
-    <span class="brand-logo"><span class="icon i-paw-print icon-white"></span></span>
-    <span>PawCare<small>Pet Clinic &amp; Vaccination</small></span>
-  </a>
-  <div class="nav-links">
-    <a th:href="@{/}">Home</a>
-    <a th:href="@{/owners}" class="active">Owners</a>
-    <a th:href="@{/pets}">My Pets</a>
-    <a th:href="@{/appointments}">Appointments</a>
-    <a th:href="@{/about}">About</a>
-  </div>
-</nav>
+<nav th:replace="~{fragments/layout :: navbar('owners')}"></nav>
 
-<main class="container section">
-  <div th:if="${successMessage}" class="alert" th:text="${successMessage}"></div>
-
-  <div class="card profile">
-    <span class="avatar-lg"><span class="icon i-user-circle icon-lg icon-accent"></span></span>
-    <div>
-      <h1 class="text-navy" th:text="${owner.firstName + ' ' + owner.lastName}">ชื่อ</h1>
-      <dl class="dl">
-        <dt>อีเมล</dt><dd th:text="${owner.email}"></dd>
-        <dt>เบอร์โทร</dt><dd th:text="${owner.phone}"></dd>
-        <dt>ที่อยู่</dt><dd th:text="${owner.address} ?: '-'"></dd>
-        <dt>ผู้ติดต่อฉุกเฉิน</dt><dd th:text="${owner.emergencyContactName} ?: '-'"></dd>
-        <dt>เบอร์ฉุกเฉิน</dt><dd th:text="${owner.emergencyContactPhone}"></dd>
-      </dl>
-      <div class="row">
-        <a th:href="@{/owners/{id}/edit(id=${owner.ownerId})}" class="btn-primary">
-          <span class="icon i-pencil-simple"></span> แก้ไข</a>
-        <!-- ลบใช้ POST (ลิงก์ธรรมดาเป็น GET) และถามยืนยันก่อน -->
-        <form method="post" th:action="@{/owners/{id}/delete(id=${owner.ownerId})}"
-              onsubmit="return confirm('ยืนยันการลบข้อมูลนี้?');">
-          <button type="submit" class="btn-secondary"><span class="icon i-trash"></span> ลบ</button>
-        </form>
-        <a th:href="@{/owners}" class="btn-text">กลับ</a>
+<main class="container">
+  <!-- หัวหน้า: ปุ่มกลับ + breadcrumb + ปุ่มแก้ไข/ลบ -->
+  <div class="page-bar">
+    <a th:href="@{/owners(selected=${owner.ownerId})}" class="back-btn">
+      <span class="icon i-arrow-left icon-sm"></span> กลับไปรายชื่อ</a>
+    <div class="titles">
+      <div class="crumbs">
+        <a th:href="@{/owners}">เจ้าของสัตว์เลี้ยง</a>
+        <span class="icon i-caret-right icon-sm"></span>
+        <span th:text="${owner.firstName + ' ' + owner.lastName}">พิชยา สิทธิพันธ์</span>
       </div>
+      <h1>แฟ้มเจ้าของสัตว์เลี้ยง</h1>
+    </div>
+    <div class="actions">
+      <a th:href="@{/owners/{id}/edit(id=${owner.ownerId})}" class="btn-mini pink">
+        <span class="icon i-pencil-simple icon-sm"></span> แก้ไข</a>
+      <!-- กดแล้วเปิดกล่องยืนยันการลบ (อยู่ท้ายหน้า) -->
+      <button type="button" class="btn-text delete-link"
+              onclick="document.getElementById('deleteDialog').showModal()">ลบ</button>
+    </div>
+  </div>
+
+  <div th:if="${successMessage}" class="alert">
+    <span class="icon i-check-circle icon-success"></span> <span th:text="${successMessage}"></span>
+  </div>
+
+  <!-- การ์ดหัวแฟ้ม: ชื่อ เบอร์ อีเมล + ปุ่มนัดหมาย -->
+  <div class="card owner-head">
+    <span class="initials lg"><span th:replace="~{fragments/layout :: initials(${owner})}"></span></span>
+    <div class="info">
+      <p class="muted-note">
+        แฟ้มเจ้าของ #<span th:text="${#numbers.formatInteger(owner.ownerId, 4)}">0001</span>
+        <span th:if="${owner.createdAt}">· ลงทะเบียน <span th:replace="~{fragments/layout :: thaiDate(${owner.createdAt})}"></span></span>
+      </p>
+      <h2 th:text="${owner.firstName + ' ' + owner.lastName}">พิชยา สิทธิพันธ์</h2>
+      <div class="contact-strip">
+        <a th:href="'tel:' + ${owner.phone}" class="btn-mini pink">
+          <span class="icon i-phone icon-sm"></span> <span th:replace="~{fragments/layout :: phone(${owner.phone})}"></span></a>
+        <span class="btn-mini"><span class="icon i-envelope icon-sm"></span> <span th:text="${owner.email}">email</span></span>
+      </div>
+    </div>
+    <!-- ส่ง ownerId ต่อให้โมดูลนัดหมาย -->
+    <a th:href="@{/appointments/new(ownerId=${owner.ownerId})}" class="btn-primary">
+      <span class="icon i-calendar-plus"></span> นัดหมายใหม่</a>
+  </div>
+
+  <div class="layout-2">
+    <div>
+      <!-- หมวด 1 ข้อมูลติดต่อ -->
+      <div class="sec">
+        <div class="sec-h"><span class="no">1</span><h2>ข้อมูลติดต่อ</h2></div>
+        <div class="sec-b kv">
+          <span class="k"><span class="icon i-phone icon-sm icon-accent"></span> เบอร์โทร</span>
+          <span class="v"><span th:replace="~{fragments/layout :: phone(${owner.phone})}"></span></span>
+          <span class="k"><span class="icon i-envelope icon-sm icon-accent"></span> อีเมล</span>
+          <span class="v" th:text="${owner.email}"></span>
+          <span class="k"><span class="icon i-map-pin icon-sm icon-accent"></span> ที่อยู่</span>
+          <span class="v" th:text="${owner.address} ?: '-'"></span>
+        </div>
+      </div>
+
+      <!-- หมวด 2 ผู้ติดต่อฉุกเฉิน (โทนแดง) -->
+      <div class="sec danger">
+        <div class="sec-h">
+          <span class="no">2</span><h2>ผู้ติดต่อฉุกเฉิน</h2>
+          <a th:href="'tel:' + ${owner.emergencyContactPhone}" class="btn-mini">
+            <span class="icon i-phone icon-sm"></span> โทร</a>
+        </div>
+        <div class="sec-b kv">
+          <span class="k"><span class="icon i-user icon-sm"></span> ชื่อ</span>
+          <span class="v" th:text="${owner.emergencyContactName} ?: '-'"></span>
+          <span class="k"><span class="icon i-phone icon-sm"></span> เบอร์โทร</span>
+          <span class="v"><span th:replace="~{fragments/layout :: phone(${owner.emergencyContactPhone})}"></span></span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+    <!-- หมวด 3 สัตว์เลี้ยง: ข้อมูลมาจากโมดูล Pet -->
+    <div class="sec">
+      <div class="sec-h">
+        <span class="no">3</span><h2>สัตว์เลี้ยง</h2>
+        <a th:href="@{/pets/new(ownerId=${owner.ownerId})}" class="btn-mini">
+          <span class="icon i-plus icon-sm"></span> เพิ่มสัตว์เลี้ยง</a>
+      </div>
+      <div class="empty">
+        <span class="icon-bubble warm"><span class="icon i-paw-print icon-navy"></span></span>
+        <p>ยังไม่มีข้อมูลสัตว์เลี้ยง</p>
+      </div>
+    </div>
+
+    <!-- หมวด 4 นัดหมายและประวัติ: ข้อมูลมาจากโมดูล Appointment -->
+    <div class="sec">
+      <div class="sec-h">
+        <span class="no">4</span><h2>นัดหมายและประวัติล่าสุด</h2>
+        <a th:href="@{/appointments(ownerId=${owner.ownerId})}" class="btn-text">ดูทั้งหมด</a>
+      </div>
+      <div class="empty">
+        <span class="icon-bubble"><span class="icon i-calendar-blank icon-accent"></span></span>
+        <p>ยังไม่มีนัดหมาย</p>
+      </div>
+    </div>
     </div>
   </div>
 </main>
+
+<!-- กล่องยืนยันการลบ -->
+<dialog id="deleteDialog" class="confirm-dialog">
+  <div class="body">
+    <div class="icon-circle"><span class="icon i-trash icon-lg"></span></div>
+    <h2>ลบแฟ้มเจ้าของนี้?</h2>
+    <p>เมื่อลบแล้วจะไม่สามารถกู้คืนได้</p>
+    <!-- พรีวิวว่ากำลังจะลบใคร กันลบผิดคน -->
+    <div class="who-box">
+      <span class="initials"><span th:replace="~{fragments/layout :: initials(${owner})}"></span></span>
+      <div>
+        <b class="text-navy" th:text="${owner.firstName + ' ' + owner.lastName}">พิชยา สิทธิพันธ์</b><br>
+        <small class="muted-note">แฟ้ม #<span th:text="${#numbers.formatInteger(owner.ownerId, 4)}">0001</span> ·
+          <span th:replace="~{fragments/layout :: phone(${owner.phone})}"></span></small>
+      </div>
+    </div>
+  </div>
+  <!-- ลบต้องใช้ POST (ลิงก์ธรรมดาเป็น GET) -->
+  <form class="footer" method="post" th:action="@{/owners/{id}/delete(id=${owner.ownerId})}">
+    <button type="button" class="btn-ghost" onclick="document.getElementById('deleteDialog').close()">ยกเลิก</button>
+    <button type="submit" class="btn-danger"><span class="icon i-trash icon-sm icon-white"></span> ยืนยันการลบ</button>
+  </form>
+</dialog>
 </body>
 </html>
