@@ -85,6 +85,7 @@
                         <th>วันที่ฉีดวัคซีน</th>
                         <th>นัดวัคซีนครั้งถัดไป</th>
                         <th>หมายเหตุ</th>
+                        <th>จัดการ</th>
                     </tr>
                 </thead>
 
@@ -99,11 +100,17 @@
                         <td th:text="${record.vaccineDate} ?: '-'"></td>
                         <td th:text="${record.nextVaccineDate} ?: '-'"></td>
                         <td th:text="${record.notes} ?: '-'"></td>
+                        <!-- เปิดหน้ารายละเอียดของรายการที่เลือก -->
+                        <td>
+                            <a th:href="@{/medical-records/{id}(id=${record.medicalRecordId})}">
+                                ดูรายละเอียด
+                            </a>
+                        </td>
                     </tr>
 
                     <!-- แสดงข้อความเมื่อยังไม่มีข้อมูล -->
                     <tr th:if="${#lists.isEmpty(medicalRecords)}">
-                        <td colspan="8" class="empty">
+                        <td colspan="9" class="empty">
                             ยังไม่มีประวัติการรักษา
                         </td>
                     </tr>
