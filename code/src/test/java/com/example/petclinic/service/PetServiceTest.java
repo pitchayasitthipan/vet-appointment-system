@@ -3,6 +3,7 @@ package com.example.petclinic.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
@@ -80,5 +81,38 @@ class PetServiceTest {
         assertEquals("Milo", result.getName());
         assertEquals("Dog", result.getSpecies());
         assertEquals(1L, result.getOwnerId());
+    }
+
+    @Test
+    void getPetById_shouldReturnPetSuccessfully() {
+
+        Pet pet = new Pet();
+        pet.setPetId(1L);
+        pet.setName("Milo");
+        pet.setSpecies("Dog");
+        pet.setBreed("Golden Retriever");
+        pet.setGender("Male");
+        pet.setBirthDate(LocalDate.of(2022, 5, 10));
+        pet.setWeight(20.5);
+        pet.setMicrochipNumber("MC123456");
+        pet.setPetOwner(petOwner);
+
+        when(petRepository.findById(1L))
+                .thenReturn(java.util.Optional.of(pet));
+
+        PetResponseDTO result = petService.getPetById(1L);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getPetId());
+        assertEquals("Milo", result.getName());
+        assertEquals("Dog", result.getSpecies());
+        assertEquals("Golden Retriever", result.getBreed());
+        assertEquals("Male", result.getGender());
+        assertEquals(LocalDate.of(2022, 5, 10), result.getBirthDate());
+        assertEquals(20.5, result.getWeight());
+        assertEquals("MC123456", result.getMicrochipNumber());
+        assertEquals(1L, result.getOwnerId());
+
+        verify(petRepository).findById(1L);
     }
 }
