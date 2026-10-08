@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -164,5 +165,48 @@ class PetServiceTest {
         verify(petRepository).findById(1L);
         verify(petOwnerRepository).findById(1L);
         verify(petRepository).save(any(Pet.class));
+    }
+
+    @Test
+    void getPetsByOwnerId_shouldReturnPetsSuccessfully() {
+
+        Pet pet1 = new Pet();
+        pet1.setPetId(1L);
+        pet1.setName("Milo");
+        pet1.setSpecies("Dog");
+        pet1.setBreed("Golden Retriever");
+        pet1.setGender("Male");
+        pet1.setWeight(20.5);
+        pet1.setPetOwner(petOwner);
+
+        Pet pet2 = new Pet();
+        pet2.setPetId(2L);
+        pet2.setName("Luna");
+        pet2.setSpecies("Cat");
+        pet2.setBreed("Persian");
+        pet2.setGender("Female");
+        pet2.setWeight(4.5);
+        pet2.setPetOwner(petOwner);
+
+        when(petRepository.findByPetOwnerOwnerId(1L))
+                .thenReturn(List.of(pet1, pet2));
+
+        List<PetResponseDTO> result =
+                petService.getPetsByOwnerId(1L);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+
+        assertEquals(1L, result.get(0).getPetId());
+        assertEquals("Milo", result.get(0).getName());
+        assertEquals("Dog", result.get(0).getSpecies());
+        assertEquals(1L, result.get(0).getOwnerId());
+
+        assertEquals(2L, result.get(1).getPetId());
+        assertEquals("Luna", result.get(1).getName());
+        assertEquals("Cat", result.get(1).getSpecies());
+        assertEquals(1L, result.get(1).getOwnerId());
+
+        verify(petRepository).findByPetOwnerOwnerId(1L);
     }
 }
