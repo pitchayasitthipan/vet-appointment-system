@@ -85,7 +85,26 @@ public class PetServiceImpl implements PetService {
 
     @Override
     public List<PetResponseDTO> getPetsByOwnerId(Long ownerId) {
-        return null;
+
+        List<Pet> pets = petRepository.findByPetOwnerOwnerId(ownerId);
+
+        return pets.stream()
+            .map(pet -> {
+                PetResponseDTO response = new PetResponseDTO();
+
+                response.setPetId(pet.getPetId());
+                response.setName(pet.getName());
+                response.setSpecies(pet.getSpecies());
+                response.setBreed(pet.getBreed());
+                response.setGender(pet.getGender());
+                response.setBirthDate(pet.getBirthDate());
+                response.setWeight(pet.getWeight());
+                response.setMicrochipNumber(pet.getMicrochipNumber());
+                response.setOwnerId(ownerId);
+
+                return response;
+            })
+            .toList();
     }
 
     @Override
