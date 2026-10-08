@@ -1,0 +1,6 @@
+code/target/
+tmp/
+.idea/
+.vscode/
+*.log
+.env
