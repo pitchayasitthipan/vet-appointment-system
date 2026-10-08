@@ -99,8 +99,8 @@ class PetOwnerServiceImplTest {
     }
 
     @Test
-    @DisplayName("สร้างข้อมูลเจ้าของสัตว์เลี้ยง: อีเมลซ้ำแบบ Case-sensitive")
-    void testCreatePetOwner_DuplicateEmailCaseSensitive() {
+    @DisplayName("สร้างข้อมูลเจ้าของสัตว์เลี้ยง: อีเมลตัวพิมพ์ใหญ่ที่มีอยู่แล้วในระบบ (409)")
+    void testCreatePetOwner_DuplicateUppercaseEmail() {
         PetOwnerRequestDTO request = new PetOwnerRequestDTO();
         request.setEmail("ABC@gmail.com");
 
@@ -209,9 +209,9 @@ class PetOwnerServiceImplTest {
     }
 
     // ต้อง mock ทั้ง findById() และ existsByEmail() เชคกับข้อมูลเดิมที่มีในระบบ
-    @Test 
-    @DisplayName("แก้ไขข้อมูลเจ้าของสัตว์เลี้ยง: อีเมลซ้ำแบบ Case-sensitive")
-    void testUpdatePetOwner_DuplicateEmailCaseSensitive() {
+    @Test
+    @DisplayName("แก้ไขข้อมูลเจ้าของสัตว์เลี้ยง: เปลี่ยนเป็นอีเมลที่มีคนใช้แล้ว (409)")
+    void testUpdatePetOwner_DuplicateUppercaseEmail() {
         PetOwner existing = new PetOwner();
         existing.setOwnerId(1L);
         existing.setEmail("abc@gmail.com");
@@ -230,6 +230,34 @@ class PetOwnerServiceImplTest {
                 .existsByEmail("ABC@gmail.com");
         verify(petOwnerRepository, never())
                 .save(any(PetOwner.class));
+    }
+
+    @Test
+    @DisplayName("แก้ไขข้อมูลเจ้าของสัตว์เลี้ยง: อีเมลต่างกันเฉพาะตัวพิมพ์เล็ก-ใหญ่ สามารถใช้ได้")
+    void testUpdatePetOwner_CaseSensitiveEmailAllowed() {
+        PetOwner existing = new PetOwner();
+        existing.setOwnerId(1L);
+        existing.setEmail("abc@gmail.com");
+
+        PetOwnerRequestDTO request = new PetOwnerRequestDTO();
+        request.setEmail("ABC@gmail.com");
+
+        when(petOwnerRepository.findById(1L))
+                .thenReturn(Optional.of(existing));
+        // ไม่พบ ABC@gmail.com ในระบบ แปลว่าสามารถใช้ได้
+        when(petOwnerRepository.existsByEmail("ABC@gmail.com"))
+                .thenReturn(false);
+        when(petOwnerRepository.save(existing))
+                .thenReturn(existing);
+
+        PetOwnerResponseDTO result = petOwnerService.updatePetOwner(1L, request);
+
+        assertNotNull(result);
+        assertEquals("ABC@gmail.com", result.getEmail());
+        verify(petOwnerRepository, times(1))
+                .existsByEmail("ABC@gmail.com");
+        verify(petOwnerRepository, times(1))
+                .save(existing);
     }
 
     @Test
