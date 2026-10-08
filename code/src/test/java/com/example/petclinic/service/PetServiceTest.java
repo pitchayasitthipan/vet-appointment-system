@@ -209,4 +209,25 @@ class PetServiceTest {
 
         verify(petRepository).findByPetOwnerOwnerId(1L);
     }
+
+    @Test
+    void deletePet_shouldDeletePetSuccessfully() {
+
+        Pet pet = new Pet();
+        pet.setPetId(1L);
+        pet.setName("Milo");
+        pet.setSpecies("Dog");
+        pet.setBreed("Golden Retriever");
+        pet.setGender("Male");
+        pet.setWeight(20.5);
+        pet.setPetOwner(petOwner);
+
+        when(petRepository.findById(1L))
+                .thenReturn(java.util.Optional.of(pet));
+
+        petService.deletePet(1L);
+
+        verify(petRepository).findById(1L);
+        verify(petRepository).delete(pet);
+    }
 }
