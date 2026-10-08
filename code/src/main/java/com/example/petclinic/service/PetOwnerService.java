@@ -1,7 +1,5 @@
 package com.example.petclinic.service;
 
-import java.util.Optional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -16,7 +14,7 @@ public interface PetOwnerService {
     // Read all: ดึงข้อมูลเจ้าของสัตว์เลี้ยงทั้งหมด
     Page<PetOwnerResponseDTO> getAllPetOwners(Pageable pageable);
 
-    // Read by Id: ดึงข้อมูลเจ้าของสัตว์เลี้ยงตามรหัส (อาจไม่เจอ -> Optional)
+    // Read by Id: ดึงข้อมูลเจ้าของสัตว์เลี้ยงตามรหัส
     PetOwnerResponseDTO getPetOwnerById(Long id);
 
     // Update: แก้ไขข้อมูลเจ้าของสัตว์เลี้ยง

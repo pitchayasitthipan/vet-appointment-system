@@ -12,7 +12,7 @@ import com.example.petclinic.dto.response.PetOwnerResponseDTO;
 @Component
 public class PetOwnerMapper {
 
-    // สร้าง Entity PetOwner ใหม่จากข้อมูลใน RequestDTO (ใช้ตอน Create)
+    // สร้าง Entity PetOwner ใหม่แยกจากข้อมูลใน RequestDTO (ใช้ตอน Create)
     public PetOwner toEntity(PetOwnerRequestDTO requestDTO) {
         PetOwner petOwner = new PetOwner();
         updateEntity(petOwner, requestDTO);
