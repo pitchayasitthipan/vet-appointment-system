@@ -109,7 +109,37 @@ public class PetServiceImpl implements PetService {
 
     @Override
     public PetResponseDTO updatePet(Long petId, PetRequestDTO request) {
-        return null;
+
+        Pet pet = petRepository.findById(petId)
+                .orElseThrow(() -> new RuntimeException("Pet not found"));
+
+        PetOwner petOwner = petOwnerRepository.findById(request.getOwnerId())
+                .orElseThrow(() -> new RuntimeException("Pet owner not found"));
+
+        pet.setName(request.getName());
+        pet.setSpecies(request.getSpecies());
+        pet.setBreed(request.getBreed());
+        pet.setGender(request.getGender());
+        pet.setBirthDate(request.getBirthDate());
+        pet.setWeight(request.getWeight());
+        pet.setMicrochipNumber(request.getMicrochipNumber());
+        pet.setPetOwner(petOwner);
+
+        Pet updatedPet = petRepository.save(pet);
+
+        PetResponseDTO response = new PetResponseDTO();
+
+        response.setPetId(updatedPet.getPetId());
+        response.setName(updatedPet.getName());
+        response.setSpecies(updatedPet.getSpecies());
+        response.setBreed(updatedPet.getBreed());
+        response.setGender(updatedPet.getGender());
+        response.setBirthDate(updatedPet.getBirthDate());
+        response.setWeight(updatedPet.getWeight());
+        response.setMicrochipNumber(updatedPet.getMicrochipNumber());
+        response.setOwnerId(updatedPet.getPetOwner().getOwnerId());
+
+        return response;
     }
 
     @Override
