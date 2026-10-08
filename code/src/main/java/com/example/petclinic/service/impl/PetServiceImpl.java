@@ -144,5 +144,10 @@ public class PetServiceImpl implements PetService {
 
     @Override
     public void deletePet(Long petId) {
+
+        Pet pet = petRepository.findById(petId)
+                .orElseThrow(() -> new RuntimeException("Pet not found"));
+
+        petRepository.delete(pet);
     }
 }
