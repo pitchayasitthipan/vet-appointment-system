@@ -11,6 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -190,6 +191,42 @@ class MedicalRecordServiceTest {
 
             verify(medicalRecordRepository)
                     .save(any(MedicalRecord.class));
+        }
+
+        @Test
+        @DisplayName("createMedicalRecord ควรสร้างข้อมูลครบทุกฟิลด์ด้วย Builder")
+        void createMedicalRecord_ShouldBuildCorrectFields() {
+
+            // Arrange: จำลอง Repository ให้คืนค่าข้อมูลที่ได้รับ
+            when(medicalRecordRepository.save(any(MedicalRecord.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+
+            // Act: เรียก Service เพื่อสร้าง MedicalRecord
+            medicalRecordService.createMedicalRecord(sampleRequestDTO);
+
+            // Assert: จับ Object ที่ส่งไปบันทึกมาตรวจสอบ
+            ArgumentCaptor<MedicalRecord> captor =
+                    ArgumentCaptor.forClass(MedicalRecord.class);
+
+            verify(medicalRecordRepository).save(captor.capture());
+
+            MedicalRecord savedRecord = captor.getValue();
+
+            // ตรวจสอบว่า Builder กำหนดค่าตรงกับ Request DTO
+            assertThat(savedRecord.getAppointmentId())
+                    .isEqualTo(sampleRequestDTO.getAppointmentId());
+            assertThat(savedRecord.getDiagnosis())
+                    .isEqualTo(sampleRequestDTO.getDiagnosis());
+            assertThat(savedRecord.getTreatment())
+                    .isEqualTo(sampleRequestDTO.getTreatment());
+            assertThat(savedRecord.getVaccineName())
+                    .isEqualTo(sampleRequestDTO.getVaccineName());
+            assertThat(savedRecord.getVaccineDate())
+                    .isEqualTo(sampleRequestDTO.getVaccineDate());
+            assertThat(savedRecord.getNextVaccineDate())
+                    .isEqualTo(sampleRequestDTO.getNextVaccineDate());
+            assertThat(savedRecord.getNotes())
+                    .isEqualTo(sampleRequestDTO.getNotes());
         }
     }
 

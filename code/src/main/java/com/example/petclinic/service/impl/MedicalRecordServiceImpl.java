@@ -62,15 +62,17 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     public MedicalRecordResponseDTO createMedicalRecord(
             MedicalRecordRequestDTO requestDTO) {
 
-        MedicalRecord medicalRecord = new MedicalRecord();
-
-        medicalRecord.setAppointmentId(requestDTO.getAppointmentId());
-        medicalRecord.setDiagnosis(requestDTO.getDiagnosis());
-        medicalRecord.setTreatment(requestDTO.getTreatment());
-        medicalRecord.setVaccineName(requestDTO.getVaccineName());
-        medicalRecord.setVaccineDate(requestDTO.getVaccineDate());
-        medicalRecord.setNextVaccineDate(requestDTO.getNextVaccineDate());
-        medicalRecord.setNotes(requestDTO.getNotes());
+        // ใช้ Builder Pattern สร้างประวัติการรักษาจากข้อมูลที่รับมา
+        // กำหนดค่าทีละฟิลด์ แล้ว build() เพื่อสร้าง Object จริง
+        MedicalRecord medicalRecord = MedicalRecord.builder()
+            .appointmentId(requestDTO.getAppointmentId())
+            .diagnosis(requestDTO.getDiagnosis())
+            .treatment(requestDTO.getTreatment())
+            .vaccineName(requestDTO.getVaccineName())
+            .vaccineDate(requestDTO.getVaccineDate())
+            .nextVaccineDate(requestDTO.getNextVaccineDate())
+            .notes(requestDTO.getNotes())
+            .build();
 
         MedicalRecord savedMedicalRecord =
                 medicalRecordRepository.save(medicalRecord);
