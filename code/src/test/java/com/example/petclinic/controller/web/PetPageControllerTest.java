@@ -74,13 +74,41 @@ class PetPageControllerTest {
     }
 
     @Test
-    @DisplayName("GET /pets เจ้าหน้าที่ไม่ระบุเจ้าของ -> ไปเลือกจากรายชื่อ")
-    void petsPage_staffWithoutOwner_redirectsToStaffList() throws Exception {
+    @DisplayName("GET /pets เจ้าหน้าที่ไม่ระบุเจ้าของ -> หน้าสัตว์เลี้ยงทั้งหมดในคลินิก")
+    void petsPage_staffWithoutOwner_showsAllPets() throws Exception {
         MockHttpSession session = new MockHttpSession();
         session.setAttribute("isStaff", true);
 
         mockMvc.perform(get("/pets").session(session))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/owners/staff"));
+                .andExpect(status().isOk())
+                .andExpect(view().name("pet/list"))
+                .andExpect(model().attribute("allPets", true))
+                .andExpect(model().attributeDoesNotExist("owner"));
+    }
+
+    @Test
+    @DisplayName("GET /pets?ownerId= เจ้าหน้าที่ดูสัตว์ของเจ้าของคนที่เลือก")
+    void petsPage_staffWithOwner_showsThatOwner() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("isStaff", true);
+        given(petOwnerService.getPetOwnerById(1L)).willReturn(owner);
+
+        mockMvc.perform(get("/pets").param("ownerId", "1").session(session))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("owner", owner))
+                .andExpect(model().attribute("allPets", false));
+    }
+
+    @Test
+    @DisplayName("GET /pets/new?returnTo=appointment เพิ่มเสร็จแล้วกลับไปหน้าจองนัด")
+    void newPetPage_fromAppointment_setsReturnFlag() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("myOwnerId", 1L);
+        given(petOwnerService.getPetOwnerById(1L)).willReturn(owner);
+
+        mockMvc.perform(get("/pets/new").param("ownerId", "1").param("returnTo", "appointment").session(session))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("returnToAppointment", true))
+                .andExpect(model().attribute("openAddForm", true));
     }
 }

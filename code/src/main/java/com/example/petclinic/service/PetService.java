@@ -19,6 +19,9 @@ public interface PetService {
 
     Page<PetResponseDTO> getAllPets(Pageable pageable);
 
+    // ค้นหาสัตว์ทั้งคลินิกด้วยคำค้นและประเภท (แบ่งหน้า) ค่าว่าง -> ไม่กรอง
+    Page<PetResponseDTO> searchPets(String keyword, String species, Pageable pageable);
+
     PetResponseDTO updatePet(
             Long petId,
             PetRequestDTO request

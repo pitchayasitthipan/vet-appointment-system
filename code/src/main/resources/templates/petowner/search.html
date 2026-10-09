@@ -62,9 +62,9 @@
         <!-- ไม่แสดงอีเมล/ผู้ติดต่อฉุกเฉินในหน้าลูกค้า กันคนอื่นเอาเบอร์มาเปิดดูข้อมูลส่วนตัว -->
         <p class="muted-note gap-top">อีเมล ที่อยู่ และผู้ติดต่อฉุกเฉิน แสดงเฉพาะเจ้าหน้าที่</p>
 
-        <!-- 2: ข้อมูลมาจากโมดูล Pet (ตอนนี้ยังไม่มี แสดงกล่องว่าง) -->
-        <p class="muted-note gap-top">หมวด 2 · สัตว์เลี้ยง</p>
-        <div class="empty">ยังไม่มีข้อมูลสัตว์เลี้ยง</div>
+        <!-- 2: ข้อมูลมาจากโมดูล Pet (รายการจริงจาก PetService) -->
+        <p class="muted-note gap-top" th:text="'หมวด 2 · สัตว์เลี้ยง (' + ${#lists.size(pets)} + ' ตัว)'">หมวด 2 · สัตว์เลี้ยง</p>
+        <div th:replace="~{fragments/owner-pets :: list(${pets}, ${owner.ownerId})}"></div>
 
         <div class="row">
           <a th:href="@{/appointments/new(ownerId=*{ownerId})}" class="btn-primary btn-sm">

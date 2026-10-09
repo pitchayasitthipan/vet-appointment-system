@@ -1017,3 +1017,431 @@ button {
     color: var(--pet-navy);
     font-size: 16px;
 }
+
+/* สีตามประเภทสัตว์: สุนัขส้มน้ำตาล แมวฟ้า อื่น ๆ เขียว */
+.tone-dog { --tone: #c9814a; --tone-soft: #fdf1e4; --tone-soft-2: #fff8ec; }
+.tone-cat { --tone: #5b7bd5; --tone-soft: #eaf0fb; --tone-soft-2: #f5f7fd; }
+.tone-other { --tone: #5f9a57; --tone-soft: #eef6ea; --tone-soft-2: #f7fbf4; }
+.tone-all { --tone: #5c6a88; --tone-soft: #f6f2ea; --tone-soft-2: #fbf8f2; }
+
+/* ----- Hero ----- */
+.pets-hero {
+    min-height: 0;
+    padding: 28px 36px;
+}
+
+.pets-hero .eyebrow,
+.pets-hero .eyebrow .icon {
+    color: #b08a5a;
+}
+
+.pets-hero h1 {
+    margin-bottom: 6px;
+}
+
+.pets-backlink {
+    display: flex;
+    width: fit-content;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+    color: var(--pet-navy);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.pets-backlink .icon {
+    color: var(--pet-navy);
+}
+
+.staff-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--pet-navy);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.staff-badge .icon {
+    color: #fff;
+}
+
+.pet-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.pet-stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border: 1px solid #f1e3cf;
+    border-radius: 14px;
+    background: #fff;
+    color: var(--pet-text);
+    font-size: 13px;
+}
+
+.pet-stat b {
+    color: var(--pet-navy);
+    font-size: 18px;
+}
+
+.pet-stat-icon {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    background: var(--tone-soft);
+}
+
+.pet-stat-icon .icon {
+    color: var(--tone);
+}
+
+.hero-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.hero-actions .btn-primary,
+.hero-actions .btn-secondary {
+    white-space: nowrap;
+}
+
+/* ปุ่มรองด้านบน: กรมท่าแทนชมพู */
+.hero-actions .btn-secondary,
+.hero-actions .btn-secondary .icon {
+    border-color: #c9d1e3;
+    color: var(--pet-navy);
+}
+
+/* ----- แถวค้นหา + ปุ่มกรอง ----- */
+.pets-toolbar {
+    gap: 14px;
+}
+
+.pet-search-box .icon {
+    color: var(--pet-muted);
+}
+
+.pet-filters {
+    display: flex;
+    gap: 8px;
+}
+
+.pet-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    border: 1px solid var(--pet-border);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--pet-text);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.pet-filter .icon {
+    color: var(--pet-muted);
+}
+
+.pet-filter[data-filter="Dog"] .icon { color: #c9814a; }
+.pet-filter[data-filter="Cat"] .icon { color: #5b7bd5; }
+.pet-filter[data-filter="Other"] .icon { color: #5f9a57; }
+
+.pet-filter.active {
+    border-color: var(--pet-navy);
+    background: var(--pet-navy);
+    color: #fff;
+}
+
+.pet-filter.active .icon {
+    color: #fff;
+}
+
+.pets-count {
+    margin: 0 0 14px;
+    color: var(--pet-muted);
+    font-size: 12px;
+}
+
+/* ----- การ์ดโปรไฟล์สัตว์ ----- */
+.pet-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.pet-profile {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 22px 18px 18px;
+    border: 1px solid var(--pet-border);
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 5px 16px rgba(48, 54, 88, 0.045);
+    text-align: center;
+}
+
+/* แถบสีด้านบนตามประเภทสัตว์ */
+.pet-profile::before {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 70px;
+    background: linear-gradient(135deg, var(--tone-soft), var(--tone-soft-2));
+    content: "";
+}
+
+.pet-profile-id {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.85);
+    color: var(--pet-muted);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.pet-avatar {
+    position: relative;
+    width: 86px;
+    height: 86px;
+    display: grid;
+    place-items: center;
+    margin: 8px auto 10px;
+    border: 4px solid #fff;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 6px 16px rgba(23, 53, 109, 0.1);
+}
+
+.pet-avatar .icon {
+    width: 46px;
+    height: 46px;
+    color: var(--tone);
+}
+
+.pet-profile h3 {
+    margin: 0;
+    color: var(--pet-navy);
+    font-size: 18px;
+    overflow-wrap: anywhere;
+}
+
+.pet-owner-line {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 4px;
+    color: var(--pet-navy);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.pet-owner-line .icon {
+    color: var(--pet-muted);
+}
+
+.pet-meta {
+    margin: 4px 0 12px;
+    color: var(--pet-muted);
+    font-size: 12px;
+}
+
+.pet-tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.pet-tags span {
+    padding: 4px 10px;
+    border: 1px solid #f1e3cf;
+    border-radius: 999px;
+    background: #fffaf2;
+    color: var(--pet-text);
+    font-size: 11px;
+}
+
+.pet-profile-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid #f1e9df;
+}
+
+.pet-book-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border: 1.5px solid var(--pet-navy);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--pet-navy);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.pet-book-btn .icon {
+    color: var(--pet-navy);
+}
+
+.pet-icon-btn {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border: 1px solid #e8e3da;
+    border-radius: 11px;
+    background: #fff;
+}
+
+.pet-icon-btn .icon {
+    color: #5c6a88;
+}
+
+.pet-icon-btn.danger {
+    border-color: #f1d6d6;
+}
+
+.pet-icon-btn.danger .icon {
+    color: #bf5065;
+}
+
+/* ช่องเพิ่มสัตว์ท้ายรายการ */
+.pet-add-tile {
+    min-height: 240px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 2px dashed #d9cdb8;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.5);
+    color: var(--pet-navy);
+    font-weight: 600;
+}
+
+.pet-add-icon {
+    width: 56px;
+    height: 56px;
+    display: grid;
+    place-items: center;
+    border-radius: 18px;
+    background: #f6f2ea;
+}
+
+.pet-add-icon .icon {
+    color: var(--pet-navy);
+}
+
+/* หน้าว่าง / ไม่พบ: ไอคอนสีกลาง ๆ */
+.pet-empty-state .icon {
+    color: var(--pet-muted);
+}
+
+/* ----- แบ่งหน้า (เจ้าหน้าที่ดูสัตว์ทั้งหมด) ----- */
+.pets-pager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 20px;
+    color: var(--pet-muted);
+    font-size: 13px;
+}
+
+.pets-pager[hidden] {
+    display: none;
+}
+
+.pets-pager .pager {
+    margin: 0;
+}
+
+.pets-pager .pager .active {
+    background: var(--pet-navy);
+}
+
+/* ----- หน้าต่างรายละเอียด/ฟอร์ม: ไอคอนตามประเภท ไม่ใช้ชมพู ----- */
+.modal-icon {
+    background: var(--tone-soft, #f6f2ea);
+}
+
+.modal-icon .icon {
+    color: var(--tone, var(--pet-navy));
+}
+
+.modal-close .icon {
+    color: var(--pet-navy);
+}
+
+/* ----- จอเล็ก ----- */
+@media (max-width: 950px) {
+    .pet-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .pets-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .pet-filters {
+        overflow-x: auto;
+    }
+}
+
+@media (max-width: 620px) {
+    .pets-hero {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 24px 20px;
+    }
+
+    .pet-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pet-stat {
+        flex: 1 1 40%;
+    }
+
+    .pet-add-tile {
+        min-height: 120px;
+    }
+
+    .pets-pager {
+        flex-direction: column;
+        gap: 10px;
+    }
+}

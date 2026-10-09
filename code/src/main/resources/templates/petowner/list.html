@@ -85,6 +85,9 @@
           <span th:text="*{firstName + ' ' + lastName}">พิชยา สิทธิพันธ์</span>
           <small class="muted-note" th:text="'· แฟ้ม #' + ${#numbers.formatInteger(selectedOwner.ownerId, 4)}">· แฟ้ม #0001</small>
         </h2>
+        <!-- ไปหน้าสัตว์เลี้ยงของเจ้าของคนนี้ (โหมดเจ้าหน้าที่) -->
+        <a th:href="@{/pets(ownerId=*{ownerId})}" class="btn-mini">
+          <span class="icon i-paw-print icon-sm"></span> สัตว์เลี้ยง</a>
         <a th:href="@{/owners/{id}(id=*{ownerId})}" class="btn-mini pink">
           เปิดแฟ้มเต็ม <span class="icon i-arrow-right icon-sm"></span></a>
       </div>
@@ -104,9 +107,9 @@
             <span th:replace="~{fragments/layout :: phone(${selectedOwner.emergencyContactPhone})}"></span></span>
         </div>
 
-        <!-- หมวด 3: ข้อมูลมาจากโมดูล Pet (ตอนนี้ยังไม่มี แสดงกล่องว่าง) -->
-        <p class="muted-note gap-top">หมวด 3 · สัตว์เลี้ยง</p>
-        <div class="empty">ยังไม่มีข้อมูลสัตว์เลี้ยง</div>
+        <!-- หมวด 3: ข้อมูลมาจากโมดูล Pet (รายการจริงจาก PetService) -->
+        <p class="muted-note gap-top" th:text="'หมวด 3 · สัตว์เลี้ยง (' + ${#lists.size(pets)} + ' ตัว)'">หมวด 3 · สัตว์เลี้ยง</p>
+        <div th:replace="~{fragments/owner-pets :: list(${pets}, ${selectedOwner.ownerId})}"></div>
       </div>
     </div>
   </div>

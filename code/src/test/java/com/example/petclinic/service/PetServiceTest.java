@@ -1,22 +1,21 @@
 
 package com.example.petclinic.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.example.petclinic.domain.entity.Pet;
@@ -46,6 +45,8 @@ class PetServiceTest {
     void setUp() {
         petOwner = new PetOwner();
         petOwner.setOwnerId(1L);
+        petOwner.setFirstName("John");
+        petOwner.setLastName("Doe");
 
         request = new PetRequestDTO();
         request.setName("Milo");
@@ -112,6 +113,7 @@ class PetServiceTest {
         assertEquals(20.5, result.getWeight());
         assertEquals("MC1", result.getMicrochipNumber());
         assertEquals(1L, result.getOwnerId());
+        assertEquals("John Doe", result.getOwnerName());
 
         verify(petRepository).findById(1L);
     }

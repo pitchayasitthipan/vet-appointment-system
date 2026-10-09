@@ -17,6 +17,9 @@ public class PetResponseDTO {
     private String microchipNumber;
     private Long ownerId;
 
+    // ชื่อเจ้าของ ให้หน้าเจ้าหน้าที่แสดงว่าเป็นสัตว์ของใคร
+    private String ownerName;
+
     public PetResponseDTO() {
     }
 
@@ -34,6 +37,7 @@ public class PetResponseDTO {
 
         if (pet.getPetOwner() != null) {
             dto.setOwnerId(pet.getPetOwner().getOwnerId());
+            dto.setOwnerName(pet.getPetOwner().getFirstName() + " " + pet.getPetOwner().getLastName());
         }
 
         return dto;
@@ -109,5 +113,13 @@ public class PetResponseDTO {
 
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public String getOwnerName() {
+        return ownerName;
+    }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
     }
 }
