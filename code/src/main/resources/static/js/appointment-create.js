@@ -93,7 +93,7 @@
     P.options(doctor, doctors.map(d => [d.doctorId, `${d.firstName} ${d.lastName} · ${d.specialization || "สัตวแพทย์"}`]), doctors.length ? "เลือกสัตวแพทย์" : "ยังไม่มีสัตวแพทย์ในระบบ");
     doctorsReady = doctors.length > 0;
     if (selectedDoctor && Array.from(doctor.options).some(o => o.value === selectedDoctor)) doctor.value = selectedDoctor;
-    if (owner) { byId("time-fields").disabled = !doctorsReady || !pet.options.length; loadSlots(); }
+    if (owner) { byId("time-fields").disabled = !doctorsReady || pet.options.length <= 1; loadSlots(); }
     if (!doctorsReady) P.message(feedback, "ยังไม่มีสัตวแพทย์ที่รับนัด กรุณาติดต่อคลินิก", "error");
   }).catch(e => P.message(feedback, e.message + " · โหลดหน้านี้ใหม่เพื่อลองอีกครั้ง", "error"));
 })();

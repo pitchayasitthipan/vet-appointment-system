@@ -304,6 +304,7 @@ async function handleAddPet(event) {
         closeModal("addPetModal");
 
         form.reset();
+        document.getElementById("petOwnerId").value = CURRENT_OWNER_ID;
 
         await loadPets();
         if (petPageParams.get("returnTo") === "appointment") location.assign("/appointment-create.html");

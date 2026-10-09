@@ -1,4 +1,5 @@
 code/target/
+node_modules/
 tmp/
 .idea/
 .vscode/
