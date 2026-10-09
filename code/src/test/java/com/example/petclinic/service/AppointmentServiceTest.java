@@ -5,6 +5,7 @@ import java.util.*;
 import com.example.petclinic.domain.entity.*;
 import com.example.petclinic.domain.enums.*;
 import com.example.petclinic.dto.request.AppointmentRequestDTO;
+import com.example.petclinic.dto.request.AppointmentUpdateDTO;
 import com.example.petclinic.exception.*;
 import com.example.petclinic.factory.*;
 import com.example.petclinic.repository.*;
@@ -96,5 +97,57 @@ class AppointmentServiceTest {
         when(appointments.findByDoctorDoctorIdAndAppointmentDateTimeGreaterThanEqualAndAppointmentDateTimeLessThanAndStatusIn(
             eq(3L), any(), any(), anyCollection())).thenReturn(List.of(appointment()));
         assertThat(service.availability(3L, time.toLocalDate())).doesNotContain(time).contains(time.plusMinutes(30));
+    }
+
+    AppointmentUpdateDTO updateRequest(Long version) {
+        return new AppointmentUpdateDTO(3L, time.plusMinutes(30), ServiceType.SURGERY, "นัดผ่าตัด", version);
+    }
+
+    @Test void reschedulesWithoutChangingPetOrConfirmedStatus() {
+        Appointment existing = spy(appointment());
+        existing.setStatus(AppointmentStatus.CONFIRMED);
+        when(existing.getVersion()).thenReturn(0L);
+        when(appointments.findLockedByIdAndOwnerId(4L, 1L)).thenReturn(Optional.of(existing));
+        bookingResources();
+        when(appointments.saveAndFlush(existing)).thenReturn(existing);
+        var result = service.update(4L, 1L, updateRequest(0L));
+        assertThat(result.appointmentId()).isEqualTo(4L);
+        assertThat(result.petId()).isEqualTo(2L);
+        assertThat(result.status()).isEqualTo(AppointmentStatus.CONFIRMED);
+        assertThat(result.appointmentDateTime()).isEqualTo(time.plusMinutes(30));
+        assertThat(result.serviceType()).isEqualTo(ServiceType.SURGERY);
+        assertThat(result.preparationInstructions()).contains("เฉพาะจากสัตวแพทย์");
+        verify(appointments).countConflicts(eq(3L), eq(2L), eq(time.plusMinutes(30)), eq(4L), anyCollection());
+    }
+    @Test void rejectsStaleVersionBeforeChangingResources() {
+        Appointment existing = spy(appointment()); when(existing.getVersion()).thenReturn(1L);
+        when(appointments.findLockedByIdAndOwnerId(4L, 1L)).thenReturn(Optional.of(existing));
+        assertThatThrownBy(() -> service.update(4L, 1L, updateRequest(0L))).isInstanceOf(DuplicateResourceException.class);
+        verifyNoInteractions(doctors, pets);
+        verify(appointments, never()).saveAndFlush(any());
+    }
+    @Test void cancelsAndRepeatingCancelIsIdempotent() {
+        Appointment existing = appointment();
+        when(appointments.findLockedByIdAndOwnerId(4L, 1L)).thenReturn(Optional.of(existing));
+        when(appointments.saveAndFlush(existing)).thenReturn(existing);
+        assertThat(service.cancel(4L, 1L).status()).isEqualTo(AppointmentStatus.CANCELLED);
+        assertThat(service.cancel(4L, 1L).status()).isEqualTo(AppointmentStatus.CANCELLED);
+        verify(appointments, times(1)).saveAndFlush(existing);
+    }
+    @Test void rejectsCompletedOrPastCancellation() {
+        Appointment existing = appointment(); existing.setStatus(AppointmentStatus.COMPLETED);
+        when(appointments.findLockedByIdAndOwnerId(4L, 1L)).thenReturn(Optional.of(existing));
+        assertThatThrownBy(() -> service.cancel(4L, 1L)).isInstanceOf(DuplicateResourceException.class);
+        existing.setStatus(AppointmentStatus.PENDING); existing.setAppointmentDateTime(time.minusDays(1));
+        assertThatThrownBy(() -> service.cancel(4L, 1L)).isInstanceOf(InvalidAppointmentException.class);
+        verify(appointments, never()).saveAndFlush(any());
+    }
+    @Test void rejectsCancelledUpdateAndWrongOwnerCancellation() {
+        Appointment existing = appointment(); existing.setStatus(AppointmentStatus.CANCELLED);
+        when(appointments.findLockedByIdAndOwnerId(4L, 1L)).thenReturn(Optional.of(existing));
+        assertThatThrownBy(() -> service.update(4L, 1L, updateRequest(0L))).isInstanceOf(DuplicateResourceException.class);
+        when(appointments.findLockedByIdAndOwnerId(4L, 9L)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> service.cancel(4L, 9L)).isInstanceOf(ResourceNotFoundException.class);
+        verify(appointments, never()).saveAndFlush(any());
     }
 }
