@@ -2,6 +2,8 @@ package com.example.petclinic.service.impl;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +34,16 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         return medicalRecordRepository.findAll().stream()
                 .map(MedicalRecordResponseDTO::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    // ===== ส่วนค้นหาข้อมูลแบบแบ่งหน้าและเรียงลำดับ =====
+    @Override
+    @Transactional(readOnly = true)
+    public Page<MedicalRecordResponseDTO> getAllMedicalRecords(Pageable pageable) {
+
+        // ให้ Repository ดึงข้อมูลตามหน้าที่ร้องขอ
+        return medicalRecordRepository.findAll(pageable)
+                .map(MedicalRecordResponseDTO::fromEntity);
     }
 
     // ===== ส่วนค้นหาข้อมูลตาม ID =====

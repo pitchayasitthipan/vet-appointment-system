@@ -1,9 +1,11 @@
 
-package com.example.petclinic.controller;
+package com.example.petclinic.controller.web;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import com.example.petclinic.exception.ResourceNotFoundException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -148,6 +150,19 @@ public String deleteMedicalRecord(
     // แจ้งผลหลังลบ แล้วกลับไปหน้ารายการ
     redirectAttributes.addFlashAttribute(
             "successMessage", "ลบประวัติการรักษาสำเร็จ");
+
+    return "redirect:/medical-records";
+}
+
+// ถ้าไม่พบประวัติการรักษา ให้กลับหน้ารายการพร้อมแจ้งเตือน
+@ExceptionHandler(ResourceNotFoundException.class)
+public String handleRecordNotFound(
+        ResourceNotFoundException ex,
+        RedirectAttributes redirectAttributes) {
+
+    redirectAttributes.addFlashAttribute(
+            "errorMessage",
+            "ไม่พบประวัติการรักษาที่ต้องการ");
 
     return "redirect:/medical-records";
 }
