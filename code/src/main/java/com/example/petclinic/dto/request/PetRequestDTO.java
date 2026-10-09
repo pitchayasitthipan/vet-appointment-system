@@ -1,3 +1,4 @@
+
 package com.example.petclinic.dto.request;
 
 import java.time.LocalDate;
@@ -8,28 +9,24 @@ import jakarta.validation.constraints.Positive;
 
 public class PetRequestDTO {
 
-    @NotBlank(message = "Pet name is required")
+    @NotBlank(message = "กรุณาระบุชื่อสัตว์เลี้ยง")
     private String name;
 
-    @NotBlank(message = "Species is required")
+    @NotBlank(message = "กรุณาระบุประเภทสัตว์")
     private String species;
 
     private String breed;
-
     private String gender;
-
     private LocalDate birthDate;
 
-    @Positive(message = "Weight must be greater than 0")
+    @Positive(message = "น้ำหนักต้องมากกว่า 0")
     private Double weight;
 
     private String microchipNumber;
 
-    @NotNull(message = "Owner ID is required")
+    @NotNull(message = "กรุณาระบุรหัสเจ้าของสัตว์เลี้ยง")
+    @Positive(message = "รหัสเจ้าของสัตว์เลี้ยงต้องมากกว่า 0")
     private Long ownerId;
-
-    public PetRequestDTO() {
-    }
 
     public String getName() {
         return name;

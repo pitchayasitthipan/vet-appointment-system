@@ -1,13 +1,16 @@
+
 package com.example.petclinic.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,8 +23,8 @@ import com.example.petclinic.domain.entity.Pet;
 import com.example.petclinic.domain.entity.PetOwner;
 import com.example.petclinic.dto.request.PetRequestDTO;
 import com.example.petclinic.dto.response.PetResponseDTO;
-import com.example.petclinic.repository.PetRepository;
 import com.example.petclinic.repository.PetOwnerRepository;
+import com.example.petclinic.repository.PetRepository;
 import com.example.petclinic.service.impl.PetServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,23 +58,26 @@ class PetServiceTest {
         request.setOwnerId(1L);
     }
 
+    private Pet createPet(Long id, String name, String species) {
+        Pet pet = new Pet();
+        pet.setPetId(id);
+        pet.setName(name);
+        pet.setSpecies(species);
+        pet.setBreed("Golden Retriever");
+        pet.setGender("Male");
+        pet.setBirthDate(LocalDate.of(2022, 5, 10));
+        pet.setWeight(20.5);
+        pet.setMicrochipNumber("MC" + id);
+        pet.setPetOwner(petOwner);
+        return pet;
+    }
+
     @Test
     void createPet_shouldCreatePetSuccessfully() {
-
-        Pet savedPet = new Pet();
-        savedPet.setPetId(1L);
-        savedPet.setName(request.getName());
-        savedPet.setSpecies(request.getSpecies());
-        savedPet.setBreed(request.getBreed());
-        savedPet.setGender(request.getGender());
-        savedPet.setBirthDate(request.getBirthDate());
-        savedPet.setWeight(request.getWeight());
-        savedPet.setMicrochipNumber(request.getMicrochipNumber());
-        savedPet.setPetOwner(petOwner);
+        Pet savedPet = createPet(1L, "Milo", "Dog");
 
         when(petOwnerRepository.findById(1L))
-                .thenReturn(java.util.Optional.of(petOwner));
-
+                .thenReturn(Optional.of(petOwner));
         when(petRepository.save(any(Pet.class)))
                 .thenReturn(savedPet);
 
@@ -82,24 +88,17 @@ class PetServiceTest {
         assertEquals("Milo", result.getName());
         assertEquals("Dog", result.getSpecies());
         assertEquals(1L, result.getOwnerId());
+
+        verify(petOwnerRepository).findById(1L);
+        verify(petRepository).save(any(Pet.class));
     }
 
     @Test
     void getPetById_shouldReturnPetSuccessfully() {
-
-        Pet pet = new Pet();
-        pet.setPetId(1L);
-        pet.setName("Milo");
-        pet.setSpecies("Dog");
-        pet.setBreed("Golden Retriever");
-        pet.setGender("Male");
-        pet.setBirthDate(LocalDate.of(2022, 5, 10));
-        pet.setWeight(20.5);
-        pet.setMicrochipNumber("MC123456");
-        pet.setPetOwner(petOwner);
+        Pet pet = createPet(1L, "Milo", "Dog");
 
         when(petRepository.findById(1L))
-                .thenReturn(java.util.Optional.of(pet));
+                .thenReturn(Optional.of(pet));
 
         PetResponseDTO result = petService.getPetById(1L);
 
@@ -111,25 +110,15 @@ class PetServiceTest {
         assertEquals("Male", result.getGender());
         assertEquals(LocalDate.of(2022, 5, 10), result.getBirthDate());
         assertEquals(20.5, result.getWeight());
-        assertEquals("MC123456", result.getMicrochipNumber());
+        assertEquals("MC1", result.getMicrochipNumber());
         assertEquals(1L, result.getOwnerId());
 
         verify(petRepository).findById(1L);
     }
 
     @Test
-    void updatePet_shouldUpdatePetSuccessfully() {
-
-        Pet existingPet = new Pet();
-        existingPet.setPetId(1L);
-        existingPet.setName("Milo");
-        existingPet.setSpecies("Dog");
-        existingPet.setBreed("Golden Retriever");
-        existingPet.setGender("Male");
-        existingPet.setBirthDate(LocalDate.of(2022, 5, 10));
-        existingPet.setWeight(20.5);
-        existingPet.setMicrochipNumber("MC123456");
-        existingPet.setPetOwner(petOwner);
+    void updatePet_shouldUpdatePetAndPreserveOriginalOwner() {
+        Pet existingPet = createPet(1L, "Milo", "Dog");
 
         PetRequestDTO updateRequest = new PetRequestDTO();
         updateRequest.setName("Milo Updated");
@@ -139,18 +128,17 @@ class PetServiceTest {
         updateRequest.setBirthDate(LocalDate.of(2022, 5, 10));
         updateRequest.setWeight(22.0);
         updateRequest.setMicrochipNumber("MC999999");
-        updateRequest.setOwnerId(1L);
+
+        // จำลองผู้ใช้ส่ง ownerId ของคนอื่นเข้ามา
+        updateRequest.setOwnerId(999L);
 
         when(petRepository.findById(1L))
-                .thenReturn(java.util.Optional.of(existingPet));
-
-        when(petOwnerRepository.findById(1L))
-                .thenReturn(java.util.Optional.of(petOwner));
-
+                .thenReturn(Optional.of(existingPet));
         when(petRepository.save(any(Pet.class)))
-                .thenReturn(existingPet);
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
-        PetResponseDTO result = petService.updatePet(1L, updateRequest);
+        PetResponseDTO result =
+                petService.updatePet(1L, updateRequest);
 
         assertNotNull(result);
         assertEquals(1L, result.getPetId());
@@ -160,33 +148,22 @@ class PetServiceTest {
         assertEquals("Male", result.getGender());
         assertEquals(22.0, result.getWeight());
         assertEquals("MC999999", result.getMicrochipNumber());
+
+        // ต้องยังเป็นเจ้าของเดิม แม้ request ส่ง ownerId = 999
         assertEquals(1L, result.getOwnerId());
+        assertEquals(1L, existingPet.getPetOwner().getOwnerId());
 
         verify(petRepository).findById(1L);
-        verify(petOwnerRepository).findById(1L);
         verify(petRepository).save(any(Pet.class));
+
+        // การแก้ไขไม่ควรค้นหาเจ้าของใหม่หรือเปลี่ยนเจ้าของ
+        verify(petOwnerRepository, never()).findById(any());
     }
 
     @Test
     void getPetsByOwnerId_shouldReturnPetsSuccessfully() {
-
-        Pet pet1 = new Pet();
-        pet1.setPetId(1L);
-        pet1.setName("Milo");
-        pet1.setSpecies("Dog");
-        pet1.setBreed("Golden Retriever");
-        pet1.setGender("Male");
-        pet1.setWeight(20.5);
-        pet1.setPetOwner(petOwner);
-
-        Pet pet2 = new Pet();
-        pet2.setPetId(2L);
-        pet2.setName("Luna");
-        pet2.setSpecies("Cat");
-        pet2.setBreed("Persian");
-        pet2.setGender("Female");
-        pet2.setWeight(4.5);
-        pet2.setPetOwner(petOwner);
+        Pet pet1 = createPet(1L, "Milo", "Dog");
+        Pet pet2 = createPet(2L, "Luna", "Cat");
 
         when(petRepository.findByPetOwnerOwnerId(1L))
                 .thenReturn(List.of(pet1, pet2));
@@ -212,18 +189,10 @@ class PetServiceTest {
 
     @Test
     void deletePet_shouldDeletePetSuccessfully() {
-
-        Pet pet = new Pet();
-        pet.setPetId(1L);
-        pet.setName("Milo");
-        pet.setSpecies("Dog");
-        pet.setBreed("Golden Retriever");
-        pet.setGender("Male");
-        pet.setWeight(20.5);
-        pet.setPetOwner(petOwner);
+        Pet pet = createPet(1L, "Milo", "Dog");
 
         when(petRepository.findById(1L))
-                .thenReturn(java.util.Optional.of(pet));
+                .thenReturn(Optional.of(pet));
 
         petService.deletePet(1L);
 

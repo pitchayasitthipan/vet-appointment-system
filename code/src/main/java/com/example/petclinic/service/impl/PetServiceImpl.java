@@ -1,15 +1,20 @@
+
 package com.example.petclinic.service.impl;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.petclinic.domain.entity.Pet;
 import com.example.petclinic.domain.entity.PetOwner;
 import com.example.petclinic.dto.request.PetRequestDTO;
 import com.example.petclinic.dto.response.PetResponseDTO;
-import com.example.petclinic.repository.PetRepository;
+import com.example.petclinic.exception.ResourceNotFoundException;
 import com.example.petclinic.repository.PetOwnerRepository;
+import com.example.petclinic.repository.PetRepository;
 import com.example.petclinic.service.PetService;
 
 @Service
@@ -20,102 +25,99 @@ public class PetServiceImpl implements PetService {
 
     public PetServiceImpl(
             PetRepository petRepository,
-            PetOwnerRepository petOwnerRepository) {
+            PetOwnerRepository petOwnerRepository
+    ) {
         this.petRepository = petRepository;
         this.petOwnerRepository = petOwnerRepository;
     }
 
     @Override
+    @Transactional
     public PetResponseDTO createPet(PetRequestDTO request) {
 
-        PetOwner petOwner = petOwnerRepository.findById(request.getOwnerId())
-                .orElseThrow(() -> new RuntimeException("Pet owner not found"));
+        PetOwner owner = petOwnerRepository
+                .findById(request.getOwnerId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "ไม่พบเจ้าของสัตว์เลี้ยงรหัส "
+                                + request.getOwnerId()
+                ));
 
         Pet pet = new Pet();
 
-        pet.setName(request.getName());
-        pet.setSpecies(request.getSpecies());
-        pet.setBreed(request.getBreed());
-        pet.setGender(request.getGender());
-        pet.setBirthDate(request.getBirthDate());
-        pet.setWeight(request.getWeight());
-        pet.setMicrochipNumber(request.getMicrochipNumber());
-        pet.setPetOwner(petOwner);
+        applyFields(pet, request);
+        pet.setPetOwner(owner);
 
         Pet savedPet = petRepository.save(pet);
 
-        PetResponseDTO response = new PetResponseDTO();
-
-        response.setPetId(savedPet.getPetId());
-        response.setName(savedPet.getName());
-        response.setSpecies(savedPet.getSpecies());
-        response.setBreed(savedPet.getBreed());
-        response.setGender(savedPet.getGender());
-        response.setBirthDate(savedPet.getBirthDate());
-        response.setWeight(savedPet.getWeight());
-        response.setMicrochipNumber(savedPet.getMicrochipNumber());
-        response.setOwnerId(savedPet.getPetOwner().getOwnerId());
-
-        return response;
+        return PetResponseDTO.fromEntity(savedPet);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PetResponseDTO getPetById(Long petId) {
 
-        Pet pet = petRepository.findById(petId)
-                .orElseThrow(() -> new RuntimeException("Pet not found"));
+        Pet pet = findPet(petId);
 
-        PetResponseDTO response = new PetResponseDTO();
-
-        response.setPetId(pet.getPetId());
-        response.setName(pet.getName());
-        response.setSpecies(pet.getSpecies());
-        response.setBreed(pet.getBreed());
-        response.setGender(pet.getGender());
-        response.setBirthDate(pet.getBirthDate());
-        response.setWeight(pet.getWeight());
-        response.setMicrochipNumber(pet.getMicrochipNumber());
-
-        if (pet.getPetOwner() != null) {
-            response.setOwnerId(pet.getPetOwner().getOwnerId());
-        }
-
-        return response;
+        return PetResponseDTO.fromEntity(pet);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PetResponseDTO> getPetsByOwnerId(Long ownerId) {
 
-        List<Pet> pets = petRepository.findByPetOwnerOwnerId(ownerId);
-
-        return pets.stream()
-            .map(pet -> {
-                PetResponseDTO response = new PetResponseDTO();
-
-                response.setPetId(pet.getPetId());
-                response.setName(pet.getName());
-                response.setSpecies(pet.getSpecies());
-                response.setBreed(pet.getBreed());
-                response.setGender(pet.getGender());
-                response.setBirthDate(pet.getBirthDate());
-                response.setWeight(pet.getWeight());
-                response.setMicrochipNumber(pet.getMicrochipNumber());
-                response.setOwnerId(ownerId);
-
-                return response;
-            })
-            .toList();
+        return petRepository
+                .findByPetOwnerOwnerId(ownerId)
+                .stream()
+                .map(PetResponseDTO::fromEntity)
+                .toList();
     }
 
     @Override
-    public PetResponseDTO updatePet(Long petId, PetRequestDTO request) {
+    @Transactional(readOnly = true)
+    public Page<PetResponseDTO> getAllPets(Pageable pageable) {
 
-        Pet pet = petRepository.findById(petId)
-                .orElseThrow(() -> new RuntimeException("Pet not found"));
+        return petRepository
+                .findAll(pageable)
+                .map(PetResponseDTO::fromEntity);
+    }
 
-        PetOwner petOwner = petOwnerRepository.findById(request.getOwnerId())
-                .orElseThrow(() -> new RuntimeException("Pet owner not found"));
+    @Override
+    @Transactional
+    public PetResponseDTO updatePet(
+            Long petId,
+            PetRequestDTO request
+    ) {
+        Pet pet = findPet(petId);
 
+        // รักษาเจ้าของเดิม ไม่เปลี่ยนเจ้าของจาก ownerId ที่ส่งมา
+        applyFields(pet, request);
+
+        Pet updatedPet = petRepository.save(pet);
+
+        return PetResponseDTO.fromEntity(updatedPet);
+    }
+
+    @Override
+    @Transactional
+    public void deletePet(Long petId) {
+
+        Pet pet = findPet(petId);
+
+        petRepository.delete(pet);
+    }
+
+    private Pet findPet(Long petId) {
+
+        return petRepository.findById(petId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "ไม่พบสัตว์เลี้ยงรหัส " + petId
+                ));
+    }
+
+    private void applyFields(
+            Pet pet,
+            PetRequestDTO request
+    ) {
         pet.setName(request.getName());
         pet.setSpecies(request.getSpecies());
         pet.setBreed(request.getBreed());
@@ -123,31 +125,5 @@ public class PetServiceImpl implements PetService {
         pet.setBirthDate(request.getBirthDate());
         pet.setWeight(request.getWeight());
         pet.setMicrochipNumber(request.getMicrochipNumber());
-        pet.setPetOwner(petOwner);
-
-        Pet updatedPet = petRepository.save(pet);
-
-        PetResponseDTO response = new PetResponseDTO();
-
-        response.setPetId(updatedPet.getPetId());
-        response.setName(updatedPet.getName());
-        response.setSpecies(updatedPet.getSpecies());
-        response.setBreed(updatedPet.getBreed());
-        response.setGender(updatedPet.getGender());
-        response.setBirthDate(updatedPet.getBirthDate());
-        response.setWeight(updatedPet.getWeight());
-        response.setMicrochipNumber(updatedPet.getMicrochipNumber());
-        response.setOwnerId(updatedPet.getPetOwner().getOwnerId());
-
-        return response;
-    }
-
-    @Override
-    public void deletePet(Long petId) {
-
-        Pet pet = petRepository.findById(petId)
-                .orElseThrow(() -> new RuntimeException("Pet not found"));
-
-        petRepository.delete(pet);
     }
 }

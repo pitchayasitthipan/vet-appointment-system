@@ -1,6 +1,9 @@
+
 package com.example.petclinic.dto.response;
 
 import java.time.LocalDate;
+
+import com.example.petclinic.domain.entity.Pet;
 
 public class PetResponseDTO {
 
@@ -15,6 +18,25 @@ public class PetResponseDTO {
     private Long ownerId;
 
     public PetResponseDTO() {
+    }
+
+    public static PetResponseDTO fromEntity(Pet pet) {
+        PetResponseDTO dto = new PetResponseDTO();
+
+        dto.setPetId(pet.getPetId());
+        dto.setName(pet.getName());
+        dto.setSpecies(pet.getSpecies());
+        dto.setBreed(pet.getBreed());
+        dto.setGender(pet.getGender());
+        dto.setBirthDate(pet.getBirthDate());
+        dto.setWeight(pet.getWeight());
+        dto.setMicrochipNumber(pet.getMicrochipNumber());
+
+        if (pet.getPetOwner() != null) {
+            dto.setOwnerId(pet.getPetOwner().getOwnerId());
+        }
+
+        return dto;
     }
 
     public Long getPetId() {
