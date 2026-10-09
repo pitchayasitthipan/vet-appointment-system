@@ -1,117 +1,75 @@
 // PawCare - Veterinarians & Schedule Management
+// ข้อมูลสัตวแพทย์มาจากฐานข้อมูลจริง: หน้าเว็บ (Thymeleaf) สร้างการ์ดไว้แล้ว
+// ไฟล์นี้อ่านข้อมูลจาก data-* ของการ์ด แล้วทำ: กรอง, สถานะวันนี้, ตารางเวรรายวัน/รายสัปดาห์
+// เจ้าหน้าที่: เพิ่ม/แก้ไข/ลบ ผ่าน REST API /api/v1/doctors แล้วโหลดหน้าใหม่
 
-// Initial Rich Data from Mockup (used if API is offline or returns empty)
-const DEFAULT_DOCTORS = [
-  {
-    doctorId: 1,
-    firstName: "ณิชาภา",
-    lastName: "วงศ์วิริยะ",
-    nameEn: "Dr. Nichapa Wongviriya",
-    specialization: "อายุรศาสตร์, โรคผิวหนัง, อัลตราซาวด์",
-    phone: "081-998-1122",
-    email: "nichapa.w@pawcare.com",
-    titlePrefix: "สพ.ญ.",
-    isChief: true,
-    room: "ห้องตรวจ 1",
-    experience: "8 ปี",
-    education: "คณะสัตวแพทยศาสตร์ จุฬาฯ",
-    statusToday: "available",
-    statusText: "ออกตรวจวันนี้",
-    timeToday: "09:00 - 17:00 น.",
-    avatar: "images/dr-nichapa.jpg",
-    workSchedule: "จันทร์ - ศุกร์: 09:00 - 17:00 น. (ห้องตรวจ 1)"
-  },
-  {
-    doctorId: 2,
-    firstName: "กิตติภัทร",
-    lastName: "สินธวรกุล",
-    nameEn: "Dr. Kittiphat Sinthavorakul",
-    specialization: "ศัลยกรรม, กระดูกและข้อ, ออร์โธปิดิกส์",
-    phone: "082-334-5566",
-    email: "kittiphat.s@pawcare.com",
-    titlePrefix: "น.สพ.",
-    isChief: false,
-    room: "ห้องผ่าตัด",
-    experience: "7 ปี",
-    education: "คณะสัตวแพทยศาสตร์ ม.เกษตรฯ",
-    statusToday: "available",
-    statusText: "ออกตรวจวันนี้",
-    timeToday: "10:00 - 18:00 น.",
-    avatar: "images/dr-kittiphat.jpg",
-    workSchedule: "อังคาร - เสาร์: 10:00 - 18:00 น. (ห้องผ่าตัด)"
-  },
-  {
-    doctorId: 3,
-    firstName: "ปรียาภรณ์",
-    lastName: "ตั้งพงษ์ศิริ",
-    nameEn: "Dr. Preeyaporn Tangpongsiri",
-    specialization: "สัตว์เลี้ยงพิเศษ, สัตว์ฟันแทะ, สัตว์เลี้ยงขนาดเล็ก",
-    phone: "083-445-6677",
-    email: "preeyaporn.t@pawcare.com",
-    titlePrefix: "สพ.ญ.",
-    isChief: false,
-    room: "ห้องตรวจ 2",
-    experience: "6 ปี",
-    education: "คณะสัตวแพทยศาสตร์ ม.มหิดล",
-    statusToday: "available",
-    statusText: "ออกตรวจวันนี้",
-    timeToday: "09:00 - 16:00 น.",
-    avatar: "images/dr-preeyaporn.jpg",
-    workSchedule: "พุธ - อาทิตย์: 09:00 - 16:00 น. (ห้องตรวจ 2)"
-  },
-  {
-    doctorId: 4,
-    firstName: "ธนวัฒน์",
-    lastName: "อภิญญากุล",
-    nameEn: "Dr. Thanawat Apinyakul",
-    specialization: "อายุรศาสตร์, หัวใจ, ระบบทางเดินหายใจ",
-    phone: "084-556-7788",
-    email: "thanawat.a@pawcare.com",
-    titlePrefix: "น.สพ.",
-    isChief: false,
-    room: "ห้องตรวจ 3",
-    experience: "5 ปี",
-    education: "คณะสัตวแพทยศาสตร์ ม.ขอนแก่น",
-    statusToday: "off",
-    statusText: "หยุดวันนี้",
-    timeToday: "-",
-    avatar: "images/dr-thanawat.jpg",
-    workSchedule: "ศุกร์ - อังคาร: 09:00 - 18:00 น. (ห้องตรวจ 3)"
-  },
-  {
-    doctorId: 5,
-    firstName: "อรอนงค์",
-    lastName: "จันทร์ไพศาล",
-    nameEn: "Dr. Ohanong Chanpaisan",
-    specialization: "ทันตกรรม, เวชศาสตร์ป้องกัน, วัคซีน",
-    phone: "085-667-8899",
-    email: "ohanong.c@pawcare.com",
-    titlePrefix: "สพ.ญ.",
-    isChief: false,
-    room: "ห้องตรวจ 1",
-    experience: "6 ปี",
-    education: "คณะสัตวแพทยศาสตร์ ม.เชียงใหม่",
-    statusToday: "available",
-    statusText: "ออกตรวจวันนี้",
-    timeToday: "13:00 - 20:00 น.",
-    avatar: "images/dr-ohanong.jpg",
-    workSchedule: "พุธ - อาทิตย์: 13:00 - 20:00 น. (ห้องตรวจ 1)"
-  }
-];
+const API_DOCTORS = "/api/v1/doctors";
+const IS_STAFF = document.body.dataset.staff === "true";
 
-let doctorsList = [];
-let currentWeekOffset = 0; // 0 = current week, -1 = last week, +1 = next week
-let activeDayIndex = 2; // Default to Wednesday or today's day
+const DAYS_ORDER = ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์", "อาทิตย์"];
 
 const THAI_MONTHS = [
   "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
   "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
 ];
 
+let doctorsList = [];
+let currentWeekOffset = 0; // 0 = current week, -1 = last week, +1 = next week
+let activeDayIndex = 0;
+
+// ป้องกันข้อความจากฐานข้อมูลไปเป็น HTML
+function escapeHtml(text) {
+  return String(text ?? "").replace(/[&<>"']/g, ch => (
+    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]
+  ));
+}
+
+// เบอร์แบบมีขีด: 0812345678 -> 081-234-5678, 021234567 -> 02-123-4567
+function formatPhone(phone) {
+  const p = String(phone || "").replace(/[\s-]/g, "");
+  if (p.length === 10) return `${p.slice(0, 3)}-${p.slice(3, 6)}-${p.slice(6)}`;
+  if (p.length === 9) return `${p.slice(0, 2)}-${p.slice(2, 5)}-${p.slice(5)}`;
+  return p || "-";
+}
+
+// อ่านข้อมูลสัตวแพทย์จากการ์ดที่หน้าเว็บสร้างไว้
+function readDoctorsFromCards() {
+  return Array.from(document.querySelectorAll(".doctor-card")).map(card => ({
+    doctorId: Number(card.dataset.id),
+    firstName: card.dataset.firstName || "",
+    lastName: card.dataset.lastName || "",
+    specialization: card.dataset.spec || "",
+    phone: card.dataset.phone || "",
+    email: card.dataset.email || "",
+    workSchedule: card.dataset.schedule || "",
+    card
+  }));
+}
+
+function fullName(doc) {
+  return `${doc.firstName} ${doc.lastName}`.trim();
+}
+
+function initials(doc) {
+  return doc.firstName.length > 1 ? doc.firstName.substring(0, 2) : doc.firstName;
+}
+
+// ห้องตรวจที่เขียนไว้ในวงเล็บของตารางเวร เช่น "... (ห้องตรวจ 1)"
+function parseRoom(scheduleText) {
+  const match = (scheduleText || "").match(/\(([^)]+)\)/);
+  return match ? match[1].trim() : "";
+}
+
+// เวลาออกตรวจในตารางเวร เช่น "09:00 - 17:00"
+function parseTime(scheduleText) {
+  const match = (scheduleText || "").match(/\d{1,2}[:.]\d{2}\s*-\s*\d{1,2}[:.]\d{2}(\s*น\.)?/);
+  return match ? match[0] : "";
+}
+
 function getWeekDates(offsetWeeks = 0) {
   const now = new Date();
   const base = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (offsetWeeks * 7));
-  
+
   // Calculate Monday (Sunday is 0, Monday is 1, ..., Saturday is 6)
   const day = base.getDay();
   const diffToMonday = (day + 6) % 7;
@@ -119,16 +77,13 @@ function getWeekDates(offsetWeeks = 0) {
 
   const days = [];
   const shortNames = ["จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส.", "อา."];
-  const fullNames = ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์", "อาทิตย์"];
-  const fullEnDays = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
 
   for (let i = 0; i < 7; i++) {
     const d = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
     days.push({
       name: shortNames[i],
       num: d.getDate(),
-      fullDay: fullEnDays[i],
-      thDay: fullNames[i],
+      thDay: DAYS_ORDER[i],
       dateObj: d,
       isToday: d.toDateString() === now.toDateString()
     });
@@ -158,151 +113,88 @@ function formatDateRange(monday, sunday) {
 let weekInfo = getWeekDates(currentWeekOffset);
 let daysData = weekInfo.days;
 
-// Helper: Check if a doctor works on a given day (e.g. "จันทร์", "อังคาร")
+// หมอออกตรวจวันนั้นไหม (อ่านจากข้อความตารางเวร เช่น "จันทร์ - ศุกร์", "อังคาร, พฤหัสบดี")
+// ไม่ได้ระบุตารางเวร = ไม่แสดงว่าออกตรวจ (ไม่เดา)
 function doctorWorksOnDay(scheduleText, targetDay) {
-  if (!scheduleText || !targetDay) return true;
-  
-  const daysOrder = ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์", "อาทิตย์"];
-  const targetIdx = daysOrder.indexOf(targetDay);
+  if (!targetDay) return true;
+  if (!scheduleText) return false;
+
+  const targetIdx = DAYS_ORDER.indexOf(targetDay);
   if (targetIdx === -1) return true;
 
-  // Direct match
-  if (scheduleText.includes(targetDay)) return true;
-
-  // Match range (e.g. "จันทร์ - ศุกร์", "อังคาร - เสาร์", "ศุกร์ - อังคาร")
-  const rangeMatch = scheduleText.match(/(จันทร์|อังคาร|พุธ|พฤหัสบดี|ศุกร์|เสาร์|อาทิตย์)\s*[-–—ถึง]+\s*(จันทร์|อังคาร|พุธ|พฤหัสบดี|ศุกร์|เสาร์|อาทิตย์)/);
-  if (rangeMatch) {
-    const startIdx = daysOrder.indexOf(rangeMatch[1]);
-    const endIdx = daysOrder.indexOf(rangeMatch[2]);
-    if (startIdx !== -1 && endIdx !== -1) {
-      if (startIdx <= endIdx) {
-        return targetIdx >= startIdx && targetIdx <= endIdx;
-      } else {
-        // Wraps over weekend (e.g. ศุกร์ - อังคาร)
-        return targetIdx >= startIdx || targetIdx <= endIdx;
-      }
-    }
+  // ช่วงวัน เช่น "จันทร์ - ศุกร์", "ศุกร์ - อังคาร" (ข้ามสุดสัปดาห์)
+  const dayPattern = "(จันทร์|อังคาร|พุธ|พฤหัสบดี|ศุกร์|เสาร์|อาทิตย์)";
+  const rangeRegex = new RegExp(`${dayPattern}\\s*[-–—]\\s*${dayPattern}`, "g");
+  let range;
+  while ((range = rangeRegex.exec(scheduleText)) !== null) {
+    const startIdx = DAYS_ORDER.indexOf(range[1]);
+    const endIdx = DAYS_ORDER.indexOf(range[2]);
+    const inRange = startIdx <= endIdx
+      ? targetIdx >= startIdx && targetIdx <= endIdx
+      : targetIdx >= startIdx || targetIdx <= endIdx;
+    if (inRange) return true;
   }
-  return false;
+
+  // ระบุวันตรง ๆ เช่น "อังคาร, พฤหัสบดี" (แยกเป็นคำแล้วเทียบทั้งคำ)
+  return scheduleText.split(/[\s,\/:()\-–—]+/).includes(targetDay);
 }
 
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
-  // If today is in the current week, select today by default
-  const todayIdx = daysData.findIndex(d => d.isToday);
-  if (todayIdx !== -1) {
-    activeDayIndex = todayIdx;
-  }
+  doctorsList = readDoctorsFromCards();
 
+  // ถ้าวันนี้อยู่ในสัปดาห์นี้ เลือกวันนี้เป็นค่าเริ่มต้น
+  const todayIdx = daysData.findIndex(d => d.isToday);
+  activeDayIndex = todayIdx !== -1 ? todayIdx : 0;
+
+  decorateCards();
+  fillSpecFilter();
   updateCalendarView();
-  loadDoctors();
+  renderWeeklyMatrixTable();
   setupEventListeners();
+  setupDoctorForm();
 });
 
-// Load Doctors from REST API /api/doctors (or fallback)
-async function loadDoctors() {
-  try {
-    const res = await fetch("/api/doctors");
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        // Merge with avatar & extra presentation properties
-        doctorsList = data.map((doc, idx) => {
-          const matchDefault = DEFAULT_DOCTORS.find(d => d.doctorId === doc.doctorId || d.email === doc.email) || DEFAULT_DOCTORS[idx % DEFAULT_DOCTORS.length];
-          return {
-            ...matchDefault,
-            ...doc,
-            avatar: matchDefault ? matchDefault.avatar : "images/dr-nichapa.jpg"
-          };
-        });
-      } else {
-        doctorsList = [...DEFAULT_DOCTORS];
-      }
-    } else {
-      doctorsList = [...DEFAULT_DOCTORS];
-    }
-  } catch (err) {
-    console.log("Using default mock doctor list:", err);
-    doctorsList = [...DEFAULT_DOCTORS];
-  }
+// เติมป้ายความเชี่ยวชาญ ห้อง และสถานะวันนี้ ให้การ์ดแต่ละใบ
+function decorateCards() {
+  const today = DAYS_ORDER[(new Date().getDay() + 6) % 7];
 
-  renderDoctors(doctorsList);
-  updateDoctorCount(doctorsList.length);
-  renderScheduleSlots(activeDayIndex);
-  renderWeeklyMatrixTable();
+  doctorsList.forEach(doc => {
+    const card = doc.card;
+
+    const tagsEl = card.querySelector(".doc-tags");
+    const tags = (doc.specialization || "สัตวแพทย์ทั่วไป").split(/[,/]+/).map(t => t.trim()).filter(Boolean);
+    tagsEl.innerHTML = tags.map(tag => `<span class="tag-pill">${escapeHtml(tag)}</span>`).join("");
+
+    const room = parseRoom(doc.workSchedule);
+    const roomEl = card.querySelector(".doc-room");
+    if (room && roomEl) {
+      roomEl.lastElementChild.textContent = room;
+      roomEl.hidden = false;
+    }
+
+    const isOn = doctorWorksOnDay(doc.workSchedule, today);
+    const badge = card.querySelector(".status-badge");
+    badge.classList.toggle("available", isOn);
+    badge.classList.toggle("off", !isOn);
+    badge.querySelector(".status-text").textContent = isOn ? "ออกตรวจวันนี้" : "หยุดวันนี้";
+    card.querySelector(".doc-time-text").textContent = isOn ? (parseTime(doc.workSchedule) || "ตามตารางเวร") : "-";
+  });
 }
 
-// Render Doctor Cards
-function renderDoctors(list) {
-  const container = document.getElementById("doctorCardsContainer");
-  if (!container) return;
-
-  if (list.length === 0) {
-    container.innerHTML = `
-      <div style="text-align: center; padding: 3rem; background: #fff; border-radius: 12px; border: 1px dashed #e2e8f0;">
-        <span style="font-size: 2.5rem;">🐾</span>
-        <h4 style="margin-top: 0.5rem; color: #475569;">ไม่พบข้อมูลสัตวแพทย์ที่ค้นหา</h4>
-        <p style="color: #94a3b8; font-size: 0.85rem;">กรุณาลองเปลี่ยนคำค้นหาหรือเลือกตัวกรองใหม่</p>
-      </div>
-    `;
-    return;
-  }
-
-  container.innerHTML = list.map(doc => {
-    const prefix = doc.titlePrefix || (doc.firstName.startsWith("ณิชาภา") || doc.firstName.startsWith("ปรียาภรณ์") || doc.firstName.startsWith("อรอนงค์") || doc.firstName.startsWith("นันทิดา") || doc.firstName.startsWith("วรรณภา") ? "สพ.ญ." : "น.สพ.");
-    const fullName = `${prefix} ${doc.firstName} ${doc.lastName}`;
-    const nameEn = doc.nameEn || `Dr. ${doc.firstName} ${doc.lastName}`;
-    const tags = (doc.specialization || "").split(/[,/]+/).map(t => t.trim()).filter(Boolean);
-    const isAvail = doc.statusToday === "available";
-    const statusClass = isAvail ? "available" : "off";
-    const statusText = doc.statusText || (isAvail ? "ออกตรวจวันนี้" : "หยุดวันนี้");
-    const timeText = isAvail ? (doc.timeToday || "09:00 - 17:00 น.") : "-";
-    const avatarSrc = doc.avatar || "images/dr-nichapa.jpg";
-
-    return `
-      <div class="doctor-card" data-id="${doc.doctorId}">
-        <div class="doc-avatar-wrap">
-          <img src="${avatarSrc}" alt="${fullName}" class="doc-avatar" onerror="this.src='images/dr-nichapa.jpg'">
-        </div>
-        
-        <div class="doc-details">
-          <div class="doc-header-row">
-            <div class="doc-title-group">
-              ${doc.isChief ? '<span class="badge-chief">หัวหน้าแพทย์</span>' : ''}
-              <h3 class="doc-name">${fullName}</h3>
-            </div>
-          </div>
-          
-          <div class="doc-name-en">${nameEn}</div>
-          
-          <div class="doc-tags">
-            ${tags.map(tag => `<span class="tag-pill">${tag}</span>`).join('')}
-          </div>
-          
-          <div class="doc-meta-row">
-            <span class="meta-item"><span class="icon i-hospital icon-accent icon-sm"></span> ${doc.room || 'ห้องตรวจ 1'}</span>
-            <span class="meta-item"><span class="icon i-stethoscope icon-accent icon-sm"></span> ประสบการณ์ ${doc.experience || '6 ปี'}</span>
-            <span class="meta-item"><span class="icon i-identification-card icon-accent icon-sm"></span> ${doc.education || 'คณะสัตวแพทยศาสตร์'}</span>
-            ${doc.phone ? `<span class="meta-item"><span class="icon i-phone icon-accent icon-sm"></span> ${doc.phone}</span>` : ''}
-          </div>
-        </div>
-        
-        <div class="doc-card-right">
-          <div>
-            <div class="status-badge ${statusClass}">
-              <span class="status-dot"></span>
-              <span>${statusText}</span>
-            </div>
-            <div class="doc-time-text">${timeText}</div>
-          </div>
-          
-          <button class="btn-schedule" onclick="viewDoctorSchedule(${doc.doctorId})">
-            <span class="icon i-calendar-blank icon-sm"></span> ดูตารางเวร
-          </button>
-        </div>
-      </div>
-    `;
-  }).join("");
+// ตัวเลือกความเชี่ยวชาญสร้างจากข้อมูลจริง (ไม่เขียนตายตัว)
+function fillSpecFilter() {
+  const select = document.getElementById("specFilter");
+  if (!select) return;
+  const specs = new Set();
+  doctorsList.forEach(doc => (doc.specialization || "").split(/[,/]+/)
+    .map(t => t.trim()).filter(Boolean).forEach(t => specs.add(t)));
+  Array.from(specs).sort((a, b) => a.localeCompare(b, "th")).forEach(spec => {
+    const option = document.createElement("option");
+    option.value = spec;
+    option.textContent = spec;
+    select.appendChild(option);
+  });
 }
 
 // Calendar Navigation & Update
@@ -328,10 +220,10 @@ function goToCurrentWeekAndToday() {
   currentWeekOffset = 0;
   weekInfo = getWeekDates(0);
   daysData = weekInfo.days;
-  
+
   const todayIdx = daysData.findIndex(d => d.isToday);
-  activeDayIndex = todayIdx !== -1 ? todayIdx : 2;
-  
+  activeDayIndex = todayIdx !== -1 ? todayIdx : 0;
+
   updateCalendarView();
 }
 
@@ -341,12 +233,12 @@ function renderDaysStrip() {
   if (!container) return;
 
   container.innerHTML = daysData.map((d, idx) => `
-    <div class="day-pill ${idx === activeDayIndex ? 'active' : ''} ${d.isToday ? 'is-today' : ''}" 
-         onclick="selectDay(${idx})" 
+    <button type="button" class="day-pill ${idx === activeDayIndex ? 'active' : ''} ${d.isToday ? 'is-today' : ''}"
+         onclick="selectDay(${idx})"
          title="${d.thDay}ที่ ${d.num} ${d.isToday ? '(วันนี้)' : ''}">
       <span class="day-name">${d.name}</span>
       <span class="day-number">${d.num}</span>
-    </div>
+    </button>
   `).join("");
 }
 
@@ -357,95 +249,79 @@ function selectDay(index) {
   renderScheduleSlots(index);
 }
 
-// Render Slots for Right Column (Derived dynamically from doctorsList)
+// ตารางเวรรายวันฝั่งขวา (สร้างจากตารางเวรของหมอแต่ละคน)
 function renderScheduleSlots(dayIdx) {
   const container = document.getElementById("timeSlotsContainer");
   if (!container) return;
 
   const currentDay = daysData[dayIdx] || daysData[0];
-  const targetDayName = currentDay.thDay;
 
-  const listToUse = (doctorsList && doctorsList.length > 0) ? doctorsList : DEFAULT_DOCTORS;
-
-  const slots = listToUse.map(doc => {
-    const isOn = doctorWorksOnDay(doc.workSchedule, targetDayName);
-    
-    let time = "09:00 - 17:00 น.";
-    if (doc.workSchedule) {
-      const match = doc.workSchedule.match(/\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\s*(?:น\.)?/);
-      if (match) time = match[0];
-    } else if (doc.timeToday) {
-      time = doc.timeToday;
-    }
-
-    return {
-      doctorId: doc.doctorId,
-      name: `${doc.titlePrefix || 'สพ.'} ${doc.firstName} ${doc.lastName}`,
-      spec: doc.specialization || "สัตวแพทย์ทั่วไป",
-      room: doc.room || "ห้องตรวจ 1",
-      avatar: doc.avatar || "images/dr-nichapa.jpg",
-      time: time,
-      status: isOn ? "on" : "off"
-    };
-  });
+  const slots = doctorsList.map(doc => ({
+    doctorId: doc.doctorId,
+    name: fullName(doc),
+    initials: initials(doc),
+    spec: doc.specialization || "สัตวแพทย์ทั่วไป",
+    room: parseRoom(doc.workSchedule),
+    time: parseTime(doc.workSchedule) || "-",
+    status: doctorWorksOnDay(doc.workSchedule, currentDay.thDay) ? "on" : "off"
+  }));
 
   // Sort: on duty doctors first
   slots.sort((a, b) => (b.status === "on" ? 1 : 0) - (a.status === "on" ? 1 : 0));
 
   if (slots.length === 0) {
-    container.innerHTML = `<div style="text-align: center; padding: 2rem; color: #94a3b8;">ไม่มีข้อมูลตารางเวรในวันนี้</div>`;
+    container.innerHTML = `<div class="slot-empty">ยังไม่มีข้อมูลตารางเวร</div>`;
     return;
   }
 
   container.innerHTML = slots.map(slot => `
-    <div class="slot-item" onclick="viewDoctorSchedule(${slot.doctorId})" title="คลิกเพื่อดูรายละเอียดตารางเวร ${slot.name}" style="cursor: pointer;">
-      <div class="slot-time">${slot.time}</div>
-      <img src="${slot.avatar}" alt="${slot.name}" class="slot-avatar" onerror="this.src='images/dr-nichapa.jpg'">
+    <div class="slot-item" onclick="viewDoctorSchedule(${slot.doctorId})" title="คลิกเพื่อดูรายละเอียดตารางเวร">
+      <div class="slot-time">${escapeHtml(slot.status === "on" ? slot.time : "-")}</div>
+      <span class="slot-avatar doc-initial">${escapeHtml(slot.initials)}</span>
       <div class="slot-info">
-        <div class="slot-doc-name">${slot.name}</div>
-        <div class="slot-spec">${slot.spec}</div>
+        <div class="slot-doc-name">${escapeHtml(slot.name)}</div>
+        <div class="slot-spec">${escapeHtml(slot.spec)}</div>
       </div>
-      <div class="slot-room"><span class="icon i-hospital icon-accent icon-sm"></span> ${slot.room}</div>
+      ${slot.room ? `<div class="slot-room"><span class="icon i-hospital icon-accent icon-sm"></span> ${escapeHtml(slot.room)}</div>` : ""}
       <div class="slot-status-pill ${slot.status}">
-        ${slot.status === 'on' ? 'ออกตรวจ' : 'ไม่ออกตรวจ'}
+        ${slot.status === "on" ? "ออกตรวจ" : "ไม่ออกตรวจ"}
       </div>
     </div>
   `).join("");
 }
 
-// Setup Event Listeners (Search & Filter)
+// ค้นหาและกรอง (ซ่อน/แสดงการ์ดที่มีอยู่)
 function setupEventListeners() {
   const searchInput = document.getElementById("searchInput");
   const specFilter = document.getElementById("specFilter");
   const dayFilter = document.getElementById("dayFilter");
-  const btnSearch = document.querySelector(".btn-search");
 
   const filterHandler = () => {
     const query = (searchInput ? searchInput.value : "").trim().toLowerCase();
     const spec = specFilter ? specFilter.value : "";
     const day = dayFilter ? dayFilter.value : "";
 
-    const filtered = doctorsList.filter(doc => {
-      const matchQuery = !query || 
-        doc.firstName.toLowerCase().includes(query) ||
-        doc.lastName.toLowerCase().includes(query) ||
-        (doc.specialization && doc.specialization.toLowerCase().includes(query)) ||
-        (doc.nameEn && doc.nameEn.toLowerCase().includes(query));
-
+    let shown = 0;
+    doctorsList.forEach(doc => {
+      const matchQuery = !query ||
+        fullName(doc).toLowerCase().includes(query) ||
+        (doc.specialization && doc.specialization.toLowerCase().includes(query));
       const matchSpec = !spec || (doc.specialization && doc.specialization.includes(spec));
       const matchDay = !day || doctorWorksOnDay(doc.workSchedule, day);
 
-      return matchQuery && matchSpec && matchDay;
+      const visible = matchQuery && matchSpec && matchDay;
+      doc.card.hidden = !visible;
+      if (visible) shown++;
     });
 
-    renderDoctors(filtered);
-    updateDoctorCount(filtered.length);
+    updateDoctorCount(shown);
+    const noMatch = document.getElementById("noMatch");
+    if (noMatch) noMatch.hidden = shown > 0 || doctorsList.length === 0;
   };
 
   if (searchInput) searchInput.addEventListener("input", filterHandler);
   if (specFilter) specFilter.addEventListener("change", filterHandler);
   if (dayFilter) dayFilter.addEventListener("change", filterHandler);
-  if (btnSearch) btnSearch.addEventListener("click", filterHandler);
 }
 
 function updateDoctorCount(count) {
@@ -453,80 +329,57 @@ function updateDoctorCount(count) {
   if (el) el.innerText = `พบสัตวแพทย์ทั้งหมด ${count} ท่าน`;
 }
 
-let currentSelectedDoctorId = 1;
-
-// View Doctor Schedule Modal
+// ดูตารางเวร (ป๊อปอัป) + ปุ่มจองนัดกับหมอคนนี้
 function viewDoctorSchedule(id) {
-  currentSelectedDoctorId = id;
-  const doc = doctorsList.find(d => d.doctorId === id) || DEFAULT_DOCTORS[0];
+  const doc = doctorsList.find(d => d.doctorId === id);
   const modal = document.getElementById("scheduleModal");
-  if (!modal) return;
+  if (!doc || !modal) return;
 
-  document.getElementById("modalDocName").innerText = `${doc.titlePrefix || 'สพ.ญ.'} ${doc.firstName} ${doc.lastName}`;
+  document.getElementById("modalDocName").innerText = fullName(doc);
   document.getElementById("modalDocSpec").innerText = doc.specialization || "สัตวแพทย์ทั่วไป";
-  document.getElementById("modalDocRoom").innerText = doc.room || "ห้องตรวจ 1";
-  document.getElementById("modalDocSchedule").innerText = doc.workSchedule || "จันทร์ - ศุกร์: 09:00 - 17:00 น.";
-  document.getElementById("modalDocPhone").innerText = doc.phone || "081-111-2233";
+  document.getElementById("modalDocSchedule").innerText = doc.workSchedule || "ยังไม่ระบุตารางเวร";
+  document.getElementById("modalDocPhone").innerText = formatPhone(doc.phone);
   document.getElementById("modalDocEmail").innerText = doc.email || "-";
+  document.getElementById("modalBookLink").href = `/appointments/new?doctorId=${doc.doctorId}`;
 
   modal.classList.add("show");
 }
 
-function proceedToBookingFromModal() {
-  closeModal('scheduleModal');
-  openBookingModal(currentSelectedDoctorId);
-}
-
 // Switch between Daily Timeline View and Weekly Matrix Table View
 function switchScheduleView(viewType) {
-  const tabSchedule = document.getElementById("tabSchedule");
-  const tabList = document.getElementById("tabList");
-  const dailyView = document.getElementById("dailyScheduleView");
-  const weeklyView = document.getElementById("weeklyScheduleView");
-
-  if (viewType === 'weekly') {
-    if (tabSchedule) tabSchedule.classList.remove("active");
-    if (tabList) tabList.classList.add("active");
-    if (dailyView) dailyView.style.display = "none";
-    if (weeklyView) weeklyView.style.display = "block";
-    renderWeeklyMatrixTable();
-  } else {
-    if (tabList) tabList.classList.remove("active");
-    if (tabSchedule) tabSchedule.classList.add("active");
-    if (weeklyView) weeklyView.style.display = "none";
-    if (dailyView) dailyView.style.display = "block";
-  }
+  const weekly = viewType === "weekly";
+  document.getElementById("tabSchedule").classList.toggle("active", !weekly);
+  document.getElementById("tabList").classList.toggle("active", weekly);
+  document.getElementById("dailyScheduleView").hidden = weekly;
+  document.getElementById("weeklyScheduleView").hidden = !weekly;
+  if (weekly) renderWeeklyMatrixTable();
 }
 
-// Render Weekly Overview Matrix Table
+// ตารางภาพรวมทั้งสัปดาห์
 function renderWeeklyMatrixTable() {
   const tbody = document.getElementById("weeklyTableBody");
   if (!tbody) return;
 
-  const list = (doctorsList && doctorsList.length > 0) ? doctorsList : DEFAULT_DOCTORS;
-  const days = ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์", "อาทิตย์"];
+  if (doctorsList.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" class="slot-empty">ยังไม่มีข้อมูลตารางเวร</td></tr>`;
+    return;
+  }
 
-  tbody.innerHTML = list.map(doc => {
-    const fullName = `${doc.titlePrefix || 'สพ.'} ${doc.firstName} ${doc.lastName}`;
-    const avatarSrc = doc.avatar || "images/dr-nichapa.jpg";
-
-    const dayCells = days.map(day => {
-      const works = doctorWorksOnDay(doc.workSchedule, day);
-      if (works) {
-        return `<td><span class="duty-pill on" title="${day}: ออกตรวจ (${doc.workSchedule || ''})">ตรวจ</span></td>`;
-      } else {
-        return `<td><span class="duty-pill off" title="${day}: ไม่ออกตรวจ">-</span></td>`;
-      }
-    }).join("");
+  tbody.innerHTML = doctorsList.map(doc => {
+    const dayCells = DAYS_ORDER.map(day => doctorWorksOnDay(doc.workSchedule, day)
+      ? `<td><span class="duty-pill on" title="${day}: ออกตรวจ">ตรวจ</span></td>`
+      : `<td><span class="duty-pill off" title="${day}: ไม่ออกตรวจ">-</span></td>`
+    ).join("");
+    const room = parseRoom(doc.workSchedule);
 
     return `
       <tr>
         <td>
-          <div class="weekly-doc-cell" onclick="viewDoctorSchedule(${doc.doctorId})" title="คลิกเพื่อดูรายละเอียดตารางเวร ${fullName}">
-            <img src="${avatarSrc}" alt="${fullName}" class="weekly-doc-avatar" onerror="this.src='images/dr-nichapa.jpg'">
+          <div class="weekly-doc-cell" onclick="viewDoctorSchedule(${doc.doctorId})" title="คลิกเพื่อดูรายละเอียดตารางเวร">
+            <span class="weekly-doc-avatar doc-initial">${escapeHtml(initials(doc))}</span>
             <div>
-              <div class="weekly-doc-name">${fullName}</div>
-              <div class="weekly-doc-room">${doc.room || 'ห้องตรวจ'}</div>
+              <div class="weekly-doc-name">${escapeHtml(fullName(doc))}</div>
+              ${room ? `<div class="weekly-doc-room">${escapeHtml(room)}</div>` : ""}
             </div>
           </div>
         </td>
@@ -536,137 +389,119 @@ function renderWeeklyMatrixTable() {
   }).join("");
 }
 
-// Open Appointment Booking Modal
-function openBookingModal(doctorId) {
-  const modal = document.getElementById("bookingModal");
-  if (!modal) return;
-
-  const list = (doctorsList && doctorsList.length > 0) ? doctorsList : DEFAULT_DOCTORS;
-  const targetId = doctorId || currentSelectedDoctorId || list[0].doctorId;
-
-  const selectEl = document.getElementById("bookingDoctorSelect");
-  if (selectEl) {
-    selectEl.innerHTML = list.map(d => `
-      <option value="${d.doctorId}" ${d.doctorId == targetId ? 'selected' : ''}>
-        ${d.titlePrefix || 'สพ.'} ${d.firstName} ${d.lastName} (${d.specialization})
-      </option>
-    `).join("");
-  }
-
-  onBookingDoctorChange(targetId);
-
-  const dateInput = document.getElementById("bookingDate");
-  if (dateInput && !dateInput.value) {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    dateInput.value = tomorrow.toISOString().split("T")[0];
-    dateInput.min = new Date().toISOString().split("T")[0];
-  }
-
-  const successBox = document.getElementById("bookingSuccessBox");
-  if (successBox) successBox.style.display = "none";
-
-  const submitBtn = document.getElementById("btnSubmitBooking");
-  if (submitBtn) {
-    submitBtn.disabled = false;
-    submitBtn.innerText = "ยืนยันการนัดหมาย";
-  }
-
-  modal.classList.add("show");
-}
-
-function onBookingDoctorChange(docId) {
-  const list = (doctorsList && doctorsList.length > 0) ? doctorsList : DEFAULT_DOCTORS;
-  const doc = list.find(d => d.doctorId == docId) || list[0];
-  if (!doc) return;
-
-  const nameEl = document.getElementById("bookingDocName");
-  const specEl = document.getElementById("bookingDocSpec");
-  const avatarEl = document.getElementById("bookingDocAvatar");
-
-  if (nameEl) nameEl.innerText = `${doc.titlePrefix || 'สพ.'} ${doc.firstName} ${doc.lastName}`;
-  if (specEl) specEl.innerText = `${doc.specialization} • ${doc.room || 'ห้องตรวจ 1'}`;
-  if (avatarEl) avatarEl.src = doc.avatar || "images/dr-nichapa.jpg";
-}
-
-function handleBookingSubmit(event) {
-  event.preventDefault();
-  const successBox = document.getElementById("bookingSuccessBox");
-  const submitBtn = document.getElementById("btnSubmitBooking");
-
-  if (successBox) successBox.style.display = "block";
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.innerText = "บันทึกเรียบร้อย ✓";
-  }
-
-  setTimeout(() => {
-    closeModal("bookingModal");
-    if (event.target) event.target.reset();
-    if (successBox) successBox.style.display = "none";
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.innerText = "ยืนยันการนัดหมาย";
-    }
-  }, 1600);
-}
-
 function closeModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) modal.classList.remove("show");
 }
 
-// Modal for Adding / Creating Doctor (via REST API POST /api/doctors)
-function openAddDoctorModal() {
-  const modal = document.getElementById("addDoctorModal");
-  if (modal) modal.classList.add("show");
+// ปิดป๊อปอัปเมื่อกดพื้นหลังหรือปุ่ม Esc
+document.addEventListener("click", e => {
+  if (e.target.classList && e.target.classList.contains("modal-overlay")) e.target.classList.remove("show");
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") document.querySelectorAll(".modal-overlay.show").forEach(m => m.classList.remove("show"));
+});
+
+// ==================== เจ้าหน้าที่: เพิ่ม / แก้ไข / ลบ ====================
+
+function clearFormErrors(form) {
+  form.querySelectorAll(".field-error").forEach(el => { el.textContent = ""; });
+  form.querySelectorAll(".form-input").forEach(el => el.classList.remove("is-invalid"));
+  document.getElementById("doctorFormMessage").textContent = "";
 }
 
-async function handleAddDoctor(event) {
-  event.preventDefault();
-  const form = event.target;
-  const newDoctor = {
-    firstName: form.firstName.value.trim(),
-    lastName: form.lastName.value.trim(),
-    specialization: form.specialization.value.trim(),
-    phone: form.phone.value.trim(),
-    email: form.email.value.trim(),
-    workSchedule: form.workSchedule.value.trim()
-  };
+// เปิดฟอร์ม: ไม่ส่ง id = เพิ่มใหม่, ส่ง id = แก้ไขหมอคนนั้น
+function openDoctorForm(id) {
+  if (!IS_STAFF) return;
+  const modal = document.getElementById("doctorFormModal");
+  const form = document.getElementById("doctorForm");
+  if (!modal || !form) return;
+
+  form.reset();
+  clearFormErrors(form);
+
+  const doc = id ? doctorsList.find(d => d.doctorId === id) : null;
+  const title = document.querySelector("#doctorFormTitle span:last-child");
+  title.textContent = doc ? `แก้ไขข้อมูล ${fullName(doc)}` : "เพิ่มข้อมูลสัตวแพทย์ใหม่";
+
+  if (doc) {
+    form.doctorId.value = doc.doctorId;
+    form.firstName.value = doc.firstName;
+    form.lastName.value = doc.lastName;
+    form.specialization.value = doc.specialization;
+    form.phone.value = doc.phone;
+    form.email.value = doc.email;
+    form.workSchedule.value = doc.workSchedule;
+  }
+
+  modal.classList.add("show");
+  form.firstName.focus();
+}
+
+function setupDoctorForm() {
+  const form = document.getElementById("doctorForm");
+  if (!form) return;
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    clearFormErrors(form);
+
+    const id = form.doctorId.value;
+    const body = {
+      firstName: form.firstName.value.trim(),
+      lastName: form.lastName.value.trim(),
+      specialization: form.specialization.value.trim(),
+      phone: form.phone.value.trim(),
+      email: form.email.value.trim(),
+      workSchedule: form.workSchedule.value.trim()
+    };
+
+    const submit = document.getElementById("doctorFormSubmit");
+    submit.disabled = true;
+    try {
+      const res = await fetch(id ? `${API_DOCTORS}/${id}` : API_DOCTORS, {
+        method: id ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+
+      if (res.ok) {
+        location.reload();
+        return;
+      }
+
+      const err = await res.json().catch(() => ({}));
+      // 400: แสดงข้อความใต้ช่องที่ผิด
+      Object.entries(err.errors || {}).forEach(([field, message]) => {
+        const holder = form.querySelector(`.field-error[data-for="${field}"]`);
+        if (holder) holder.textContent = message;
+        if (form[field]) form[field].classList.add("is-invalid");
+      });
+      document.getElementById("doctorFormMessage").textContent =
+        res.status === 403 ? "หมดเวลาเจ้าหน้าที่ กรุณาใส่รหัสที่หน้า Staff Only ใหม่" : (err.message || "ไม่สามารถบันทึกได้");
+    } catch (e) {
+      document.getElementById("doctorFormMessage").textContent = "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาลองใหม่";
+    } finally {
+      submit.disabled = false;
+    }
+  });
+}
+
+async function deleteDoctor(id) {
+  if (!IS_STAFF) return;
+  const doc = doctorsList.find(d => d.doctorId === id);
+  if (!doc || !confirm(`ต้องการลบข้อมูล ${fullName(doc)} ใช่หรือไม่?`)) return;
 
   try {
-    const res = await fetch("/api/doctors", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newDoctor)
-    });
-
+    const res = await fetch(`${API_DOCTORS}/${id}`, { method: "DELETE" });
     if (res.ok) {
-      alert("เพิ่มข้อมูลสัตวแพทย์สำเร็จ!");
-      closeModal("addDoctorModal");
-      form.reset();
-      loadDoctors(); // Refresh list
-    } else {
-      const err = await res.json();
-      alert("เกิดข้อผิดพลาด: " + (err.message || "ไม่สามารถบันทึกได้"));
+      location.reload();
+      return;
     }
+    const err = await res.json().catch(() => ({}));
+    // 409: ยังมีนัดหมายผูกกับหมอคนนี้
+    alert(err.message || "ไม่สามารถลบได้");
   } catch (e) {
-    // If backend isn't running, append locally to mock data
-    const localNewDoc = {
-      ...newDoctor,
-      doctorId: Date.now(),
-      room: "ห้องตรวจ 1",
-      experience: "1 ปี",
-      education: "คณะสัตวแพทยศาสตร์",
-      statusToday: "available",
-      statusText: "ออกตรวจวันนี้",
-      timeToday: "09:00 - 17:00 น.",
-      avatar: "images/dr-nichapa.jpg"
-    };
-    doctorsList.unshift(localNewDoc);
-    renderDoctors(doctorsList);
-    updateDoctorCount(doctorsList.length);
-    closeModal("addDoctorModal");
-    alert("เพิ่มข้อมูลสัตวแพทย์ในรายการเรียบร้อยแล้ว!");
+    alert("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาลองใหม่");
   }
 }

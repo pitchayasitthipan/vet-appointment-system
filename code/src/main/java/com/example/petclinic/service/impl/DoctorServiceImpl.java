@@ -3,6 +3,9 @@ package com.example.petclinic.service.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +25,12 @@ public class DoctorServiceImpl implements DoctorService {
 
     public DoctorServiceImpl(DoctorRepository doctorRepository) {
         this.doctorRepository = doctorRepository;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<DoctorResponseDTO> getDoctors(Pageable pageable) {
+        return doctorRepository.findAll(pageable).map(DoctorResponseDTO::fromEntity);
     }
 
     @Override
@@ -83,6 +92,14 @@ public class DoctorServiceImpl implements DoctorService {
         if (!doctorRepository.existsById(id)) {
             throw new ResourceNotFoundException("ไม่พบข้อมูลสัตวแพทย์ที่มีรหัส: " + id);
         }
-        doctorRepository.deleteById(id);
+        try {
+            doctorRepository.deleteById(id);
+            // flush = ส่งคำสั่งลบไปฐานข้อมูลทันที ถ้ายังมีนัดหมายอ้างถึง (FK doctor_id) จะรู้ตรงนี้เลย
+            doctorRepository.flush();
+        } catch (DataIntegrityViolationException e) {
+            // ยังมีนัดหมายผูกกับสัตวแพทย์คนนี้ -> ไม่ให้ลบ ตอบ 409 พร้อมข้อความที่อ่านเข้าใจ
+            throw new DuplicateResourceException(
+                    "ไม่สามารถลบสัตวแพทย์ที่ยังมีนัดหมายในระบบได้ กรุณาย้ายหรือยกเลิกนัดหมายก่อน");
+        }
     }
 }
