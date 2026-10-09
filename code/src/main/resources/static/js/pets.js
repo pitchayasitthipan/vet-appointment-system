@@ -24,6 +24,12 @@ const PETS_API = "/api/v1/pets";
 // เจ้าหน้าที่ดูสัตว์ทั้งหมด: หน้าละ 8 ตัว (การ์ด 4 ใบ x 2 แถว)
 const PAGE_SIZE = 8;
 
+// โหมดเจ้าหน้าที่: จำนวนสัตว์ที่ตรงกับคำค้น/ตัวกรองทั้งคลินิก (จาก totalElements)
+let totalMatched = 0;
+
+// รอให้พิมพ์เสร็จก่อนค่อยค้นที่เซิร์ฟเวอร์ (ไม่ยิง API ทุกตัวอักษร)
+let searchTimer = null;
+
 // ในฐานข้อมูลเก็บเป็นภาษาอังกฤษ แสดงผลเป็นภาษาไทย
 const SPECIES_LABELS = {
     Dog: "สุนัข",
@@ -92,10 +98,22 @@ async function loadOwnerPets() {
 
 
 // เจ้าหน้าที่ดูสัตว์ทั้งหมด: ดึงทีละหน้าจาก GET /api/v1/pets?page=&size=
+// คำค้นและตัวกรองส่งไปค้นที่เซิร์ฟเวอร์ จึงค้นเจอทั้งคลินิก ไม่ใช่เฉพาะหน้าที่เปิดอยู่
 async function loadAllPetsPage() {
 
+    const params = new URLSearchParams({
+        page: currentPage,
+        size: PAGE_SIZE,
+        sort: "petId,asc"
+    });
+
+    const keyword = searchKeyword();
+
+    if (keyword) params.set("keyword", keyword);
+    if (activeFilter !== "all") params.set("species", activeFilter);
+
     const response =
-        await fetch(`${PETS_API}?page=${currentPage}&size=${PAGE_SIZE}&sort=petId,asc`);
+        await fetch(`${PETS_API}?${params}`);
 
     if (!response.ok) {
         throw new Error("Failed to load pets");
@@ -110,8 +128,12 @@ async function loadAllPetsPage() {
     }
 
     petsList = page.content;
+    totalMatched = page.totalElements;
 
-    await renderClinicStats(page.totalElements);
+    // ตัวเลขสรุปเป็นจำนวนทั้งคลินิก: อัปเดตเฉพาะตอนไม่ได้ค้นหรือกรอง
+    if (!isFiltering()) {
+        await renderClinicStats(page.totalElements);
+    }
 
     renderPager(page.totalElements, page.totalPages);
 }
@@ -179,14 +201,52 @@ async function renderClinicStats(totalPets) {
 
 // ==================== FILTER & SEARCH ====================
 
-// รวมปุ่มกรองกับช่องค้นหา แล้วแสดงผล
-function applyFilters() {
+function searchKeyword() {
 
     const input =
         document.getElementById("petSearchInput");
 
+    return input ? input.value.trim() : "";
+}
+
+
+function isFiltering() {
+    return activeFilter !== "all" || searchKeyword() !== "";
+}
+
+
+// เปลี่ยนคำค้นหรือตัวกรองในโหมดเจ้าหน้าที่: ค้นใหม่ที่เซิร์ฟเวอร์ เริ่มหน้าแรก
+async function reloadFromFirstPage() {
+
+    currentPage = 0;
+
+    await loadPets();
+}
+
+
+function onSearchInput() {
+
+    if (!ALL_PETS_MODE) {
+        applyFilters();
+        return;
+    }
+
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(reloadFromFirstPage, 300);
+}
+
+
+// รวมปุ่มกรองกับช่องค้นหา แล้วแสดงผล
+// โหมดเจ้าหน้าที่ เซิร์ฟเวอร์กรองมาให้แล้ว แสดงตามที่ได้รับ
+function applyFilters() {
+
+    if (ALL_PETS_MODE) {
+        renderPets(petsList);
+        return;
+    }
+
     const keyword =
-        input ? input.value.trim().toLowerCase() : "";
+        searchKeyword().toLowerCase();
 
     const filtered =
         petsList.filter(pet => {
@@ -221,6 +281,11 @@ function setFilter(filter) {
         button.classList.toggle("active", button.dataset.filter === filter);
     });
 
+    if (ALL_PETS_MODE) {
+        reloadFromFirstPage();
+        return;
+    }
+
     applyFilters();
 }
 
@@ -237,18 +302,18 @@ function renderPets(pets) {
 
     if (!container) return;
 
-    const isFiltering =
-        activeFilter !== "all" ||
-        document.getElementById("petSearchInput").value.trim() !== "";
+    const filtering = isFiltering();
 
     if (count) {
         count.innerText = ALL_PETS_MODE
-            ? `แสดง ${pets.length} ตัวในหน้านี้`
+            ? (filtering
+                ? `พบสัตว์เลี้ยงทั้งคลินิก ${totalMatched} ตัว`
+                : `แสดง ${pets.length} ตัวในหน้านี้`)
             : `พบสัตว์เลี้ยง ${pets.length} ตัว`;
     }
 
     // ยังไม่มีสัตว์เลยสักตัว (ไม่ได้กรอง)
-    if (petsList.length === 0) {
+    if (petsList.length === 0 && !filtering) {
 
         container.innerHTML = `
             <div class="pet-empty-state">
@@ -275,7 +340,7 @@ function renderPets(pets) {
         : "";
 
     // ช่องเพิ่มสัตว์ท้ายรายการ: เฉพาะตอนดูแฟ้มเดียวและไม่ได้กรอง
-    const addTile = !ALL_PETS_MODE && !isFiltering
+    const addTile = !ALL_PETS_MODE && !filtering
         ? `<button type="button" class="pet-add-tile" onclick="openAddPetModal()">
                <span class="pet-add-icon"><span class="icon i-plus icon-lg"></span></span>
                เพิ่มสัตว์เลี้ยงตัวใหม่
@@ -819,7 +884,7 @@ document.addEventListener(
 
             searchInput.addEventListener(
                 "input",
-                applyFilters
+                onSearchInput
             );
         }
 

@@ -15,6 +15,7 @@ import com.example.petclinic.dto.response.PetResponseDTO;
 import com.example.petclinic.exception.ResourceNotFoundException;
 import com.example.petclinic.repository.PetOwnerRepository;
 import com.example.petclinic.repository.PetRepository;
+import com.example.petclinic.repository.PetSpecifications;
 import com.example.petclinic.service.PetService;
 
 @Service
@@ -78,6 +79,15 @@ public class PetServiceImpl implements PetService {
 
         return petRepository
                 .findAll(pageable)
+                .map(PetResponseDTO::fromEntity);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PetResponseDTO> searchPets(String keyword, String species, Pageable pageable) {
+
+        return petRepository
+                .findAll(PetSpecifications.search(keyword, species), pageable)
                 .map(PetResponseDTO::fromEntity);
     }
 
