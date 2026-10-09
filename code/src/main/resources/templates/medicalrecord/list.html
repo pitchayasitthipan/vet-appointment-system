@@ -6,19 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ประวัติการรักษา | PawCare</title>
 
+    <link rel="stylesheet" th:href="@{/css/pawcare.css}">
+    <link rel="stylesheet" th:href="@{/css/icons.css}">
+
     <style>
         /* จัดรูปแบบหน้าเว็บเบื้องต้น */
         body {
             font-family: Arial, sans-serif;
-            background: #f7f9fc;
+            background: #fffbeb;
             color: #263238;
             margin: 0;
-            padding: 32px;
+            padding: 0;
         }
 
         .container {
             max-width: 1200px;
-            margin: auto;
+            margin: 32px auto;
+            padding: 0 20px;
         }
 
         h1 { margin-bottom: 8px; }
@@ -53,16 +57,33 @@
             color: #667085;
             padding: 32px;
         }
+
+        .add-record-btn {
+            display: inline-block;
+            padding: 12px 20px;
+            background: #df6697;
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .add-record-btn:hover {
+            background: #c95787;
+             color: white;
+        }
+
     </style>
 </head>
 <body>
+    <nav th:replace="~{fragments/layout :: navbar('medical-records')}"></nav>
     <main class="container">
         <h1>ประวัติการรักษาและวัคซีน</h1>
         <p class="subtitle">PawCare | Medical Records</p>
         
         <!-- เปิดหน้าฟอร์มเพิ่มประวัติการรักษา -->
         <p>
-            <a th:href="@{/medical-records/new}">
+            <a th:href="@{/medical-records/new}" class="add-record-btn">
                 + เพิ่มประวัติการรักษา
             </a>
         </p>
@@ -71,7 +92,7 @@
         <p th:if="${successMessage}"
             th:text="${successMessage}"
             style="color: green;"></p>
-            
+
         <!-- แจ้งเตือนเมื่อไม่พบประวัติการรักษา -->
         <p th:if="${errorMessage}"
             th:text="${errorMessage}"
@@ -124,4 +145,5 @@
         </section>
     </main>
 </body>
+
 </html>
