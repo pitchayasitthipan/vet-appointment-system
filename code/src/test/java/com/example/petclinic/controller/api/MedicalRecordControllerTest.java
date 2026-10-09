@@ -1,6 +1,8 @@
 
 package com.example.petclinic.controller.api;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.mockito.Mockito.never;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -112,4 +114,88 @@ class MedicalRecordControllerTest {
         verify(medicalRecordService)
                 .createMedicalRecord(any(MedicalRecordRequestDTO.class));
     }
+
+        // ทดสอบ Create: appointmentId = 0 ต้องไม่ผ่าน Validation
+        @Test
+        @DisplayName("POST - appointmentId เป็น 0 ต้องคืน 400")
+        void createMedicalRecord_zeroAppointmentId() throws Exception {
+        String invalidJson = """
+                {
+                        "appointmentId": 0,
+                        "diagnosis": "ตรวจสุขภาพทั่วไป"
+                }
+                """;
+
+        mockMvc.perform(post("/api/v1/medical-records")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.appointmentId").exists());
+
+        verify(medicalRecordService, never())
+                .createMedicalRecord(any(MedicalRecordRequestDTO.class));
+        }
+
+        // ทดสอบ Create: appointmentId ติดลบต้องไม่ผ่าน Validation
+        @Test
+        @DisplayName("POST - appointmentId ติดลบต้องคืน 400")
+        void createMedicalRecord_negativeAppointmentId() throws Exception {
+        String invalidJson = """
+                {
+                        "appointmentId": -1,
+                        "diagnosis": "ตรวจสุขภาพทั่วไป"
+                }
+                """;
+
+        mockMvc.perform(post("/api/v1/medical-records")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.appointmentId").exists());
+
+        verify(medicalRecordService, never())
+                .createMedicalRecord(any(MedicalRecordRequestDTO.class));
+        }
+
+        // ทดสอบ Update: appointmentId = 0 ต้องไม่ผ่าน Validation
+        @Test
+        @DisplayName("PUT - appointmentId เป็น 0 ต้องคืน 400")
+        void updateMedicalRecord_zeroAppointmentId() throws Exception {
+        String invalidJson = """
+                {
+                        "appointmentId": 0,
+                        "diagnosis": "แก้ไขผลตรวจ"
+                }
+                """;
+
+        mockMvc.perform(put("/api/v1/medical-records/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.appointmentId").exists());
+
+        verify(medicalRecordService, never())
+                .updateMedicalRecord(any(Long.class), any(MedicalRecordRequestDTO.class));
+        }
+
+        // ทดสอบ Update: appointmentId ติดลบต้องไม่ผ่าน Validation
+        @Test
+        @DisplayName("PUT - appointmentId ติดลบต้องคืน 400")
+        void updateMedicalRecord_negativeAppointmentId() throws Exception {
+        String invalidJson = """
+                {
+                        "appointmentId": -1,
+                        "diagnosis": "แก้ไขผลตรวจ"
+                }
+                """;
+
+        mockMvc.perform(put("/api/v1/medical-records/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.appointmentId").exists());
+
+        verify(medicalRecordService, never())
+                .updateMedicalRecord(any(Long.class), any(MedicalRecordRequestDTO.class));
+        }
 }

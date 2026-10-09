@@ -1,6 +1,14 @@
 
 package com.example.petclinic.controller.web;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.mockito.ArgumentMatchers.anyLong;
+
+import java.util.List;
+
+import com.example.petclinic.dto.response.MedicalRecordResponseDTO;
+
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
@@ -90,5 +98,43 @@ class MedicalRecordWebControllerTest {
                 .andExpect(redirectedUrl("/medical-records"))
                 .andExpect(flash().attribute(
                         "errorMessage", "ไม่พบประวัติการรักษาที่ต้องการ"));
+    }
+
+    // ตรวจว่า Thymeleaf แสดงหน้ารายการได้จริง
+    @Test
+    @DisplayName("GET /medical-records - ต้องแสดง HTML สำเร็จ")
+    void listMedicalRecords_rendersHtml() throws Exception {
+        when(medicalRecordService.getAllMedicalRecords())
+                .thenReturn(List.of());
+
+        mockMvc.perform(get("/medical-records"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("medicalrecord/list"))
+                .andExpect(content().contentTypeCompatibleWith("text/html"));
+    }
+
+    // ตรวจว่า Thymeleaf แสดงฟอร์มเพิ่มข้อมูลได้จริง
+    @Test
+    @DisplayName("GET /medical-records/new - ต้องแสดง HTML สำเร็จ")
+    void showCreateForm_rendersHtml() throws Exception {
+        mockMvc.perform(get("/medical-records/new"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("medicalrecord/form"))
+                .andExpect(content().contentTypeCompatibleWith("text/html"));
+    }
+
+    // ตรวจว่า Thymeleaf แสดงหน้ารายละเอียดได้จริง
+    @Test
+    @DisplayName("GET /medical-records/{id} - ต้องแสดง HTML สำเร็จ")
+    void viewMedicalRecord_rendersHtml() throws Exception {
+        MedicalRecordResponseDTO record = new MedicalRecordResponseDTO();
+
+        when(medicalRecordService.getMedicalRecordById(1L))
+                .thenReturn(record);
+
+        mockMvc.perform(get("/medical-records/1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("medicalrecord/detail"))
+                .andExpect(content().contentTypeCompatibleWith("text/html"));
     }
 }

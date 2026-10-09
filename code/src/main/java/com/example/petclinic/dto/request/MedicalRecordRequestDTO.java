@@ -2,10 +2,12 @@ package com.example.petclinic.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Positive;
 
 public class MedicalRecordRequestDTO {
 
-    @NotNull(message = "กรุณาระบุรหัสนัดหมาย")
+    @NotNull(message = "กรุณาระบุรหัสการนัดหมาย")
+    @Positive(message = "รหัสการนัดหมายต้องมากกว่า 0")
     private Long appointmentId;
 
     @Size(max = 2000, message = "การวินิจฉัยต้องมีความยาวไม่เกิน 2000 ตัวอักษร")
