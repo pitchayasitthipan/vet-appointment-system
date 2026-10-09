@@ -1,0 +1,677 @@
+:root {
+  --page:#fffbe9;
+  --ink:#25262b;
+  --navy:#17306b;
+  --accent:#bd537c;
+  --pink:#fbe1e8;
+  --border:#e5e1d6;
+  --muted:#666b75;
+  --surface:#fff
+}
+
+* {
+  box-sizing:border-box
+}
+
+body {
+  margin:0;
+  background:var(--page);
+  color:var(--ink);
+  font:16px/1.7 "Leelawadee UI",Tahoma,sans-serif
+}
+
+a {
+  color:var(--accent);
+  text-underline-offset:4px
+}
+
+button,input,select,textarea {
+  font:inherit
+}
+
+button {
+  cursor:pointer
+}
+
+button:disabled {
+  cursor:not-allowed
+}
+
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible {
+  outline:3px solid var(--navy);
+  outline-offset:3px
+}
+
+.skip-link {
+  position:absolute;
+  left:16px;
+  top:-80px;
+  z-index:20;
+  background:white;
+  padding:12px
+}
+
+.skip-link:focus {
+  top:12px
+}
+
+.site-header {
+  background:var(--surface);
+  border-bottom:1px solid var(--border)
+}
+
+.header-inner {
+  max-width:1140px;
+  margin:auto;
+  padding:20px 28px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:28px
+}
+
+.brand {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  text-decoration:none;
+  color:var(--navy);
+  font-size:25px;
+  font-weight:800;
+  line-height:1.1
+}
+
+.brand small {
+  display:block;
+  font-size:11px;
+  letter-spacing:.5px;
+  color:var(--muted);
+  font-weight:400;
+  margin-top:7px
+}
+
+.brand-mark {
+  display:grid;
+  place-items:center;
+  width:48px;
+  height:48px;
+  background:var(--pink);
+  border-radius:15px;
+  font-size:26px
+}
+
+nav {
+  display:flex;
+  gap:28px
+}
+
+nav a {
+  color:var(--muted);
+  font-size:14px;
+  text-decoration:none;
+  padding:9px 0
+}
+
+nav a[aria-current] {
+  color:var(--accent);
+  border-bottom:2px solid var(--accent);
+  font-weight:700
+}
+
+.page-shell {
+  max-width:1140px;
+  margin:auto;
+  padding:0 28px 60px
+}
+
+.hero {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+  padding:44px 0 30px
+}
+
+.eyebrow {
+  font-size:11px;
+  letter-spacing:2px;
+  font-weight:700;
+  color:var(--accent);
+  margin:0 0 14px
+}
+
+h1 {
+  font-size:40px;
+  line-height:1.35;
+  letter-spacing:-1px;
+  color:var(--navy);
+  margin:0 0 16px
+}
+
+h2 {
+  font-size:20px;
+  line-height:1.5;
+  margin:0;
+  color:var(--navy)
+}
+
+.hero p:not(.eyebrow) {
+  color:var(--muted);
+  margin:0
+}
+
+.hero-art {
+  background:#f9e7ba;
+  min-width:240px;
+  width:240px;
+  height:210px;
+  border-radius:46% 54% 44% 56%;
+  position:relative;
+  display:grid;
+  place-items:center;
+  transform:rotate(-5deg);
+  margin:0 38px
+}
+
+.paw {
+  font-size:75px;
+  transform:rotate(5deg)
+}
+
+.heart {
+  position:absolute;
+  top:-15px;
+  right:12px;
+  color:var(--accent);
+  font-size:58px;
+  line-height:1
+}
+
+.art-label {
+  position:absolute;
+  bottom:15px;
+  background:white;
+  border-radius:30px;
+  padding:8px 18px;
+  font-size:13px;
+  color:var(--navy);
+  transform:rotate(5deg);
+  box-shadow:0 8px 20px #c7799820
+}
+
+.notice {
+  padding:15px 20px;
+  border:1px solid #ead39d;
+  background:#fff5d8;
+  border-radius:12px;
+  font-size:14px;
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  color:#6a501f
+}
+
+.steps {
+  list-style:none;
+  display:flex;
+  padding:0;
+  margin:28px 0;
+  gap:26px;
+  align-items:center;
+  font-size:14px;
+  color:var(--muted)
+}
+
+.steps li {
+  display:flex;
+  gap:10px;
+  align-items:center
+}
+
+.steps li+li:before {
+  content:"";
+  width:32px;
+  height:1px;
+  background:#d5ccc0;
+  margin-right:12px
+}
+
+.steps span {
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  width:28px;
+  height:28px;
+  background:#ece8da;
+  font-size:12px;
+  font-weight:700
+}
+
+.steps .current {
+  color:var(--accent);
+  font-weight:700
+}
+
+.steps .current span {
+  background:var(--accent);
+  color:white
+}
+
+.booking-layout {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 310px;
+  gap:24px;
+  align-items:start
+}
+
+.card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:26px;
+  margin-bottom:20px;
+  box-shadow:0 3px 16px #17306b03
+}
+
+.section-title {
+  display:flex;
+  align-items:flex-start;
+  gap:13px;
+  margin-bottom:22px
+}
+
+.section-title p {
+  margin:5px 0 0;
+  font-size:13px;
+  color:var(--muted)
+}
+
+.section-number {
+  flex-shrink:0;
+  background:var(--pink);
+  color:var(--accent);
+  border-radius:11px;
+  padding:8px 10px;
+  font-size:13px;
+  font-weight:700
+}
+
+.section-number.muted {
+  background:#f5f2e8;
+  color:#716b5d
+}
+
+fieldset {
+  padding:0;
+  margin:0;
+  border:0;
+  min-width:0
+}
+
+label,.field-label {
+  display:block;
+  font-weight:600;
+  font-size:14px;
+  margin:0 0 8px
+}
+
+.required {
+  color:var(--accent)
+}
+
+input:not([type=radio]),select,textarea {
+  display:block;
+  width:100%;
+  border:1px solid #d5d4d1;
+  border-radius:10px;
+  padding:11px 13px;
+  background:#fff;
+  color:var(--ink);
+  font-size:14px;
+  min-height:46px
+}
+
+input:disabled,select:disabled,textarea:disabled {
+  background:#f8f8f5;
+  color:#74777e;
+  opacity:1
+}
+
+input::placeholder,textarea::placeholder {
+  color:#74777e;
+  opacity:1
+}
+
+textarea {
+  resize:vertical
+}
+
+.phone-row {
+  display:flex;
+  gap:10px
+}
+
+.phone-row input {
+  flex:1;
+  min-width:0
+}
+
+.primary {
+  border:0;
+  border-radius:10px;
+  background:var(--accent);
+  color:white;
+  padding:12px 20px;
+  font-size:14px;
+  font-weight:700;
+  white-space:nowrap
+}
+
+.primary:disabled {
+  background:#d9d0d3;
+  color:#55505a
+}
+
+.field-hint {
+  font-size:12px;
+  color:var(--muted);
+  margin:9px 0 0
+}
+
+.registration-hint {
+  border-top:1px solid var(--border);
+  padding-top:17px;
+  margin:19px 0 0;
+  color:var(--muted);
+  font-size:13px
+}
+
+.service-field {
+  margin:23px 0
+}
+
+.service-options {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px
+}
+
+.service-option {
+  display:flex;
+  gap:9px;
+  padding:12px 10px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  margin:0;
+  cursor:pointer;
+  background:#fafaf7
+}
+
+.service-option input {
+  accent-color:var(--accent);
+  margin:5px 0 0;
+  flex-shrink:0
+}
+
+.service-option b {
+  font-size:13px;
+  display:block
+}
+
+.service-option small {
+  display:block;
+  font-size:11px;
+  color:var(--muted);
+  font-weight:400;
+  margin-top:4px
+}
+
+.service-option:has(input:checked) {
+  border-color:var(--accent);
+  background:var(--pink)
+}
+
+.two-fields {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin:22px 0 0
+}
+
+.form-actions {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:18px;
+  font-size:14px;
+  padding:2px 0 18px
+}
+
+.summary h2 {
+  font-size:19px
+}
+
+.aside-intro {
+  font-size:13px;
+  color:var(--muted);
+  margin:9px 0 20px
+}
+
+.checklist {
+  padding:0;
+  list-style:none;
+  font-size:13px;
+  margin:0
+}
+
+.checklist li {
+  display:flex;
+  gap:10px;
+  margin-bottom:15px
+}
+
+.checklist li:before {
+  content:"✓";
+  color:#37775b;
+  font-weight:bold
+}
+
+.surgery-note {
+  border-radius:12px;
+  background:#fff5dc;
+  padding:15px;
+  margin-top:22px;
+  font-size:13px;
+  color:#6a501f
+}
+
+.surgery-note p {
+  margin:7px 0 0
+}
+
+.care-note {
+  display:flex;
+  gap:12px;
+  align-items:center;
+  padding:4px 12px;
+  color:var(--muted);
+  font-size:12px
+}
+
+.care-note span {
+  font-size:40px;
+  color:var(--accent)
+}
+
+.care-note p {
+  margin:0
+}
+
+footer {
+  border-top:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  padding:24px max(28px,calc((100vw - 1084px)/2));
+  font-size:12px;
+  color:var(--muted);
+  background:#fffdf4
+}
+
+.visually-hidden {
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap;
+  border:0
+}
+
+[hidden] {
+  display:none!important
+}
+
+@media(max-width:900px) {
+  .booking-layout {
+    grid-template-columns:minmax(0,1fr) 260px
+  }
+  .hero-art {
+    margin-right:0;
+    width:190px;
+    min-width:190px;
+    height:190px
+  }
+  .service-options {
+    grid-template-columns:1fr
+  }
+  .service-option small {
+    margin-top:0
+  }
+  .header-inner {
+    gap:16px
+  }
+  nav {
+    gap:18px
+  }
+}
+
+@media(max-width:700px) {
+  .header-inner {
+    flex-direction:column;
+    align-items:flex-start;
+    padding:17px 20px;
+    gap:15px
+  }
+  nav {
+    justify-content:space-between;
+    width:100%;
+    gap:12px
+  }
+  nav a {
+    font-size:13px
+  }
+  .page-shell {
+    padding:0 18px 35px
+  }
+  .hero {
+    padding:32px 0 24px;
+    gap:10px
+  }
+  h1 {
+    font-size:30px
+  }
+  .hero-art {
+    min-width:95px;
+    width:95px;
+    height:115px;
+    margin:0
+  }
+  .paw {
+    font-size:42px
+  }
+  .heart {
+    font-size:30px;
+    top:-9px;
+    right:0
+  }
+  .art-label {
+    display:none
+  }
+  .desktop-break {
+    display:none
+  }
+  .hero p:not(.eyebrow) {
+    font-size:13px
+  }
+  .eyebrow {
+    letter-spacing:1px;
+    font-size:10px
+  }
+  .notice {
+    font-size:12px;
+    gap:3px;
+    padding:12px 15px
+  }
+  .steps {
+    gap:10px;
+    font-size:11px;
+    margin:22px 0
+  }
+  .steps li {
+    gap:5px
+  }
+  .steps li+li:before {
+    display:none
+  }
+  .steps span {
+    width:23px;
+    height:23px;
+    font-size:11px
+  }
+  .booking-layout {
+    grid-template-columns:1fr;
+    gap:0
+  }
+  .card {
+    padding:21px 18px;
+    border-radius:14px
+  }
+  h2 {
+    font-size:18px
+  }
+  .section-title p {
+    font-size:12px
+  }
+  .phone-row {
+    flex-direction:column
+  }
+  .phone-row .primary {
+    width:100%
+  }
+  .service-options {
+    grid-template-columns:1fr
+  }
+  .two-fields {
+    grid-template-columns:1fr;
+    gap:18px
+  }
+  .form-actions {
+    flex-direction:column-reverse;
+    align-items:stretch;
+    text-align:center;
+    gap:15px
+  }
+  .care-note {
+    justify-content:center;
+    margin-top:15px
+  }
+  footer {
+    flex-direction:column;
+    text-align:center;
+    gap:5px;
+    padding:20px 18px
+  }
+}
