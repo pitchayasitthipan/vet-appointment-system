@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>แฟ้มเจ้าของสัตว์เลี้ยง - PawCare</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/pawcare.css}">
+  <link rel="stylesheet" th:href="@{/css/icons.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar('owners')}"></nav>
+
+<main class="container">
+  <!-- หัวหน้า: ปุ่มกลับ + breadcrumb + ปุ่มแก้ไข/ลบ -->
+  <div class="page-bar">
+    <!-- เจ้าหน้าที่ -> กลับไปรายชื่อทั้งหมด, ลูกค้า -> กลับหน้าค้นหาด้วยเบอร์ -->
+    <a th:href="${isStaff} ? @{/owners/staff(selected=${owner.ownerId})} : @{/owners(phone=${owner.phone})}" class="back-btn">
+      <span class="icon i-arrow-left icon-sm"></span>
+      <span th:text="${isStaff} ? 'กลับไปรายชื่อ' : 'กลับหน้าค้นหา'">กลับหน้าค้นหา</span></a>
+    <div class="titles">
+      <div class="crumbs">
+        <a th:if="${isStaff}" th:href="@{/owners/staff}">จัดการรายชื่อเจ้าของ</a>
+        <a th:unless="${isStaff}" th:href="@{/owners(phone=${owner.phone})}">ค้นหาข้อมูลของฉัน</a>
+        <span class="icon i-caret-right icon-sm"></span>
+        <span th:text="${owner.firstName + ' ' + owner.lastName}">พิชยา สิทธิพันธ์</span>
+      </div>
+      <h1>แฟ้มเจ้าของสัตว์เลี้ยง</h1>
+    </div>
+    <div class="actions">
+      <!-- แก้ไข/ลบ เฉพาะเจ้าหน้าที่ ลูกค้าดูได้อย่างเดียว -->
+      <a th:if="${isStaff}" th:href="@{/owners/{id}/edit(id=${owner.ownerId})}" class="btn-mini pink">
+        <span class="icon i-pencil-simple icon-sm"></span> แก้ไข</a>
+      <!-- กดแล้วเปิดกล่องยืนยันการลบ (อยู่ท้ายหน้า) -->
+      <button th:if="${isStaff}" type="button" class="btn-text delete-link"
+              onclick="document.getElementById('deleteDialog').showModal()">ลบ</button>
+      <span th:unless="${isStaff}" class="muted-note">ต้องการแก้ไขข้อมูล กรุณาติดต่อเจ้าหน้าที่คลินิก</span>
+    </div>
+  </div>
+
+  <div th:if="${errorMessage}" class="alert alert-warning" th:text="${errorMessage}"></div>
+  <div th:if="${successMessage}" class="alert">
+    <span class="icon i-check-circle icon-success"></span> <span th:text="${successMessage}"></span>
+  </div>
+
+  <!-- การ์ดหัวแฟ้ม: ชื่อ เบอร์ อีเมล + ปุ่มนัดหมาย -->
+  <div class="card owner-head">
+    <span class="initials lg"><span th:replace="~{fragments/layout :: initials(${owner})}"></span></span>
+    <div class="info">
+      <p class="muted-note">
+        แฟ้มเจ้าของ #<span th:text="${#numbers.formatInteger(owner.ownerId, 4)}">0001</span>
+        <span th:if="${owner.createdAt}">· ลงทะเบียน <span th:replace="~{fragments/layout :: thaiDate(${owner.createdAt})}"></span></span>
+      </p>
+      <h2 th:text="${owner.firstName + ' ' + owner.lastName}">พิชยา สิทธิพันธ์</h2>
+      <div class="contact-strip">
+        <a th:href="'tel:' + ${owner.phone}" class="btn-mini pink">
+          <span class="icon i-phone icon-sm"></span> <span th:replace="~{fragments/layout :: phone(${owner.phone})}"></span></a>
+                <span th:if="${isStaff}" class="btn-mini"><span class="icon i-envelope icon-sm"></span> 
+          <span th:text="${owner.email}">email</span></span>
+      </div>
+    </div>
+    <!-- ส่ง ownerId ต่อให้โมดูลนัดหมาย -->
+    <a th:href="@{/appointments/new(ownerId=${owner.ownerId})}" class="btn-primary">
+      <span class="icon i-calendar-plus"></span> นัดหมายใหม่</a>
+  </div>
+
+  <div class="layout-2">
+    <div>
+      <!-- 1. ข้อมูลติดต่อ -->
+      <div class="sec">
+        <div class="sec-h"><span class="no">1</span><h2>ข้อมูลติดต่อ</h2></div>
+        <div class="sec-b kv">
+          <span class="k"><span class="icon i-phone icon-sm icon-accent"></span> เบอร์โทร</span>
+          <span class="v"><span th:replace="~{fragments/layout :: phone(${owner.phone})}"></span></span>
+          <!-- อีเมล/ที่อยู่ แสดงเฉพาะเจ้าหน้าที่ กันคนอื่นเอาเบอร์มาเปิดดูข้อมูลส่วนตัว -->
+          <th:block th:if="${isStaff}">
+            <span class="k"><span class="icon i-envelope icon-sm icon-accent"></span> อีเมล</span>
+            <span class="v" th:text="${owner.email}"></span>
+            <span class="k"><span class="icon i-map-pin icon-sm icon-accent"></span> ที่อยู่</span>
+            <span class="v" th:text="${owner.address} ?: '-'"></span>
+          </th:block>
+        </div>
+        <p th:unless="${isStaff}" class="sec-b muted-note">อีเมล ที่อยู่ และผู้ติดต่อฉุกเฉิน แสดงเฉพาะเจ้าหน้าที่ หากต้องการตรวจสอบหรือแก้ไข กรุณาติดต่อคลินิก</p>
+      </div>
+
+      <!-- 2. ผู้ติดต่อฉุกเฉิน (โทนแดง) -->
+      <div th:if="${isStaff}" class="sec danger">
+        <div class="sec-h">
+          <span class="no">2</span><h2>ผู้ติดต่อฉุกเฉิน</h2>
+          <a th:href="'tel:' + ${owner.emergencyContactPhone}" class="btn-mini">
+            <span class="icon i-phone icon-sm"></span> โทร</a>
+        </div>
+        <div class="sec-b kv">
+          <span class="k"><span class="icon i-user icon-sm"></span> ชื่อ</span>
+          <span class="v" th:text="${owner.emergencyContactName} ?: '-'"></span>
+          <span class="k"><span class="icon i-phone icon-sm"></span> เบอร์โทร</span>
+          <span class="v"><span th:replace="~{fragments/layout :: phone(${owner.emergencyContactPhone})}"></span></span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+    <!-- 3. สัตว์เลี้ยง: ข้อมูลมาจากโมดูล Pet -->
+    <div class="sec">
+      <div class="sec-h">
+        <span class="no" th:text="${isStaff} ? 3 : 2">3</span><h2>สัตว์เลี้ยง</h2>
+        <a th:href="@{/pets/new(ownerId=${owner.ownerId})}" class="btn-mini">
+          <span class="icon i-plus icon-sm"></span> เพิ่มสัตว์เลี้ยง</a>
+      </div>
+      <div class="empty">
+        <span class="icon-bubble warm"><span class="icon i-paw-print icon-navy"></span></span>
+        <p>ยังไม่มีข้อมูลสัตว์เลี้ยง</p>
+      </div>
+    </div>
+
+    <!-- 4. นัดหมายและประวัติ: ข้อมูลมาจากโมดูล Appointment -->
+    <div class="sec">
+      <div class="sec-h">
+        <span class="no" th:text="${isStaff} ? 4 : 3">4</span><h2>นัดหมายและประวัติล่าสุด</h2>
+        <a th:href="@{/appointments(ownerId=${owner.ownerId})}" class="btn-text">ดูทั้งหมด</a>
+      </div>
+      <div class="empty">
+        <span class="icon-bubble"><span class="icon i-calendar-blank icon-accent"></span></span>
+        <p>ยังไม่มีนัดหมาย</p>
+      </div>
+    </div>
+    </div>
+  </div>
+</main>
+
+<!-- กล่องยืนยันการลบ -->
+<dialog th:if="${isStaff}" id="deleteDialog" class="confirm-dialog">
+  <div class="body">
+    <div class="icon-circle"><span class="icon i-trash icon-lg"></span></div>
+    <h2>ลบแฟ้มเจ้าของนี้?</h2>
+    <p>เมื่อลบแล้วจะไม่สามารถกู้คืนได้</p>
+    <!-- พรีวิวว่ากำลังจะลบใคร กันลบผิดคน -->
+    <div class="who-box">
+      <span class="initials"><span th:replace="~{fragments/layout :: initials(${owner})}"></span></span>
+      <div>
+        <b class="text-navy" th:text="${owner.firstName + ' ' + owner.lastName}">พิชยา สิทธิพันธ์</b><br>
+        <small class="muted-note">แฟ้ม #<span th:text="${#numbers.formatInteger(owner.ownerId, 4)}">0001</span> ·
+          <span th:replace="~{fragments/layout :: phone(${owner.phone})}"></span></small>
+      </div>
+    </div>
+  </div>
+  <!-- ลบต้องใช้ POST (ลิงก์ธรรมดาเป็น GET) -->
+  <form class="footer" method="post" th:action="@{/owners/{id}/delete(id=${owner.ownerId})}">
+    <button type="button" class="btn-ghost" onclick="document.getElementById('deleteDialog').close()">ยกเลิก</button>
+    <button type="submit" class="btn-danger"><span class="icon i-trash icon-sm icon-white"></span> ยืนยันการลบ</button>
+  </form>
+</dialog>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${isEdit} ? 'แก้ไขข้อมูลเจ้าของ - PawCare' : 'ลงทะเบียนเจ้าของ - PawCare'">ฟอร์มเจ้าของสัตว์เลี้ยง</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/pawcare.css}">
+  <link rel="stylesheet" th:href="@{/css/icons.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar('owners')}"></nav>
+
+<main class="container">
+  <!-- แก้ไข -> กลับไปแฟ้มเดิม, เพิ่มใหม่ -> เจ้าหน้าที่กลับไปรายชื่อ / ลูกค้ากลับหน้าค้นหา -->
+  <div class="page-bar">
+    <a th:href="${isEdit} ? @{/owners/{id}(id=${ownerId})} : (${isStaff} ? @{/owners/staff} : @{/owners})" class="back-btn">
+      <span class="icon i-arrow-left icon-sm"></span>
+      <span th:text="${isEdit} ? 'กลับไปแฟ้ม' : (${isStaff} ? 'กลับไปรายชื่อ' : 'กลับหน้าค้นหา')">กลับ</span></a>
+    <div class="titles">
+      <div class="crumbs">
+        <a th:if="${isStaff}" th:href="@{/owners/staff}">จัดการรายชื่อเจ้าของ</a>
+        <a th:unless="${isStaff}" th:href="@{/owners}">ค้นหาข้อมูลของฉัน</a>
+        <span class="icon i-caret-right icon-sm"></span>
+        <th:block th:if="${owner}">
+          <a th:href="@{/owners/{id}(id=${ownerId})}" th:text="${owner.firstName + ' ' + owner.lastName}">สมชาย ใจดี</a>
+          <span class="icon i-caret-right icon-sm"></span>
+        </th:block>
+        <span th:text="${isEdit} ? 'แก้ไข' : 'ลงทะเบียนใหม่'">ลงทะเบียนใหม่</span>
+      </div>
+      <h1 th:text="${isEdit} ? 'แก้ไขข้อมูลเจ้าของ' : 'ลงทะเบียนเจ้าของสัตว์เลี้ยง'">ลงทะเบียนเจ้าของสัตว์เลี้ยง</h1>
+    </div>
+  </div>
+
+  <!-- หน้าแก้ไข: แสดงข้อมูลที่แก้ไม่ได้ (เลขแฟ้ม, วันลงทะเบียน) -->
+  <div th:if="${isEdit}" class="readonly-box">
+    <span>แฟ้ม <b th:text="'#' + ${#numbers.formatInteger(ownerId, 4)}">#0001</b></span>
+    <span th:if="${owner != null and owner.createdAt != null}">ลงทะเบียน
+      <b><span th:replace="~{fragments/layout :: thaiDate(${owner.createdAt})}"></span>
+        <span th:text="${#temporals.format(owner.createdAt, 'HH:mm')}">14:30</span></b></span>
+  </div>
+
+  <!-- error จาก Service เช่น อีเมลซ้ำ (ถ้าเบอร์ซ้ำ จะแสดงเป็นกล่องใต้ช่องเบอร์แทน) -->
+  <div th:if="${errorMessage != null and duplicateOwner == null}" class="alert alert-warning">
+    <span class="icon i-warning icon-warning"></span> <span th:text="${errorMessage}"></span>
+  </div>
+
+  <!-- isEdit = false -> POST /owners (เพิ่ม), isEdit = true -> POST /owners/{id} (แก้ไข) -->
+  <form class="form-calm" method="post" th:object="${ownerRequest}"
+        th:action="${isEdit} ? @{/owners/{id}(id=${ownerId})} : @{/owners}">
+
+    <!-- หมวด 1 ข้อมูลเจ้าของ -->
+    <div class="sec">
+      <div class="sec-h"><span class="no">1</span><h2>ข้อมูลเจ้าของ</h2>
+        <span class="muted-note">ใช้ติดต่อและแจ้งเตือนนัดหมาย</span></div>
+      <div class="sec-b fields-2">
+        <div class="field">
+          <label for="firstName">ชื่อจริง <span class="req">*</span></label>
+          <!-- th:errorclass ใส่ class is-invalid ให้ช่องที่กรอกผิด (ขอบแดง) -->
+          <input id="firstName" class="input" th:field="*{firstName}" th:errorclass="is-invalid">
+          <!-- แสดงข้อความ error จาก @NotBlank หรือ @Size ใน PetOwnerRequestDTO -->
+          <small class="err" th:if="${#fields.hasErrors('firstName')}"><span class="icon i-warning icon-sm"></span> <span th:text="${#fields.errors('firstName')[0]}"></span></small>
+        </div>
+        <div class="field">
+          <label for="lastName">นามสกุล <span class="req">*</span></label>
+          <input id="lastName" class="input" th:field="*{lastName}" th:errorclass="is-invalid">
+          <small class="err" th:if="${#fields.hasErrors('lastName')}"><span class="icon i-warning icon-sm"></span> <span th:text="${#fields.errors('lastName')[0]}"></span></small>
+        </div>
+        <div class="field">
+          <label for="phone">เบอร์โทร <span class="req">*</span></label>
+          <input id="phone" type="tel" class="input" th:field="*{phone}" th:errorclass="is-invalid" placeholder="0812345678">
+          <small class="err" th:if="${#fields.hasErrors('phone')}"><span class="icon i-warning icon-sm"></span> <span th:text="${#fields.errors('phone')[0]}"></span></small>
+          <small class="hint" th:unless="${#fields.hasErrors('phone')}">ขึ้นต้นด้วย 0 และมี 9-10 หลัก</small>
+        </div>
+        <div class="field">
+          <label for="email">อีเมล <span class="req">*</span></label>
+          <input id="email" type="email" class="input" th:field="*{email}" th:errorclass="is-invalid" placeholder="name@example.com">
+          <small class="err" th:if="${#fields.hasErrors('email')}"><span class="icon i-warning icon-sm"></span> <span th:text="${#fields.errors('email')[0]}"></span></small>
+        </div>
+        <!-- เบอร์ซ้ำ (เจ้าหน้าที่): บอกว่าเป็นของใคร + ลิงก์ไปแฟ้มเดิม (กันลงทะเบียนคนเดิมซ้ำ) -->
+        <div th:if="${duplicateOwner != null and isStaff}" class="dup-box full">
+          <span class="icon i-info icon-sm icon-navy"></span>
+          <span>เบอร์ <span th:replace="~{fragments/layout :: phone(${duplicateOwner.phone})}"></span> มีในระบบแล้ว
+            (<span th:text="${duplicateOwner.firstName + ' ' + duplicateOwner.lastName}">สมชาย ใจดี</span>
+            #<span th:text="${#numbers.formatInteger(duplicateOwner.ownerId, 4)}">0001</span>)</span>
+          <a th:href="@{/owners/{id}(id=${duplicateOwner.ownerId})}">เปิดแฟ้มเดิม</a>
+        </div>
+        <!-- เบอร์ซ้ำ (ลูกค้า): ไม่บอกชื่อเจ้าของเบอร์ ให้ไปค้นหาด้วยเบอร์นั้นแทน -->
+        <div th:if="${duplicateOwner != null and !isStaff}" class="dup-box full">
+          <span class="icon i-info icon-sm icon-navy"></span>
+          <span>เบอร์ <span th:replace="~{fragments/layout :: phone(${duplicateOwner.phone})}"></span> ลงทะเบียนไว้แล้ว</span>
+          <a th:href="@{/owners(phone=${duplicateOwner.phone})}">ค้นหาด้วยเบอร์นี้</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- หมวด 2 ที่อยู่ (ไม่บังคับ) -->
+    <div class="sec">
+      <div class="sec-h"><span class="no">2</span><h2>ที่อยู่</h2><span class="muted-note">ไม่บังคับ</span></div>
+      <div class="sec-b field">
+        <label for="address">ที่อยู่</label>
+        <textarea id="address" class="textarea" rows="2" th:field="*{address}"
+                  placeholder="บ้านเลขที่ ถนน ตำบล อำเภอ จังหวัด รหัสไปรษณีย์"></textarea>
+      </div>
+    </div>
+
+    <!-- หมวด 3 ผู้ติดต่อฉุกเฉิน -->
+    <div class="sec">
+      <div class="sec-h"><span class="no">3</span><h2>ผู้ติดต่อฉุกเฉิน</h2>
+        <span class="muted-note">ติดต่อเมื่อติดต่อเจ้าของไม่ได้ หรือกรณีผ่าตัด</span></div>
+      <div class="sec-b fields-2">
+        <div class="field">
+          <label for="emergencyContactName">ชื่อผู้ติดต่อ</label>
+          <input id="emergencyContactName" class="input" th:field="*{emergencyContactName}" th:errorclass="is-invalid"
+                 placeholder="เช่น สมศรี (ภรรยา)">
+          <small class="err" th:if="${#fields.hasErrors('emergencyContactName')}"><span class="icon i-warning icon-sm"></span> <span th:text="${#fields.errors('emergencyContactName')[0]}"></span></small>
+        </div>
+        <div class="field">
+          <label for="emergencyContactPhone">เบอร์ฉุกเฉิน <span class="req">*</span></label>
+          <input id="emergencyContactPhone" type="tel" class="input" th:field="*{emergencyContactPhone}"
+                 th:errorclass="is-invalid" placeholder="0898765432">
+          <small class="err" th:if="${#fields.hasErrors('emergencyContactPhone')}"><span class="icon i-warning icon-sm"></span> <span th:text="${#fields.errors('emergencyContactPhone')[0]}"></span></small>
+        </div>
+      </div>
+    </div>
+
+    <!-- แถบปุ่มท้ายฟอร์ม -->
+    <div class="action-bar">
+      <span class="muted-note" th:if="${isEdit}">ตรวจสอบข้อมูลก่อนบันทึก</span>
+      <span class="muted-note" th:unless="${isEdit}">ช่องที่มี <span class="req">*</span> ต้องกรอก</span>
+      <div class="row">
+        <a th:href="${isEdit} ? @{/owners/{id}(id=${ownerId})} : (${isStaff} ? @{/owners/staff} : @{/owners})" class="btn-ghost">ยกเลิก</a>
+        <!-- หน้าแก้ไข: ปุ่มเดียว -->
+        <button th:if="${isEdit}" type="submit" class="btn-solid">
+          <span class="icon i-check icon-sm icon-white"></span> บันทึกการแก้ไข</button>
+        <!-- หน้าเพิ่มใหม่: บันทึก -> ไปหน้าแฟ้ม, บันทึกและเพิ่มสัตว์เลี้ยง -> ส่ง next=pet ไปหน้าเพิ่มสัตว์เลี้ยง -->
+        <th:block th:unless="${isEdit}">
+          <button type="submit" class="btn-ghost">บันทึก</button>
+          <button type="submit" name="next" value="pet" class="btn-solid">
+            บันทึกและเพิ่มสัตว์เลี้ยง <span class="icon i-arrow-right icon-sm icon-white"></span></button>
+        </th:block>
+      </div>
+    </div>
+  </form>
+</main>
+</body>
+</html>
