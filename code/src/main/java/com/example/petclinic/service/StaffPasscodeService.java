@@ -1,9 +1,11 @@
+
 package com.example.petclinic.service;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +22,7 @@ public class StaffPasscodeService {
     private final String staffPasscode;
     private final Clock clock;
 
+    // เก็บเฉพาะสถานะการกรอกรหัสผิดและการล็อก
     private final ConcurrentHashMap<String, AttemptState> attempts =
             new ConcurrentHashMap<>();
 
@@ -29,12 +32,13 @@ public class StaffPasscodeService {
         this(staffPasscode, Clock.systemUTC());
     }
 
-    // Constructor สำหรับ Unit Test เพื่อจำลองเวลาได้
+    // Constructor สำหรับ Unit Test เพื่อจำลองเวลา
     StaffPasscodeService(String staffPasscode, Clock clock) {
         if (staffPasscode == null || !staffPasscode.matches("\\d{8}")) {
             throw new IllegalStateException(
                     "STAFF_PASSCODE must contain exactly 8 digits");
         }
+
         this.staffPasscode = staffPasscode;
         this.clock = clock;
     }
@@ -42,44 +46,50 @@ public class StaffPasscodeService {
     public Result verify(String clientKey, String submittedPasscode) {
         Instant now = clock.instant();
 
-        return attempts.compute(clientKey, (key, existing) -> {
+        // เก็บผลลัพธ์เฉพาะการเรียก verify() ครั้งนี้
+        // ไม่เก็บ Result ไว้ใน AttemptState ของ Map
+        AtomicReference<Result> resultHolder = new AtomicReference<>();
+
+        attempts.compute(clientKey, (key, existing) -> {
             AttemptState state =
                     existing == null ? new AttemptState() : existing;
 
-            // ยังอยู่ในช่วงล็อก: ห้ามเข้าแม้รหัสถูก
+            // ยังถูกล็อกอยู่ แม้กรอกรหัสถูกก็เข้าไม่ได้
             if (state.lockedUntil != null
                     && now.isBefore(state.lockedUntil)) {
+
                 long remainingSeconds =
                         Duration.between(now, state.lockedUntil).getSeconds();
 
                 long remainingMinutes =
                         (remainingSeconds + 59) / 60;
 
-                state.result =
-                        new Result(false, true, remainingMinutes);
+                resultHolder.set(
+                        new Result(false, true, remainingMinutes));
+
                 return state;
             }
 
-            // หมดเวลาล็อกแล้ว เริ่มนับการกรอกผิดรอบใหม่
+            // หมดเวลาล็อกแล้ว เริ่มนับการกรอกรหัสผิดรอบใหม่
             if (state.lockedUntil != null) {
                 state.lockedUntil = null;
                 state.failedAttempts = 0;
                 state.windowStartedAt = null;
             }
 
-            // กรอกรหัสถูก: รีเซ็ตทุกอย่าง
+            // กรอกรหัสถูก รีเซ็ตจำนวนครั้งและระดับการล็อก
             if (staffPasscode.equals(submittedPasscode)) {
-                state.failedAttempts = 0;
-                state.windowStartedAt = null;
-                state.lockLevel = 0;
-                state.result = new Result(true, false, 0);
-                return state;
+                resultHolder.set(new Result(true, false, 0));
+
+                // ลบสถานะเดิมออกจาก Map
+                return null;
             }
 
-            // เริ่มหน้าต่างนับการกรอกผิด 10 นาที
+            // นับการกรอกรหัสผิดภายในช่วงเวลา 10 นาที
             if (state.windowStartedAt == null
                     || !now.isBefore(
                             state.windowStartedAt.plus(ATTEMPT_WINDOW))) {
+
                 state.windowStartedAt = now;
                 state.failedAttempts = 0;
             }
@@ -87,10 +97,12 @@ public class StaffPasscodeService {
             state.failedAttempts++;
 
             if (state.failedAttempts >= MAX_ATTEMPTS) {
-                // 15, 30, 60, 120... นาที (สูงสุด 24 ชั่วโมง)
+
+                // ระยะเวลาล็อก 15, 30, 60, 120... นาที
                 Duration lockDuration = FIRST_LOCK.multipliedBy(
                         1L << Math.min(state.lockLevel, 7));
 
+                // ระยะเวลาล็อกสูงสุด 24 ชั่วโมง
                 if (lockDuration.compareTo(MAX_LOCK) > 0) {
                     lockDuration = MAX_LOCK;
                 }
@@ -100,14 +112,18 @@ public class StaffPasscodeService {
                 state.failedAttempts = 0;
                 state.windowStartedAt = null;
 
-                state.result = new Result(
-                        false, true, lockDuration.toMinutes());
+                resultHolder.set(new Result(
+                        false,
+                        true,
+                        lockDuration.toMinutes()));
             } else {
-                state.result = new Result(false, false, 0);
+                resultHolder.set(new Result(false, false, 0));
             }
 
             return state;
-        }).result;
+        });
+
+        return resultHolder.get();
     }
 
     public record Result(
@@ -116,11 +132,11 @@ public class StaffPasscodeService {
             long remainingMinutes) {
     }
 
+    // เก็บเฉพาะสถานะ ไม่เก็บผลการตรวจรหัสครั้งล่าสุด
     private static class AttemptState {
         int failedAttempts;
         int lockLevel;
         Instant windowStartedAt;
         Instant lockedUntil;
-        Result result;
     }
 }
