@@ -16,9 +16,9 @@ import com.example.petclinic.repository.MedicalRecordRepository;
 import com.example.petclinic.service.MedicalRecordService;
 import com.example.petclinic.service.AppointmentService;
 
-    @Service
-    @Transactional
-    public class MedicalRecordServiceImpl implements MedicalRecordService {
+@Service
+@Transactional
+public class MedicalRecordServiceImpl implements MedicalRecordService {
 
     // Repository สำหรับจัดการข้อมูลประวัติการรักษา
     private final MedicalRecordRepository medicalRecordRepository;

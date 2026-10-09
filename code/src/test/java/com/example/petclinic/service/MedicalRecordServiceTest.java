@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.example.petclinic.domain.entity.MedicalRecord;
 import com.example.petclinic.dto.request.MedicalRecordRequestDTO;
 import com.example.petclinic.dto.response.MedicalRecordResponseDTO;
+import com.example.petclinic.exception.DuplicateResourceException;
 import com.example.petclinic.exception.ResourceNotFoundException;
 import com.example.petclinic.repository.MedicalRecordRepository;
 import com.example.petclinic.service.impl.MedicalRecordServiceImpl;
@@ -346,11 +347,11 @@ class MedicalRecordServiceTest {
 
                 // จำลองกรณีนัดหมายยังไม่เสร็จสิ้น
                 when(appointmentService.requireCompletedForMedicalRecord(10L))
-                        .thenThrow(new IllegalStateException("นัดหมายยังไม่เสร็จสิ้น"));
+                        .thenThrow(new DuplicateResourceException("นัดหมายยังไม่เสร็จสิ้น"));
 
                 assertThatThrownBy(
                         () -> medicalRecordService.createMedicalRecord(sampleRequestDTO))
-                        .isInstanceOf(IllegalStateException.class);
+                        .isInstanceOf(DuplicateResourceException.class);
 
                 verify(medicalRecordRepository, never())
                         .save(any(MedicalRecord.class));
