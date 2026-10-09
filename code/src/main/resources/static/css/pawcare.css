@@ -1781,4 +1781,67 @@ button,
   :is(button, [class*="btn"], .pager > a, .nav-links a, .home-link):is(:hover, :active) {
     transform: none;
   }
+
+  /* ----- รายการสัตว์เลี้ยงในแฟ้มเจ้าของ (fragments/owner-pets.html) ----- */
+.owner-pets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+/* แถวสัตว์แต่ละตัว: กดทั้งแถวไปหน้า My Pets */
+.owner-pet {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: inherit;
+  text-decoration: none;
+}
+
+.owner-pet:hover {
+  border-color: var(--color-secondary);
+}
+
+.owner-pet > .icon:last-child {
+  margin-left: auto;
+  color: var(--color-muted);
+}
+
+/* วงไอคอนสัตว์ สีตามประเภท: สุนัขส้มน้ำตาล แมวฟ้า อื่นๆ เขียว (เหมือนหน้า My Pets) */
+.owner-pet-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+
+.owner-pet-icon.dog { background: #fdf1e4; }
+.owner-pet-icon.dog .icon { color: #c9814a; }
+.owner-pet-icon.cat { background: #eaf0fb; }
+.owner-pet-icon.cat .icon { color: #5b7bd5; }
+.owner-pet-icon.other { background: #eef6ea; }
+.owner-pet-icon.other .icon { color: #5f9a57; }
+
+.owner-pet-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.owner-pet-text b {
+  color: var(--color-navy);
+}
+
+.owner-pet-text small {
+  color: #6b6d76;
+  font-size: 13px;
+}
 }
