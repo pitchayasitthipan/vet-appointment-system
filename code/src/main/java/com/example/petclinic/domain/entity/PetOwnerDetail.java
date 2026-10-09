@@ -22,7 +22,7 @@ public class PetOwnerDetail {
     @Column(name = "address", columnDefinition = "TEXT")
     private String address;
 
-    @Column(name = "emergency_contact_name", length = 100)
+    @Column(name = "emergency_contact_name", length = 50)
     private String emergencyContactName;
 
     @Column(name = "emergency_contact_phone", length = 20)

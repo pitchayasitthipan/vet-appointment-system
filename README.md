@@ -10,7 +10,7 @@
 | --- | --- | --- | --- | --- | --- |
 | 1 | นายสิทธิโชค มุขนาค | 673380428-6 | 04 | `sitthichok_6733804286_04` |  |
 | 2 | นายณัฐภัทร ฉ่ำตะคุ | 673380583-4 | 04 | `nathapat_6733805834_04` |  |
-| 3 | นางสาวพิชยา สิทธิพันธุ์ | 673380596-5 | 04 | `pitchaya_6733805965_04` |  |
+| 3 | นางสาวพิชยา สิทธิพันธ์ | 673380596-5 | 04 | `pitchaya_6733805965_04` | โมดูลเจ้าของสัตว์เลี้ยง (PetOwner, PetOwnerDetail), Global Exception Handler, ER Diagram และ Data Dictionary, รวบรวม README |
 | 4 | นายสรวิศ สุคงเจริญ | 673380606-8 | 04 | `soravit_6733806068_04` |  |
 | 5 | นางสาวอมลวรรณ พิมพิชัย | 673380608-4 | 04 | `amonwan_6733806084_04` |  |
 
@@ -26,10 +26,10 @@
 ---
 
 ## ฟังก์ชันและโครงสร้างหน้าเว็บ (Core Screens & Features)
-ระบบกำหนดโครงสร้างหน้าจอหลักไว้ 4 หน้า ได้แก่:
+ระบบกำหนดโครงสร้างหน้าจอหลักไว้ดังนี้:
 
-* **หน้าจอหลักของระบบ (4 Core Screens)**
-หน้าหลัก / แดชบอร์ด (Home / Dashboard): หน้าต้อนรับ ค้นหาสัตวแพทย์ และแสดงข่าวสาร/บริการของคลินิก
+* **หน้าหลัก / แดชบอร์ด (Home / Dashboard):** หน้าต้อนรับ ค้นหาสัตวแพทย์ และแสดงข่าวสาร/บริการของคลินิก
+* **หน้าข้อมูลเจ้าของสัตว์เลี้ยง (Pet Owner Page):** หน้ารายชื่อ ค้นหา ดูแฟ้ม เพิ่ม แก้ไข และลบข้อมูลเจ้าของสัตว์เลี้ยง
 * **หน้าจัดการข้อมูลสัตว์เลี้ยง (Pet Management Page):** หน้าสำหรับเพิ่ม แก้ไข และดูรายชื่อสัตว์เลี้ยงของเจ้าของ
 * **หน้าระบบนัดหมาย (Appointment Page):** หน้าจองคิว เลือกสัตวแพทย์ เลือกวันเวลา และเลือกประเภทบริการ (ตรวจรักษา/ฉีดวัคซีน)
 * **หน้าประวัติการรักษาและวัคซีน (Medical & Vaccination Record Page):** หน้าแสดงประวัติการรักษา บันทึกสัตวแพทย์ และตารางการรับวัคซีน
@@ -57,13 +57,13 @@
 ## Tech Stack
 
 * **Programming Language:** Java 17
-* **Backend Framework:** Spring Boot 3.x (Spring Data JPA, Spring Validation)
-* **Build Tool:** Gradle
-* **Database:** PostgreSQL / MySQL (ประมวลผลผ่าน Spring Data JPA)
+* **Backend Framework:** Spring Boot 4.1 (Spring Web MVC, Spring Data JPA, Spring Validation)
+* **Build Tool:** Maven (ใช้ Maven Wrapper `mvnw` ที่อยู่ในโปรเจกต์)
+* **Database:** PostgreSQL
 * **ORM:** Spring Data JPA (Hibernate)
-* **Frontend Framework:** Thymeleaf + HTML5 / CSS3 (Bootstrap 5)
-* **API Documentation:** OpenAPI 3.0 / Swagger UI
-* **Testing Framework:** JUnit 5, Mockito, Spring Boot Test
+* **Frontend:** Thymeleaf + HTML5 / CSS3 (PawCare Design System: `pawcare.css`, `icons.css`)
+* **API Documentation:** OpenAPI 3 / Swagger UI (springdoc-openapi)
+* **Testing Framework:** JUnit 5, Mockito, Spring Boot Test (`@WebMvcTest`, `@DataJpaTest`)
 * **Containerization:** Docker และ Docker Compose
 * **Development Environment:** Visual Studio Code (VS Code)
 
@@ -116,56 +116,55 @@ Domain / Entity Layer (Entities, Value Objects, Enums) + DTO Layer (Request/Resp
 | **Factory Method** | Creational | แยกวัตถุการนัดหมายตามประเภทบริการ เช่น `VaccineAppointment` (สำหรับการตรวจนัดฉีดวัคซีนตามระยะ) และ `SurgeryAppointment` (สำหรับการนัดหมายผ่าตัดที่ต้องมีเงื่อนไขเตรียมตัวพิเศษ) |
 | **Builder Pattern** | Creational | ใช้ในการประกอบวัตถุ DTO ที่มีความซับซ้อน ได้แก่ `MedicalSummaryReportDTO` ซึ่งรวบรวมข้อมูลจากหลาย Entity เพื่อส่งออกข้อมูลผ่าน REST API |
 | **Singleton Pattern** | Creational | บริหารจัดการ Instance ของการตั้งค่าระบบ (`SystemConfigRegistry`) และนโยบายอัตราค่าบริการ (`ClinicPricePolicy`) ให้มีเพียง Instance เดียวตลอดวงจรชีวิตของแอปพลิเคชันผ่าน Spring Bean |
+| **DTO + Mapper** | Enterprise | แยก Entity ออกจากข้อมูลที่รับ-ส่งผ่าน API เช่น `PetOwnerRequestDTO`, `PetOwnerResponseDTO` และ `PetOwnerMapper` ทำหน้าที่แปลงข้อมูลแยกจาก Service |
 
 ---
 
 ## การติดตั้งและเริ่มต้นใช้งาน (Installation & Setup)
 
-**เงื่อนไขเบื้องต้น (Prerequisites)**
-
 **สิ่งที่ต้องติดตั้ง**
-* Java Development Kit (JDK) 17 หรือเวอร์ชันที่โครงการรองรับ
-* Visual Studio Code (VS Code)
-* Gradle หรือใช้ Gradle Wrapper ที่อยู่ในโครงการ
-* PostgreSQL หรือ MySQL ตามฐานข้อมูลที่โครงการเลือกใช้
+* Java Development Kit (JDK) 17 ขึ้นไป
+* Docker Desktop (สำหรับรัน PostgreSQL)
 * Git
+* Visual Studio Code (VS Code)
+* ไม่ต้องติดตั้ง Maven เพราะใช้ Maven Wrapper (`mvnw`) ที่อยู่ในโปรเจกต์
 
 
 ### ขั้นตอนที่ 1: การ Clone Repository
 ```bash
-1. Clone Repository จาก GitHub
-git clone [https://github.com/pitchayasitthipan/vet-appointment-system.git](https://github.com/pitchayasitthipan/vet-appointment-system.git)
-
-2. เข้าสู่โฟลเดอร์โปรเจกต์
+git clone https://github.com/pitchayasitthipan/vet-appointment-system.git
 cd vet-appointment-system
-
 ```
 
 ### ขั้นตอนที่ 2: การกำหนดค่าฐานข้อมูล (Database Configuration)
 
-* สร้างฐานข้อมูลตามชื่อและการตั้งค่าที่กำหนดไว้ในไฟล์ application.properties หรือ application.yml 
-* กำหนดข้อมูลการเชื่อมต่อฐานข้อมูลให้ตรงกับสภาพแวดล้อมที่ใช้งาน โดยไม่ควรเผยแพร่รหัสผ่านหรือข้อมูลสำคัญลงใน Repository
+* ค่าการเชื่อมต่อฐานข้อมูลอยู่ใน `code/src/main/resources/application.properties` และอ่านค่าจาก Environment Variable ได้
+* ค่าเริ่มต้น: ฐานข้อมูล `petclinic_db` ที่ `localhost:5432` ผู้ใช้ `postgres` รหัสผ่าน `postgres` (ตรงกับ `docker-compose.yml`)
+* Hibernate สร้างตารางให้อัตโนมัติ (`spring.jpa.hibernate.ddl-auto=update`)
+* ไม่ควรเผยแพร่รหัสผ่านหรือข้อมูลสำคัญของระบบจริงลงใน Repository
 
-```
+---
+
 ## How to Run
 
-### วิธีที่ 1: การรันแอปพลิเคชันผ่าน Gradle Wrapper
+### วิธีที่ 1: รันฐานข้อมูลด้วย Docker แล้วรันแอปผ่าน Maven Wrapper
 
 ```bash
-# เริ่มต้นการทำงานของฐานข้อมูลผ่าน Docker Compose
-docker-compose up -d
+# เริ่มฐานข้อมูล PostgreSQL (รันที่โฟลเดอร์หลักของโปรเจกต์)
+docker compose up -d db
 
-# คอมไพล์และสั่งรันระบบด้วย Gradle
-./gradlew bootRun
-
+# รันระบบ
+cd code
+./mvnw spring-boot:run
 ```
 
-### วิธีที่ 2: การรันแอปพลิเคชันผ่าน Docker Container
+### วิธีที่ 2: รันทั้งระบบผ่าน Docker Compose
 
 ```bash
-docker-compose up --build
-
+docker compose up --build
 ```
+
+เปิดใช้งานที่ `http://localhost:8080`
 
 ---
 
@@ -174,19 +173,21 @@ docker-compose up --build
 เมื่อระบบเริ่มต้นการทำงานเรียบร้อยแล้ว สามารถเข้าถึงเอกสารและทดสอบการทำงานของ RESTful API ผ่าน Swagger UI ได้ที่:
 
 * **Swagger UI URL:** `http://localhost:8080/swagger-ui.html`
+* **OpenAPI JSON:** `http://localhost:8080/v3/api-docs`
 
 ---
 
 ## How to Run Tests
 
-Unit Testin และ Integration Testing ดำเนินการผ่าน JUnit 5 และ Mockito ด้วยคำสั่ง:
+Unit Testing และ Integration Testing ดำเนินการผ่าน JUnit 5 และ Mockito ต้องเปิดฐานข้อมูลก่อน เพราะ test บางส่วนทดสอบกับ PostgreSQL จริง:
 
 ```bash
-./gradlew test
-
+docker compose up -d db
+cd code
+./mvnw test
 ```
 
-*รายงานผลการทดสอบ (Test Report) จะถูกสร้างขึ้น ณ ตำแหน่ง `build/reports/tests/test/index.html*`*
+*รายงานผลการทดสอบ (Test Report) จะถูกสร้างขึ้นที่ `code/target/surefire-reports/`*
 
 ---
 
@@ -194,23 +195,41 @@ Unit Testin และ Integration Testing ดำเนินการผ่า�
 
 ```text
 .
-├── code/                   # Source code และไฟล์การกำหนดค่าระบบทั้งหมด
-│   ├── src/main/java/com/example/vetcare/
-│   │   ├── config/            # System Configuration & Security Beans
-│   │   ├── controller/        # RestControllers (@RestControllerAdvice) & Web Controllers
-│   │   ├── service/           # Business Logic Layer (Interfaces & Implementations)
-│   │   ├── repository/        # Spring Data JPA Repositories
-│   │   ├── domain/            # Entities, Enums, Value Objects
-│   │   ├── dto/               # Request/Response DTOs & Mappers
-│   │   └── exception/         # Global Exception Handlers & Custom Exceptions
-│   └── src/main/resources/    # Configuration files & Database Migration Scripts
-├── test/                   # การทดสอบทั้งหมด (JUnit 5, Mockito, Spring Boot Test)
-├── doc/                    # เอกสารวิเคราะห์สถาปัตยกรรมระบบและสไลด์นำเสนอ
-│   ├── diagrams/              # Use Case, ERD, Class, Sequence, State Diagrams
-│   ├── solid-analysis.md      # เอกสารวิเคราะห์ SOLID Principles
-│   ├── design-patterns.md    # เอกสารวิเคราะห์ Design Patterns
-│   └── slide/                 # สไลด์นำเสนอโปรเจกต์
-└── img/                    # ไฟล์สื่อและภาพประกอบระบบ
-
+├── code/                               # Source code และไฟล์การกำหนดค่าระบบทั้งหมด
+│   ├── src/main/java/com/example/petclinic/
+│   │   ├── PetclinicApplication.java      # จุดเริ่มต้นของระบบ
+│   │   ├── controller/
+│   │   │   ├── api/                       # REST Controllers
+│   │   │   └── web/                       # Thymeleaf Controllers 
+│   │   ├── service/                       # Service Interfaces (Business Logic)
+│   │   │   └── impl/                      # Service Implementations
+│   │   ├── repository/                    # Spring Data JPA Repositories
+│   │   ├── domain/
+│   │   │   └── entity/                    # JPA Entities
+│   │   ├── dto/
+│   │   │   ├── request/                   # Request DTOs (รับข้อมูล + Validation)
+│   │   │   └── response/                  # Response DTOs (ส่งข้อมูลออก)
+│   │   ├── mapper/                        # แปลงข้อมูลระหว่าง DTO และ Entity
+│   │   └── exception/                     # Global Exception Handler & Custom Exceptions
+│   ├── src/main/resources/
+│   │   ├── application.properties         # ค่าการเชื่อมต่อฐานข้อมูลและระบบ
+│   │   ├── templates/                     # หน้าเว็บ Thymeleaf
+│   │   └── static/                        # CSS, JavaScript, รูปภาพ, หน้า HTML
+│   ├── src/test/java/com/example/petclinic/  # Unit Test และ Integration Test
+│   ├── Dockerfile                         # สร้าง Docker Image ของระบบ
+│   ├── pom.xml                            # Maven Dependencies
+│   └── mvnw, mvnw.cmd                     # Maven Wrapper
+├── doc/                                # เอกสารทั้งหมด
+│   ├── data-dictionary.md                 # Data Dictionary
+│   ├── docker-guide.md                    # คู่มือการใช้งาน Docker
+│   ├── singleton-pattern.md               # เอกสาร Singleton Pattern
+│   ├── diagrams/                          # Use Case, ERD, Class, Sequence, State Diagrams (กำลังจัดทำ)
+│   ├── solid-analysis.md                  # วิเคราะห์ SOLID Principles (กำลังจัดทำ)
+│   ├── design-patterns.md                 # วิเคราะห์ Design Patterns (กำลังจัดทำ)
+│   └── slide/                             # สไลด์นำเสนอ (กำลังจัดทำ)
+├── test/                               # ผลการทดสอบและ Test Report (กำลังจัดทำ)
+├── img/                                # ไฟล์สื่อและภาพประกอบระบบ (กำลังจัดทำ)
+├── docker-compose.yml                  # รันฐานข้อมูลและระบบด้วย Docker
+└── README.md
 ```
-*(หมายเหตุ: อาจะมีการแก้ไขในภายหลัง)*
+*(หมายเหตุ: รายการที่ระบุว่า "กำลังจัดทำ" จะเพิ่มเข้ามาเมื่อสมาชิกส่งงานส่วนของตนเอง)*

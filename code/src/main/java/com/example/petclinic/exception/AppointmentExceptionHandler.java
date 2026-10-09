@@ -18,6 +18,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class AppointmentExceptionHandler {
     private final Clock clock;
+    public AppointmentExceptionHandler() { this(Clock.system(ZoneId.of("Asia/Bangkok"))); }
     public AppointmentExceptionHandler(Clock appointmentClock) { this.clock = appointmentClock; }
 
     @ExceptionHandler(InvalidAppointmentException.class)
