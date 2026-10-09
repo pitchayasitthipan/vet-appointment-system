@@ -1720,3 +1720,65 @@ footer {
   font-size: 22px;
   letter-spacing: 6px;
 }
+
+/* ==========================================================
+   22. SOFT CLICK (ปุ่มและลิงก์ที่กดได้ทั้งเว็บ)
+   ========================================================== */
+
+/* การเคลื่อนไหวนุ่ม ๆ ของทุกอย่างที่กดได้ */
+button,
+[class*="btn"],
+.pager > a,
+.nav-links a,
+.home-link {
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    filter 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+/* ชี้เมาส์ที่ปุ่ม: ลอยขึ้น 1px (ปุ่มแบบข้อความไม่ลอย) */
+/* (:not รวมเงื่อนไขไว้ในวงเล็บเดียว ให้น้ำหนัก selector เท่ากับตอนกดค้าง ตอนกดจึงชนะ) */
+:is(button, [class*="btn"], .pager > a):hover:not(:disabled, .btn-text) {
+  transform: translateY(-1px);
+}
+
+/* กดค้าง: ยุบลงเหลือ 97% สีเข้มขึ้นนิดหนึ่ง เงาจางลง */
+:is(button, [class*="btn"], .pager > a):active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+  filter: brightness(0.96);
+  box-shadow: var(--shadow-sm);
+  transition-duration: 0.08s;
+}
+
+/* เมนู navbar: ไม่ลอย แต่กดแล้วยุบเล็กน้อย */
+.nav-links a:active {
+  transform: scale(0.96);
+}
+
+/* การ์ดทางเข้าหน้าแรก: ชี้แล้วลอยขึ้น กดแล้วยุบ */
+.home-link:hover {
+  transform: translateY(-3px);
+}
+
+.home-link:active {
+  transform: translateY(0) scale(0.99);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ผู้ใช้ที่ตั้งค่าเครื่องให้ลดการเคลื่อนไหว: ไม่ขยับ */
+@media (prefers-reduced-motion: reduce) {
+  button,
+  [class*="btn"],
+  .pager > a,
+  .nav-links a,
+  .home-link {
+    transition: none;
+  }
+
+  :is(button, [class*="btn"], .pager > a, .nav-links a, .home-link):is(:hover, :active) {
+    transform: none;
+  }
+}
