@@ -5,6 +5,7 @@ import java.util.*;
 import com.example.petclinic.domain.entity.*;
 import com.example.petclinic.domain.enums.*;
 import com.example.petclinic.dto.request.AppointmentRequestDTO;
+import com.example.petclinic.dto.request.AppointmentUpdateDTO;
 import com.example.petclinic.dto.response.*;
 import com.example.petclinic.exception.*;
 import com.example.petclinic.factory.AppointmentFactoryRegistry;
@@ -36,6 +37,7 @@ public class AppointmentService {
 
     public AppointmentResponseDTO create(AppointmentRequestDTO request) {
         requireId(request.ownerId());
+        requireId(request.petId());
         // Every booking writer locks Doctor, then Pet, before checking availability.
         Doctor doctor = lockedDoctor(request.doctorId());
         Pet pet = pets.findLockedById(request.petId())
@@ -47,6 +49,51 @@ public class AppointmentService {
         requireFree(doctor.getDoctorId(), pet.getPetId(), request.appointmentDateTime(), null);
         Appointment saved = appointments.saveAndFlush(factories.create(request, pet, doctor));
         return AppointmentResponseDTO.fromEntity(saved);
+    }
+
+    public AppointmentResponseDTO update(Long id, Long ownerId, AppointmentUpdateDTO request) {
+        Appointment existing = lockedAppointment(id, ownerId);
+        requireEditable(existing);
+        if (request.version() == null || !Objects.equals(existing.getVersion(), request.version())) {
+            throw new DuplicateResourceException("ข้อมูลนัดหมายเปลี่ยนแล้ว กรุณาโหลดข้อมูลล่าสุดก่อนแก้ไข");
+        }
+        Doctor doctor = lockedDoctor(request.doctorId());
+        Pet pet = pets.findLockedById(existing.getPet().getPetId())
+            .orElseThrow(() -> new ResourceNotFoundException("ไม่พบสัตว์เลี้ยง"));
+        schedule.validate(doctor, request.appointmentDateTime());
+        requireFree(doctor.getDoctorId(), pet.getPetId(), request.appointmentDateTime(), id);
+        Appointment replacement = factories.create(new AppointmentRequestDTO(ownerId, pet.getPetId(),
+            doctor.getDoctorId(), request.appointmentDateTime(), request.serviceType(), request.symptoms()), pet, doctor);
+        existing.setDoctor(doctor);
+        existing.setAppointmentDateTime(replacement.getAppointmentDateTime());
+        existing.setServiceType(replacement.getServiceType());
+        existing.setSymptoms(replacement.getSymptoms());
+        existing.setPreparationInstructions(replacement.getPreparationInstructions());
+        // Keep the original identity, pet, owner and PENDING/CONFIRMED status.
+        return AppointmentResponseDTO.fromEntity(appointments.saveAndFlush(existing));
+    }
+
+    public AppointmentResponseDTO cancel(Long id, Long ownerId) {
+        Appointment existing = lockedAppointment(id, ownerId);
+        if (existing.getStatus() == AppointmentStatus.CANCELLED) {
+            return AppointmentResponseDTO.fromEntity(existing);
+        }
+        requireEditable(existing);
+        existing.setStatus(AppointmentStatus.CANCELLED);
+        return AppointmentResponseDTO.fromEntity(appointments.saveAndFlush(existing));
+    }
+
+    private Appointment lockedAppointment(Long id, Long ownerId) {
+        requireId(id); requireId(ownerId);
+        return appointments.findLockedByIdAndOwnerId(id, ownerId)
+            .orElseThrow(() -> new ResourceNotFoundException("ไม่พบนัดหมายของเจ้าของที่ระบุ"));
+    }
+
+    private void requireEditable(Appointment appointment) {
+        if (!ACTIVE.contains(appointment.getStatus())) {
+            throw new DuplicateResourceException("นัดที่เสร็จสิ้นหรือยกเลิกแล้วไม่สามารถแก้ไขได้");
+        }
+        schedule.requireFuture(appointment.getAppointmentDateTime());
     }
 
     @Transactional(readOnly = true)
