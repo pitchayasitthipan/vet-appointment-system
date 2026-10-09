@@ -1,67 +1,46 @@
 <!DOCTYPE html>
-<html lang="th">
+<html xmlns:th="http://www.thymeleaf.org" lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Pets | PawCare Pet Clinic</title>
 
-    <link rel="stylesheet" href="/css/pawcare.css">
-    <link rel="stylesheet" href="/css/icons.css">
-    <link rel="stylesheet" href="/css/pets.css">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/pawcare.css}">
+    <link rel="stylesheet" th:href="@{/css/icons.css}">
+    <link rel="stylesheet" th:href="@{/css/pets.css}">
 </head>
-<body>
+<!-- data-owner-id: เจ้าของที่กำลังดู (ลูกค้ามาจาก session, เจ้าหน้าที่เลือกจาก ownerId=) ให้ pets.js ใช้เรียก API -->
+<!-- data-open-add: มาจาก /pets/new -> เปิดฟอร์มเพิ่มสัตว์ทันที -->
+<body th:attr="data-owner-id=${owner.ownerId},data-open-add=${openAddForm}">
 
-    <!-- Navigation -->
-    <header class="pawcare-header">
-        <nav class="pawcare-navbar">
-            <a class="pawcare-brand" href="/index.html">
-                <span class="brand-icon">🐾</span>
-                <span class="brand-text">
-                    <strong>PawCare</strong>
-                    <small>Pet Clinic &amp; Vaccination</small>
-                </span>
-            </a>
-
-            <div class="pawcare-nav-links">
-                <a href="/index.html">Home</a>
-                <a href="/pets.html" class="active">My Pets</a>
-                <a href="#">Appointments</a>
-                <a href="/doctors.html">Veterinarians</a>
-                <a href="#">About</a>
-            </div>
-
-            <div class="pawcare-nav-actions">
-                <a href="/pets.html" class="nav-search" aria-label="ค้นหาสัตว์เลี้ยง">⌕</a>
-                <a href="#" class="nav-book-button">จองนัดหมาย</a>
-                <button class="nav-notification" type="button" aria-label="การแจ้งเตือน">♧</button>
-                <div class="nav-avatar">🐶</div>
-            </div>
-        </nav>
-    </header>
+    <nav th:replace="~{fragments/layout :: navbar('pets')}"></nav>
 
     <main class="pets-page">
 
         <!-- Hero -->
         <section class="pets-hero">
             <div class="pets-hero-content">
-                <span class="eyebrow"><span>🐾</span> MY PETS</span>
+                <span class="eyebrow"><span class="icon i-paw-print icon-sm icon-pink"></span> MY PETS</span>
                 <h1>สัตว์เลี้ยงของฉัน</h1>
+                <p class="pets-owner-name">ของคุณ <strong th:text="${owner.firstName + ' ' + owner.lastName}">John Doe</strong></p>
                 <p>จัดการข้อมูลสัตว์เลี้ยงของคุณ ดูรายละเอียดและข้อมูลสุขภาพเบื้องต้นได้ในที่เดียว</p>
 
+                <!-- ไอคอนในป้ายใช้ <i> เพราะ .hero-highlights span ใน pets.css จะทำให้ไอคอนกลายเป็นป้ายซ้อน -->
                 <div class="hero-highlights">
-                    <span>♡ ข้อมูลสัตว์เลี้ยง</span>
-                    <span>♡ ดูรายละเอียดได้ง่าย</span>
-                    <span>♡ จัดการข้อมูลได้สะดวก</span>
+                    <span><i class="icon i-paw-print icon-sm icon-pink"></i> ข้อมูลสัตว์เลี้ยง</span>
+                    <span><i class="icon i-eye icon-sm icon-pink"></i> ดูรายละเอียดได้ง่าย</span>
+                    <span><i class="icon i-note-pencil icon-sm icon-pink"></i> จัดการข้อมูลได้สะดวก</span>
                 </div>
             </div>
 
             <div class="pets-hero-art" aria-hidden="true">
                 <div class="hero-art-circle">
-                    <span>🐕</span>
+                    <span class="icon i-dog icon-pink"></span>
                 </div>
-                <span class="hero-paw paw-one">🐾</span>
-                <span class="hero-paw paw-two">♡</span>
-                <span class="hero-sparkle">✦</span>
+                <span class="icon i-paw-print hero-paw paw-one"></span>
+                <span class="icon i-heart hero-paw paw-two"></span>
+                <span class="icon i-bone hero-sparkle"></span>
             </div>
         </section>
 
@@ -75,13 +54,13 @@
                 </div>
 
                 <button class="primary-button" type="button" onclick="openAddPetModal()">
-                    <span>＋</span> เพิ่มสัตว์เลี้ยง
+                    <span class="icon i-plus icon-sm icon-white"></span> เพิ่มสัตว์เลี้ยง
                 </button>
             </div>
 
             <div class="pets-toolbar">
                 <label class="pet-search-box" for="petSearchInput">
-                    <span aria-hidden="true">⌕</span>
+                    <span class="icon i-magnifying-glass icon-sm" aria-hidden="true"></span>
                     <input
                         type="search"
                         id="petSearchInput"
@@ -97,15 +76,15 @@
 
             <div id="petCardsContainer" class="pet-cards-container">
                 <div class="pets-loading">
-                    <span class="loading-paw">🐾</span>
+                    <span class="icon i-paw-print icon-lg icon-pink loading-paw"></span>
                     <p>กำลังโหลดข้อมูลสัตว์เลี้ยง...</p>
                 </div>
             </div>
 
             <div class="pets-bottom-note">
-                <span>♡</span>
+                <span class="icon i-heart icon-sm"></span>
                 <p>เพื่อนตัวน้อยทุกตัวสมควรได้รับการดูแลอย่างดีที่สุด</p>
-                <span>♡</span>
+                <span class="icon i-heart icon-sm"></span>
             </div>
         </section>
     </main>
@@ -117,10 +96,10 @@
         <section class="pet-modal-dialog" role="dialog" aria-modal="true"
                  aria-labelledby="petDetailTitle">
             <button class="modal-close" type="button"
-                    onclick="closeModal('petDetailModal')" aria-label="ปิด">×</button>
+                    onclick="closeModal('petDetailModal')" aria-label="ปิด"><span class="icon i-x icon-sm icon-pink"></span></button>
 
             <div class="modal-heading">
-                <span class="modal-icon">🐾</span>
+                <span class="modal-icon"><span class="icon i-paw-print icon-lg icon-pink"></span></span>
                 <div>
                     <span class="eyebrow">PET PROFILE</span>
                     <h2 id="petDetailTitle">รายละเอียดสัตว์เลี้ยง</h2>
@@ -177,10 +156,10 @@
         <section class="pet-modal-dialog" role="dialog" aria-modal="true"
                  aria-labelledby="addPetTitle">
             <button class="modal-close" type="button"
-                    onclick="closeModal('addPetModal')" aria-label="ปิด">×</button>
+                    onclick="closeModal('addPetModal')" aria-label="ปิด"><span class="icon i-x icon-sm icon-pink"></span></button>
 
             <div class="modal-heading">
-                <span class="modal-icon">🐶</span>
+                <span class="modal-icon"><span class="icon i-dog icon-lg icon-pink"></span></span>
                 <div>
                     <span class="eyebrow">NEW COMPANION</span>
                     <h2 id="addPetTitle">เพิ่มสัตว์เลี้ยง</h2>
@@ -202,8 +181,6 @@
                             <option value="">เลือกประเภทสัตว์</option>
                             <option value="Dog">สุนัข (Dog)</option>
                             <option value="Cat">แมว (Cat)</option>
-                            <option value="Bird">นก (Bird)</option>
-                            <option value="Rabbit">กระต่าย (Rabbit)</option>
                             <option value="Other">อื่น ๆ (Other)</option>
                         </select>
                     </div>
@@ -240,12 +217,6 @@
                                type="text" placeholder="ถ้ามี">
                     </div>
 
-                    <div class="form-field form-full">
-                        <label for="petOwnerId">รหัสเจ้าของสัตว์เลี้ยง *</label>
-                        <input id="petOwnerId" name="ownerId" type="number"
-                               min="1" value="1" required>
-                        <small>กรุณาใช้รหัสเจ้าของที่มีอยู่ในฐานข้อมูล</small>
-                    </div>
                 </div>
 
                 <div class="modal-actions">
@@ -260,10 +231,10 @@
     </div>
 
     <footer class="pets-footer">
-        <span>🐾</span> PawCare Pet Clinic &amp; Vaccination
-        <span>Made with love for your pets ♡</span>
+        <span class="icon i-paw-print icon-sm"></span> PawCare Pet Clinic &amp; Vaccination
+        <span>Made with love for your pets <span class="icon i-heart icon-sm icon-pink"></span></span>
     </footer>
 
-    <script src="/js/pets.js"></script>
+    <script th:src="@{/js/pets.js}"></script>
 </body>
 </html>

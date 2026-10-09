@@ -6,22 +6,31 @@ import java.time.LocalDate;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
 public class PetRequestDTO {
 
+    // ความยาวสูงสุดให้ตรงกับคอลัมน์ใน Pet.java (ยาวเกิน -> 400 แทน error จากฐานข้อมูล)
     @NotBlank(message = "กรุณาระบุชื่อสัตว์เลี้ยง")
+    @Size(max = 100, message = "ชื่อสัตว์เลี้ยงต้องไม่เกิน 100 ตัวอักษร")
     private String name;
 
     @NotBlank(message = "กรุณาระบุประเภทสัตว์")
+    @Size(max = 50, message = "ประเภทสัตว์ต้องไม่เกิน 50 ตัวอักษร")
     private String species;
 
+    @Size(max = 100, message = "สายพันธุ์ต้องไม่เกิน 100 ตัวอักษร")
     private String breed;
+
+    @Size(max = 20, message = "เพศต้องไม่เกิน 20 ตัวอักษร")
     private String gender;
+
     private LocalDate birthDate;
 
     @Positive(message = "น้ำหนักต้องมากกว่า 0")
     private Double weight;
 
+    @Size(max = 100, message = "หมายเลขไมโครชิปต้องไม่เกิน 100 ตัวอักษร")
     private String microchipNumber;
 
     @NotNull(message = "กรุณาระบุรหัสเจ้าของสัตว์เลี้ยง")
