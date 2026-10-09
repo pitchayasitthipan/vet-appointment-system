@@ -14,7 +14,7 @@ public class AppointmentGuestController {
     private final AppointmentGuestService service;
     private final String registrationPath;
     public AppointmentGuestController(AppointmentGuestService service,
-            @Value("${appointments.owner-registration-path:/owners.html}") String registrationPath) {
+            @Value("${appointments.owner-registration-path:/owners/new}") String registrationPath) {
         this.service = service; this.registrationPath = registrationPath;
     }
     @PostMapping("/lookup")

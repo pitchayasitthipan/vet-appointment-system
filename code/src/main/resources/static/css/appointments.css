@@ -9,6 +9,10 @@
   --surface:#fff
 }
 
+.feedback { padding: 14px 18px; margin: 14px 0; border-radius: 10px; background: #fff5d8; color: #674c1f; overflow-wrap: anywhere; }
+.feedback.error { background: #fff0f0; color: #952b37; }
+.feedback.success { background: #e5f5ec; color: #205a3a; }
+
 * {
   box-sizing:border-box
 }
