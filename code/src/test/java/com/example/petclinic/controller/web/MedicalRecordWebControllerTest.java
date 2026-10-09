@@ -6,6 +6,8 @@ import java.util.List;
 import com.example.petclinic.dto.response.MedicalRecordResponseDTO;
 import com.example.petclinic.exception.ResourceNotFoundException;
 import com.example.petclinic.service.MedicalRecordService;
+import com.example.petclinic.exception.DuplicateResourceException;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -91,9 +93,8 @@ class MedicalRecordWebControllerTest {
     @DisplayName("แก้ไขข้อมูลที่ไม่มีอยู่จริง ต้อง Redirect กลับหน้ารายการ")
     void updateMedicalRecord_notFound_redirectsToList() throws Exception {
 
-        when(medicalRecordService.updateMedicalRecord(
-                eq(999L),
-                org.mockito.ArgumentMatchers.any()))
+        // ตรวจว่าประวัติมีอยู่ก่อนแก้ไข -> ไม่พบ ต้องกลับหน้ารายการ
+        when(medicalRecordService.getMedicalRecordById(999L))
                 .thenThrow(new ResourceNotFoundException(
                         "ไม่พบประวัติการรักษา"));
 
@@ -180,4 +181,63 @@ class MedicalRecordWebControllerTest {
 
         verify(medicalRecordService, never()).deleteMedicalRecord(1L);
     }
+
+// ===== บันทึกกับนัดหมายที่ใช้ไม่ได้: ต้องกลับฟอร์มเดิมพร้อมข้อความใต้ช่องรหัสนัดหมาย =====
+
+    @Test
+    @DisplayName("สร้างประวัติกับนัดที่ยังไม่ COMPLETED ต้องกลับฟอร์มเดิม ไม่ใช่ JSON")
+    void createMedicalRecord_appointmentNotCompleted_showsFormError() throws Exception {
+
+        when(medicalRecordService.createMedicalRecord(org.mockito.ArgumentMatchers.any()))
+                .thenThrow(new DuplicateResourceException(
+                        "บันทึกประวัติการรักษาได้เฉพาะนัดที่เสร็จสิ้นแล้ว (COMPLETED)"));
+
+        mockMvc.perform(post("/medical-records")
+                        .param("appointmentId", "1")
+                        .param("diagnosis", "ตรวจสุขภาพทั่วไป")
+                        .sessionAttr("isStaff", true))
+                .andExpect(status().isOk())
+                .andExpect(view().name("medicalrecord/form"))
+                .andExpect(model().attributeHasFieldErrors("medicalRecord", "appointmentId"))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "บันทึกประวัติการรักษาได้เฉพาะนัดที่เสร็จสิ้นแล้ว")));
+    }
+
+    @Test
+    @DisplayName("สร้างประวัติกับนัดที่ไม่มีอยู่จริง ต้องกลับฟอร์มเดิมพร้อมข้อความ")
+    void createMedicalRecord_appointmentNotFound_showsFormError() throws Exception {
+
+        when(medicalRecordService.createMedicalRecord(org.mockito.ArgumentMatchers.any()))
+                .thenThrow(new ResourceNotFoundException(
+                        "ไม่พบนัดหมายสำหรับบันทึกประวัติการรักษา"));
+
+        mockMvc.perform(post("/medical-records")
+                        .param("appointmentId", "99999")
+                        .param("diagnosis", "ตรวจสุขภาพทั่วไป")
+                        .sessionAttr("isStaff", true))
+                .andExpect(status().isOk())
+                .andExpect(view().name("medicalrecord/form"))
+                .andExpect(model().attributeHasFieldErrors("medicalRecord", "appointmentId"));
+    }
+
+    @Test
+    @DisplayName("แก้ไขประวัติเป็นนัดที่ยังไม่ COMPLETED ต้องกลับฟอร์มแก้ไขเดิม")
+    void updateMedicalRecord_appointmentNotCompleted_showsFormError() throws Exception {
+
+        when(medicalRecordService.updateMedicalRecord(
+                eq(1L),
+                org.mockito.ArgumentMatchers.any()))
+                .thenThrow(new DuplicateResourceException(
+                        "บันทึกประวัติการรักษาได้เฉพาะนัดที่เสร็จสิ้นแล้ว (COMPLETED)"));
+
+        mockMvc.perform(post("/medical-records/1/edit")
+                        .param("appointmentId", "1")
+                        .param("diagnosis", "ตรวจสุขภาพทั่วไป")
+                        .sessionAttr("isStaff", true))
+                .andExpect(status().isOk())
+                .andExpect(view().name("medicalrecord/form"))
+                .andExpect(model().attribute("recordId", 1L))
+                .andExpect(model().attributeHasFieldErrors("medicalRecord", "appointmentId"));
+    }
+
 }

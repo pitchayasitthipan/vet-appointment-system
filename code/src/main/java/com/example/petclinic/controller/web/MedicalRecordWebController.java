@@ -1,10 +1,10 @@
-
 package com.example.petclinic.controller.web;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import com.example.petclinic.exception.DuplicateResourceException;
 import com.example.petclinic.exception.ResourceNotFoundException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,7 +33,7 @@ public class MedicalRecordWebController {
         this.medicalRecordService = medicalRecordService;
     }
 
-        // ตรวจสิทธิ์เจ้าหน้าที่ก่อนเข้าใช้งานหน้าประวัติการรักษา
+    // ตรวจสิทธิ์เจ้าหน้าที่ก่อนเข้าใช้งานหน้าประวัติการรักษา
     private boolean isNotStaff(HttpSession session) {
         return !StaffAccess.isStaff(session);
     }
@@ -46,7 +46,7 @@ public class MedicalRecordWebController {
         return "redirect:/owners/staff";
     }
 
-        // เปิดหน้ารายการประวัติการรักษา
+    // เปิดหน้ารายการประวัติการรักษา
     @GetMapping
     public String listMedicalRecords(
             Model model,
@@ -65,7 +65,7 @@ public class MedicalRecordWebController {
         return "medicalrecord/list";
     }
 
-        // เปิดฟอร์มสำหรับเพิ่มประวัติการรักษา
+    // เปิดฟอร์มสำหรับเพิ่มประวัติการรักษา
     @GetMapping("/new")
     public String showCreateForm(
             Model model,
@@ -80,7 +80,7 @@ public class MedicalRecordWebController {
         return "medicalrecord/form";
     }
 
-        // รับข้อมูลจากฟอร์มแล้วบันทึกผ่าน Service
+    // รับข้อมูลจากฟอร์มแล้วบันทึกผ่าน Service
     @PostMapping
     public String createMedicalRecord(
             @Valid @ModelAttribute("medicalRecord") MedicalRecordRequestDTO requestDTO,
@@ -96,7 +96,13 @@ public class MedicalRecordWebController {
             return "medicalrecord/form";
         }
 
-        medicalRecordService.createMedicalRecord(requestDTO);
+        // นัดหมายไม่มีจริง / ยังไม่ COMPLETED -> กลับฟอร์มเดิม แจ้งใต้ช่องรหัสนัดหมาย (ข้อมูลที่กรอกไม่หาย)
+        try {
+            medicalRecordService.createMedicalRecord(requestDTO);
+        } catch (ResourceNotFoundException | DuplicateResourceException | IllegalArgumentException e) {
+            bindingResult.rejectValue("appointmentId", "appointment.invalid", e.getMessage());
+            return "medicalrecord/form";
+        }
 
         redirectAttributes.addFlashAttribute(
                 "successMessage", "บันทึกประวัติการรักษาสำเร็จ");
@@ -104,7 +110,7 @@ public class MedicalRecordWebController {
         return "redirect:/medical-records";
     }
 
-        // แสดงรายละเอียดประวัติการรักษาตาม ID
+    // แสดงรายละเอียดประวัติการรักษาตาม ID
     @GetMapping("/{id}")
     public String viewMedicalRecord(
             @PathVariable Long id,
@@ -124,7 +130,7 @@ public class MedicalRecordWebController {
         return "medicalrecord/detail";
     }
 
-        // เปิดฟอร์มแก้ไข โดยดึงข้อมูลเดิมมาแสดง
+    // เปิดฟอร์มแก้ไข โดยดึงข้อมูลเดิมมาแสดง
     @GetMapping("/{id}/edit")
     public String showEditForm(
             @PathVariable Long id,
@@ -154,7 +160,7 @@ public class MedicalRecordWebController {
         return "medicalrecord/form";
     }
 
-        // รับข้อมูลที่แก้ไข แล้วส่งให้ Service บันทึก
+    // รับข้อมูลที่แก้ไข แล้วส่งให้ Service บันทึก
     @PostMapping("/{id}/edit")
     public String updateMedicalRecord(
             @PathVariable Long id,
@@ -173,7 +179,18 @@ public class MedicalRecordWebController {
             return "medicalrecord/form";
         }
 
-        medicalRecordService.updateMedicalRecord(id, requestDTO);
+        // ตรวจก่อนว่าประวัติมีอยู่จริง (ไม่มี -> @ExceptionHandler พากลับหน้ารายการ)
+        // จะได้แยกออกจากกรณีรหัสนัดหมายผิดด้านล่าง
+        medicalRecordService.getMedicalRecordById(id);
+
+        // นัดหมายไม่มีจริง / ยังไม่ COMPLETED -> กลับฟอร์มเดิม แจ้งใต้ช่องรหัสนัดหมาย
+        try {
+            medicalRecordService.updateMedicalRecord(id, requestDTO);
+        } catch (ResourceNotFoundException | DuplicateResourceException | IllegalArgumentException e) {
+            bindingResult.rejectValue("appointmentId", "appointment.invalid", e.getMessage());
+            model.addAttribute("recordId", id);
+            return "medicalrecord/form";
+        }
 
         redirectAttributes.addFlashAttribute(
                 "successMessage", "แก้ไขประวัติการรักษาสำเร็จ");
@@ -181,7 +198,7 @@ public class MedicalRecordWebController {
         return "redirect:/medical-records/" + id;
     }
 
-        // ลบประวัติการรักษาตาม ID
+    // ลบประวัติการรักษาตาม ID
     @PostMapping("/{id}/delete")
     public String deleteMedicalRecord(
             @PathVariable Long id,
@@ -200,18 +217,17 @@ public class MedicalRecordWebController {
         return "redirect:/medical-records";
     }
 
+    // ถ้าไม่พบประวัติการรักษา ให้กลับหน้ารายการพร้อมแจ้งเตือน
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public String handleRecordNotFound(
+            ResourceNotFoundException ex,
+            RedirectAttributes redirectAttributes) {
 
-// ถ้าไม่พบประวัติการรักษา ให้กลับหน้ารายการพร้อมแจ้งเตือน
-@ExceptionHandler(ResourceNotFoundException.class)
-public String handleRecordNotFound(
-        ResourceNotFoundException ex,
-        RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute(
+                "errorMessage",
+                "ไม่พบประวัติการรักษาที่ต้องการ");
 
-    redirectAttributes.addFlashAttribute(
-            "errorMessage",
-            "ไม่พบประวัติการรักษาที่ต้องการ");
-
-    return "redirect:/medical-records";
-}
+        return "redirect:/medical-records";
+    }
 
 }
