@@ -33,6 +33,10 @@ class MedicalRecordServiceTest {
     @Mock
     private MedicalRecordRepository medicalRecordRepository;
 
+    // จำลอง Service สำหรับตรวจสถานะนัดหมาย
+    @Mock
+    private AppointmentService appointmentService;
+
     @InjectMocks
     private MedicalRecordServiceImpl medicalRecordService;
 
@@ -296,6 +300,98 @@ class MedicalRecordServiceTest {
                     .save(any(MedicalRecord.class));
         }
     }
+
+        // ===== ทดสอบการเชื่อม Appointment กับ MedicalRecord =====
+        @Nested
+        @DisplayName("ทดสอบการตรวจนัดหมายก่อนบันทึกประวัติ")
+        class AppointmentValidationTests {
+
+            @Test
+            @DisplayName("สร้างประวัติได้เมื่อ Appointment ผ่านการตรวจสอบ")
+            void create_WhenAppointmentCompleted_ShouldSave() {
+
+                // จำลองว่านัดหมายผ่านการตรวจสอบแล้ว
+                when(medicalRecordRepository.save(any(MedicalRecord.class)))
+                        .thenReturn(sampleMedicalRecord);
+
+                medicalRecordService.createMedicalRecord(sampleRequestDTO);
+
+                // ต้องตรวจนัดหมายก่อนบันทึก
+                verify(appointmentService)
+                        .requireCompletedForMedicalRecord(10L);
+                verify(medicalRecordRepository)
+                        .save(any(MedicalRecord.class));
+            }
+
+            @Test
+            @DisplayName("ไม่สร้างประวัติเมื่อนัดหมายไม่มีอยู่จริง")
+            void create_WhenAppointmentNotFound_ShouldNotSave() {
+
+                // จำลองกรณีไม่พบนัดหมาย
+                when(appointmentService.requireCompletedForMedicalRecord(10L))
+                        .thenThrow(new ResourceNotFoundException("ไม่พบนัดหมาย"));
+
+                assertThatThrownBy(
+                        () -> medicalRecordService.createMedicalRecord(sampleRequestDTO))
+                        .isInstanceOf(ResourceNotFoundException.class);
+
+                // ต้องไม่บันทึกข้อมูลเมื่อการตรวจสอบไม่ผ่าน
+                verify(medicalRecordRepository, never())
+                        .save(any(MedicalRecord.class));
+            }
+
+            @Test
+            @DisplayName("ไม่สร้างประวัติเมื่อนัดหมายยังไม่ COMPLETED")
+            void create_WhenAppointmentNotCompleted_ShouldNotSave() {
+
+                // จำลองกรณีนัดหมายยังไม่เสร็จสิ้น
+                when(appointmentService.requireCompletedForMedicalRecord(10L))
+                        .thenThrow(new IllegalStateException("นัดหมายยังไม่เสร็จสิ้น"));
+
+                assertThatThrownBy(
+                        () -> medicalRecordService.createMedicalRecord(sampleRequestDTO))
+                        .isInstanceOf(IllegalStateException.class);
+
+                verify(medicalRecordRepository, never())
+                        .save(any(MedicalRecord.class));
+            }
+
+            @Test
+            @DisplayName("แก้ไขประวัติได้เมื่อ Appointment ผ่านการตรวจสอบ")
+            void update_WhenAppointmentCompleted_ShouldSave() {
+
+                when(medicalRecordRepository.findById(1L))
+                        .thenReturn(Optional.of(sampleMedicalRecord));
+                when(medicalRecordRepository.save(any(MedicalRecord.class)))
+                        .thenReturn(sampleMedicalRecord);
+
+                medicalRecordService.updateMedicalRecord(1L, sampleRequestDTO);
+
+                // ต้องตรวจสถานะนัดหมายก่อนแก้ไข
+                verify(appointmentService)
+                        .requireCompletedForMedicalRecord(10L);
+                verify(medicalRecordRepository)
+                        .save(any(MedicalRecord.class));
+            }
+
+            @Test
+            @DisplayName("ไม่แก้ไขประวัติเมื่อนัดหมายยังไม่ COMPLETED")
+            void update_WhenAppointmentNotCompleted_ShouldNotSave() {
+
+                when(medicalRecordRepository.findById(1L))
+                        .thenReturn(Optional.of(sampleMedicalRecord));
+
+                when(appointmentService.requireCompletedForMedicalRecord(10L))
+                        .thenThrow(new IllegalStateException("นัดหมายยังไม่เสร็จสิ้น"));
+
+                assertThatThrownBy(
+                        () -> medicalRecordService.updateMedicalRecord(1L, sampleRequestDTO))
+                        .isInstanceOf(IllegalStateException.class);
+
+                verify(medicalRecordRepository, never())
+                        .save(any(MedicalRecord.class));
+            }
+        }
 
         // ===== ส่วนทดสอบการลบ MedicalRecord =====
     @Nested
