@@ -29,7 +29,7 @@ public class MedicalRecord {
     @Column(name = "treatment", columnDefinition = "TEXT")
     private String treatment;
 
-    @Column(name = "vaccine_name", length = 255)
+    @Column(name = "vaccine_name", length = 150)
     private String vaccineName;
 
     @Column(name = "vaccine_date")
