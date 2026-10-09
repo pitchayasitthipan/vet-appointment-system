@@ -3,6 +3,7 @@ package com.example.petclinic.service;
 import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,5 +70,16 @@ class ClinicConfigServiceTest {
         assertThat(clinicConfigService2.getBaseConsultationFee()).isEqualByComparingTo(newConsultationFee);
         assertThat(clinicConfigService2.getVaccineServiceFee()).isEqualByComparingTo(newVaccineFee);
         assertThat(clinicConfigService2.getSurgeryServiceFee()).isEqualByComparingTo(newSurgeryFee);
+    }
+
+    @Test
+    @DisplayName("Update Policy Test: ค่าบริการติดลบต้องไม่ถูกบันทึก (IllegalArgumentException -> 400)")
+    void testUpdateFeePolicy_NegativeFee_ShouldThrow() {
+        BigDecimal before = clinicConfigService1.getVaccineServiceFee();
+
+        assertThatThrownBy(() -> clinicConfigService1.updatePricePolicy(null, new BigDecimal("-1"), null))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        assertThat(clinicConfigService1.getVaccineServiceFee()).isEqualByComparingTo(before);
     }
 }

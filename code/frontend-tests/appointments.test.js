@@ -33,7 +33,7 @@ function setup(page, script, handler, cached = false, session = cached ? {...own
   return {dom,w,el,change,submit,calls};
 }
 const bookHandler=(url,options)=>{
-  if(url==="/api/doctors")return {body:doctors};
+  if(url==="/api/v1/doctors/all")return {body:doctors};
   if(url.endsWith("/config"))return {body:{ownerRegistrationPath:"/owners/new",ownerRegistrationEnabled:"false",petRegistrationEnabled:"false"}};
   if(url.endsWith("/lookup"))return {body:owner};
   if(url.endsWith("/pets"))return {body:[{petId:2,petName:"มะลิ"}]};
@@ -87,7 +87,7 @@ test("registration destination retains phone and appointment return flow",async(
   finally{ui.dom.window.close();}
 });
 const listHandler=(url,options)=>{
-  if(url==="/api/doctors")return {body:doctors};
+  if(url==="/api/v1/doctors/all")return {body:doctors};
   if(url.startsWith("/api/v1/appointments/availability"))return {body:["2099-01-05T09:30:00"]};
   if(url.startsWith("/api/v1/appointments?"))return {body:{content:[appointment],totalPages:1,totalElements:1}};
   if(url.startsWith("/api/v1/appointments/4"))return {body:appointment};

@@ -1,6 +1,5 @@
 package com.example.petclinic.controller.api;
 
-import com.example.petclinic.controller.DoctorController;
 import com.example.petclinic.exception.AppointmentExceptionHandler;
 import com.example.petclinic.exception.InvalidAppointmentException;
 import com.example.petclinic.service.DoctorService;
@@ -33,6 +32,6 @@ class AppointmentAdviceSliceTest {
         assertThat(timestamp).isBetween(LocalDateTime.now(ZoneId.of("Asia/Bangkok")).minusSeconds(5),
             LocalDateTime.now(ZoneId.of("Asia/Bangkok")).plusSeconds(5));
         when(doctors.getAllDoctors()).thenReturn(java.util.List.of());
-        mvc.perform(get("/api/doctors")).andExpect(status().isOk());
+        mvc.perform(get("/api/v1/doctors/all")).andExpect(status().isOk());
     }
 }

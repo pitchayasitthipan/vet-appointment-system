@@ -100,7 +100,7 @@
     if(saving || (!owner && !clinic)) return;
     const version=++editVersion;
     try {
-      const [a,doctors]=await Promise.all([P.request(scoped(id, ownerId)),P.request("/api/doctors")]);
+      const [a,doctors]=await Promise.all([P.request(scoped(id, ownerId)),P.request("/api/v1/doctors/all")]);
       if(version!==editVersion || (!owner && !clinic)) return;
       selected=a; el("edit-pet").textContent=`${a.petName} · นัด #${a.appointmentId}`;
       P.options(el("edit-doctor"),doctors.map(d=>[d.doctorId,`${d.firstName} ${d.lastName}`]),"เลือกสัตวแพทย์");
