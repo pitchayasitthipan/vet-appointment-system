@@ -55,7 +55,8 @@
       <div class="contact-strip">
         <a th:href="'tel:' + ${owner.phone}" class="btn-mini pink">
           <span class="icon i-phone icon-sm"></span> <span th:replace="~{fragments/layout :: phone(${owner.phone})}"></span></a>
-        <span class="btn-mini"><span class="icon i-envelope icon-sm"></span> <span th:text="${owner.email}">email</span></span>
+                <span th:if="${isStaff}" class="btn-mini"><span class="icon i-envelope icon-sm"></span> 
+          <span th:text="${owner.email}">email</span></span>
       </div>
     </div>
     <!-- ส่ง ownerId ต่อให้โมดูลนัดหมาย -->
@@ -70,16 +71,20 @@
         <div class="sec-h"><span class="no">1</span><h2>ข้อมูลติดต่อ</h2></div>
         <div class="sec-b kv">
           <span class="k"><span class="icon i-phone icon-sm icon-accent"></span> เบอร์โทร</span>
-          <span class="v"><span th:replace="~{fragments/layout :: phone(${owner.phone})}"></span></span>
-          <span class="k"><span class="icon i-envelope icon-sm icon-accent"></span> อีเมล</span>
-          <span class="v" th:text="${owner.email}"></span>
-          <span class="k"><span class="icon i-map-pin icon-sm icon-accent"></span> ที่อยู่</span>
+          <!-- อีเมล/ที่อยู่ แสดงเฉพาะเจ้าหน้าที่ กันคนอื่นเอาเบอร์มาเปิดดูข้อมูลส่วนตัว -->
+          <th:block th:if="${isStaff}">
+            <span class="k"><span class="icon i-envelope icon-sm icon-accent"></span> อีเมล</span>
+            <span class="v" th:text="${owner.email}"></span>
+            <span class="k"><span class="icon i-map-pin icon-sm icon-accent"></span> ที่อยู่</span>
+            <span class="v" th:text="${owner.address} ?: '-'"></span>
+          </th:block>
+                  <p th:unless="${isStaff}" class="sec-b muted-note">อีเมล ที่อยู่ และผู้ติดต่อฉุกเฉิน แสดงเฉพาะเจ้าหน้าที่ หากต้องการตรวจสอบหรือแก้ไข กรุณาติดต่อคลินิก</p>
           <span class="v" th:text="${owner.address} ?: '-'"></span>
         </div>
       </div>
 
       <!-- 2. ผู้ติดต่อฉุกเฉิน (โทนแดง) -->
-      <div class="sec danger">
+      <div th:if="${isStaff}" class="sec danger">
         <div class="sec-h">
           <span class="no">2</span><h2>ผู้ติดต่อฉุกเฉิน</h2>
           <a th:href="'tel:' + ${owner.emergencyContactPhone}" class="btn-mini">
@@ -98,7 +103,7 @@
     <!-- 3. สัตว์เลี้ยง: ข้อมูลมาจากโมดูล Pet -->
     <div class="sec">
       <div class="sec-h">
-        <span class="no">3</span><h2>สัตว์เลี้ยง</h2>
+        <span class="no" th:text="${isStaff} ? 3 : 2">3</span><h2>สัตว์เลี้ยง</h2>
         <a th:href="@{/pets/new(ownerId=${owner.ownerId})}" class="btn-mini">
           <span class="icon i-plus icon-sm"></span> เพิ่มสัตว์เลี้ยง</a>
       </div>
@@ -111,7 +116,7 @@
     <!-- 4. นัดหมายและประวัติ: ข้อมูลมาจากโมดูล Appointment -->
     <div class="sec">
       <div class="sec-h">
-        <span class="no">4</span><h2>นัดหมายและประวัติล่าสุด</h2>
+        <span class="no" th:text="${isStaff} ? 4 : 3">4</span><h2>นัดหมายและประวัติล่าสุด</h2>
         <a th:href="@{/appointments(ownerId=${owner.ownerId})}" class="btn-text">ดูทั้งหมด</a>
       </div>
       <div class="empty">

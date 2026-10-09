@@ -69,9 +69,18 @@ public class PetOwnerController {
     // ไม่ต้องใส่รหัส)
     @Operation(summary = "ค้นหาเจ้าของสัตว์เลี้ยงด้วยเบอร์โทรศัพท์")
     @GetMapping("/search")
-    public ResponseEntity<PetOwnerResponseDTO> getPetOwnerByPhone(@RequestParam String phone) {
+    public ResponseEntity<PetOwnerResponseDTO> getPetOwnerByPhone(@RequestParam String phone, HttpSession session) {
         PetOwnerResponseDTO owner = petOwnerService.getPetOwnerByPhone(phone);
-        return ResponseEntity.ok(owner);
+        if (StaffAccess.isStaff(session)) {
+            return ResponseEntity.ok(owner); // เจ้าหน้าที่เห็นข้อมูลครบ
+        }
+        // ลูกค้าทั่วไป: ส่งแค่ ownerId กับชื่อ พอให้โมดูลอื่นใช้ต่อ
+        // ไม่ส่งอีเมล ที่อยู่ ผู้ติดต่อฉุกเฉิน กันคนอื่นเอาเบอร์มาเปิดดูข้อมูลส่วนตัว
+        PetOwnerResponseDTO basic = new PetOwnerResponseDTO();
+        basic.setOwnerId(owner.getOwnerId());
+        basic.setFirstName(owner.getFirstName());
+        basic.setLastName(owner.getLastName());
+        return ResponseEntity.ok(basic);
     }
 
     // Get by Id ดึงข้อมูลเจ้าของสัตว์เลี้ยงตาม Id

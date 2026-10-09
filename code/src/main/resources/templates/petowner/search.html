@@ -58,19 +58,13 @@
         <div class="kv">
           <span class="k"><span class="icon i-phone icon-sm icon-accent"></span> เบอร์โทร</span>
           <span class="v"><span th:replace="~{fragments/layout :: phone(${owner.phone})}"></span></span>
-          <span class="k"><span class="icon i-envelope icon-sm icon-accent"></span> อีเมล</span>
-          <span class="v" th:text="*{email}">pitchaya@example.com</span>
+                  </div>
+        <!-- ไม่แสดงอีเมล/ผู้ติดต่อฉุกเฉินในหน้าลูกค้า กันคนอื่นเอาเบอร์มาเปิดดูข้อมูลส่วนตัว -->
+        <p class="muted-note gap-top">อีเมล ที่อยู่ และผู้ติดต่อฉุกเฉิน แสดงเฉพาะเจ้าหน้าที่</p>
         </div>
 
-        <p class="muted-note gap-top">หมวด 2 · ผู้ติดต่อฉุกเฉิน</p>
-        <div class="emer">
-          <span class="icon i-first-aid-kit"></span>
-          <span><b th:text="*{emergencyContactName} ?: '-'">อมลวรรณ พิมพิชัย</b> ·
-            <span th:replace="~{fragments/layout :: phone(${owner.emergencyContactPhone})}"></span></span>
-        </div>
-
-        <!-- 3: ข้อมูลมาจากโมดูล Pet (ตอนนี้ยังไม่มี แสดงกล่องว่าง) -->
-        <p class="muted-note gap-top">หมวด 3 · สัตว์เลี้ยง</p>
+        <!-- 2: ข้อมูลมาจากโมดูล Pet (ตอนนี้ยังไม่มี แสดงกล่องว่าง) -->
+                <p class="muted-note gap-top">หมวด 2 · สัตว์เลี้ยง</p>
         <div class="empty">ยังไม่มีข้อมูลสัตว์เลี้ยง</div>
 
         <div class="row">

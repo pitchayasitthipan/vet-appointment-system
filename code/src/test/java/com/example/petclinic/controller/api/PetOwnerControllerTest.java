@@ -127,17 +127,32 @@ class PetOwnerControllerTest {
         }
 
         @Test
-        @DisplayName("ค้นหาเจ้าของสัตว์เลี้ยงด้วยเบอร์โทร: พบข้อมูล")
+        @DisplayName("ค้นหาเจ้าของสัตว์เลี้ยงด้วยเบอร์โทร: พบข้อมูล (เจ้าหน้าที่เห็นครบ)")
         void testGetPetOwnerByPhone_Found() throws Exception {
                 given(petOwnerService.getPetOwnerByPhone("0876543210")).willReturn(responseDTO);
 
-                mockMvc.perform(get("/api/v1/owners/search?phone=0876543210")
+                mockMvc.perform(get("/api/v1/owners/search?phone=0876543210").session(staffSession)
                                 .contentType(MediaType.APPLICATION_JSON))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.ownerId").value(1))
                                 .andExpect(jsonPath("$.phone").value("0876543210"));
 
                 verify(petOwnerService, times(1)).getPetOwnerByPhone("0876543210");
+        }
+
+        @Test
+        @DisplayName("ค้นหาเจ้าของสัตว์เลี้ยงด้วยเบอร์โทร: ลูกค้าเห็นแค่ ownerId กับชื่อ")
+        void testGetPetOwnerByPhone_Guest() throws Exception {
+                given(petOwnerService.getPetOwnerByPhone("0876543210")).willReturn(responseDTO);
+
+                mockMvc.perform(get("/api/v1/owners/search?phone=0876543210")
+                                .contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.ownerId").value(1))
+                                .andExpect(jsonPath("$.firstName").value(responseDTO.getFirstName()))
+                                .andExpect(jsonPath("$.email").doesNotExist())
+                                .andExpect(jsonPath("$.address").doesNotExist())
+                                .andExpect(jsonPath("$.emergencyContactPhone").doesNotExist());
         }
 
         @Test
