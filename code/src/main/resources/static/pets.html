@@ -1,347 +1,269 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Pets | PawCare Pet Clinic</title>
 
-  <title>My Pets - PawCare Pet Clinic</title>
-
-  <link rel="stylesheet" href="css/pawcare.css">
-  <link rel="stylesheet" href="css/icons.css">
-  <link rel="stylesheet" href="css/pets.css">
+    <link rel="stylesheet" href="/css/pawcare.css">
+    <link rel="stylesheet" href="/css/icons.css">
+    <link rel="stylesheet" href="/css/pets.css">
 </head>
-
 <body>
 
-  <!-- ==================== NAVBAR ==================== -->
-  <header class="navbar">
-    <div class="nav-container">
+    <!-- Navigation -->
+    <header class="pawcare-header">
+        <nav class="pawcare-navbar">
+            <a class="pawcare-brand" href="/index.html">
+                <span class="brand-icon">🐾</span>
+                <span class="brand-text">
+                    <strong>PawCare</strong>
+                    <small>Pet Clinic &amp; Vaccination</small>
+                </span>
+            </a>
 
-      <a href="/" class="brand">
-        <div class="brand-logo">🐾</div>
+            <div class="pawcare-nav-links">
+                <a href="/index.html">Home</a>
+                <a href="/pets.html" class="active">My Pets</a>
+                <a href="#">Appointments</a>
+                <a href="/doctors.html">Veterinarians</a>
+                <a href="#">About</a>
+            </div>
 
-        <div class="brand-text">
-          <span class="brand-name">PawCare</span>
-          <small>Pet Clinic & Vaccination</small>
-        </div>
-      </a>
+            <div class="pawcare-nav-actions">
+                <a href="/pets.html" class="nav-search" aria-label="ค้นหาสัตว์เลี้ยง">⌕</a>
+                <a href="#" class="nav-book-button">จองนัดหมาย</a>
+                <button class="nav-notification" type="button" aria-label="การแจ้งเตือน">♧</button>
+                <div class="nav-avatar">🐶</div>
+            </div>
+        </nav>
+    </header>
 
-      <ul class="nav-links">
-        <li>
-          <a href="/" class="nav-link">Home</a>
-        </li>
+    <main class="pets-page">
 
-        <li>
-          <a href="/pets.html" class="nav-link active">My Pets</a>
-        </li>
+        <!-- Hero -->
+        <section class="pets-hero">
+            <div class="pets-hero-content">
+                <span class="eyebrow"><span>🐾</span> MY PETS</span>
+                <h1>สัตว์เลี้ยงของฉัน</h1>
+                <p>จัดการข้อมูลสัตว์เลี้ยงของคุณ ดูรายละเอียดและข้อมูลสุขภาพเบื้องต้นได้ในที่เดียว</p>
 
-        <li>
-          <a href="#" class="nav-link">Appointments</a>
-        </li>
+                <div class="hero-highlights">
+                    <span>♡ ข้อมูลสัตว์เลี้ยง</span>
+                    <span>♡ ดูรายละเอียดได้ง่าย</span>
+                    <span>♡ จัดการข้อมูลได้สะดวก</span>
+                </div>
+            </div>
 
-        <li>
-          <a href="/doctors.html" class="nav-link">Veterinarians</a>
-        </li>
+            <div class="pets-hero-art" aria-hidden="true">
+                <div class="hero-art-circle">
+                    <span>🐕</span>
+                </div>
+                <span class="hero-paw paw-one">🐾</span>
+                <span class="hero-paw paw-two">♡</span>
+                <span class="hero-sparkle">✦</span>
+            </div>
+        </section>
 
-        <li>
-          <a href="#" class="nav-link">About</a>
-        </li>
-      </ul>
+        <!-- Pet list -->
+        <section class="pets-content">
+            <div class="pets-section-heading">
+                <div>
+                    <span class="eyebrow">YOUR LOVELY COMPANIONS</span>
+                    <h2>รายการสัตว์เลี้ยง</h2>
+                    <p id="petCountText">ดูแลข้อมูลเพื่อนตัวน้อยของคุณ</p>
+                </div>
 
-      <div class="nav-actions">
-        <button class="icon-btn" title="Search">
-          <span class="icon i-magnifying-glass icon-accent"></span>
-        </button>
+                <button class="primary-button" type="button" onclick="openAddPetModal()">
+                    <span>＋</span> เพิ่มสัตว์เลี้ยง
+                </button>
+            </div>
 
-        <button class="btn-book">
-          จองนัดหมาย
-        </button>
+            <div class="pets-toolbar">
+                <label class="pet-search-box" for="petSearchInput">
+                    <span aria-hidden="true">⌕</span>
+                    <input
+                        type="search"
+                        id="petSearchInput"
+                        placeholder="ค้นหาชื่อสัตว์เลี้ยง หรือสายพันธุ์..."
+                        autocomplete="off">
+                </label>
 
-        <button class="icon-btn" title="Notifications">
-          🔔
-          <span class="badge-count">1</span>
-        </button>
+                <div class="pet-toolbar-note">
+                    <span class="status-dot"></span>
+                    จัดการข้อมูลสัตว์เลี้ยงของคุณ
+                </div>
+            </div>
 
-        <div class="avatar-nav pet-user-avatar">
-          👤
-        </div>
-      </div>
+            <div id="petCardsContainer" class="pet-cards-container">
+                <div class="pets-loading">
+                    <span class="loading-paw">🐾</span>
+                    <p>กำลังโหลดข้อมูลสัตว์เลี้ยง...</p>
+                </div>
+            </div>
 
-    </div>
-  </header>
+            <div class="pets-bottom-note">
+                <span>♡</span>
+                <p>เพื่อนตัวน้อยทุกตัวสมควรได้รับการดูแลอย่างดีที่สุด</p>
+                <span>♡</span>
+            </div>
+        </section>
+    </main>
 
+    <!-- Pet detail modal -->
+    <div id="petDetailModal" class="pet-modal" aria-hidden="true">
+        <div class="pet-modal-backdrop" onclick="closeModal('petDetailModal')"></div>
 
-  <!-- ==================== HERO ==================== -->
-  <section class="pet-hero">
-    <div class="pet-hero-content">
+        <section class="pet-modal-dialog" role="dialog" aria-modal="true"
+                 aria-labelledby="petDetailTitle">
+            <button class="modal-close" type="button"
+                    onclick="closeModal('petDetailModal')" aria-label="ปิด">×</button>
 
-      <div class="badge-tag">
-        <span class="icon i-paw-print icon-accent icon-sm"></span>
-        My Pets
-      </div>
+            <div class="modal-heading">
+                <span class="modal-icon">🐾</span>
+                <div>
+                    <span class="eyebrow">PET PROFILE</span>
+                    <h2 id="petDetailTitle">รายละเอียดสัตว์เลี้ยง</h2>
+                    <p>ข้อมูลพื้นฐานของเพื่อนตัวน้อยของคุณ</p>
+                </div>
+            </div>
 
-      <h1>สัตว์เลี้ยงของฉัน</h1>
+            <div class="pet-detail-grid">
+                <div class="detail-item">
+                    <span>ชื่อสัตว์เลี้ยง</span>
+                    <strong id="detailPetName">-</strong>
+                </div>
+                <div class="detail-item">
+                    <span>ประเภท</span>
+                    <strong id="detailPetSpecies">-</strong>
+                </div>
+                <div class="detail-item">
+                    <span>สายพันธุ์</span>
+                    <strong id="detailPetBreed">-</strong>
+                </div>
+                <div class="detail-item">
+                    <span>เพศ</span>
+                    <strong id="detailPetGender">-</strong>
+                </div>
+                <div class="detail-item">
+                    <span>วันเกิด</span>
+                    <strong id="detailPetBirthDate">-</strong>
+                </div>
+                <div class="detail-item">
+                    <span>น้ำหนัก</span>
+                    <strong id="detailPetWeight">-</strong>
+                </div>
+                <div class="detail-item detail-full">
+                    <span>หมายเลขไมโครชิป</span>
+                    <strong id="detailPetMicrochip">-</strong>
+                </div>
+            </div>
 
-      <p>
-        จัดการข้อมูลสัตว์เลี้ยงของคุณ
-        และดูรายละเอียดสุขภาพเบื้องต้นได้ในที่เดียว
-      </p>
-
-    </div>
-
-    <div class="pet-hero-icon">
-      🐶
-    </div>
-  </section>
-
-
-  <!-- ==================== MAIN ==================== -->
-  <main class="pet-main">
-
-    <!-- Header -->
-    <div class="pet-page-header">
-
-      <div>
-        <h2>รายการสัตว์เลี้ยง</h2>
-
-        <p id="petCount">
-          กำลังโหลดข้อมูล...
-        </p>
-      </div>
-
-      <button class="btn-add-pet" onclick="openAddPetModal()">
-        <span class="icon i-plus icon-sm"></span>
-        เพิ่มสัตว์เลี้ยง
-      </button>
-
-    </div>
-
-
-    <!-- Search -->
-    <div class="pet-search">
-
-      <span class="icon i-magnifying-glass icon-accent"></span>
-
-      <input
-        type="text"
-        id="petSearchInput"
-        placeholder="ค้นหาชื่อสัตว์เลี้ยง หรือสายพันธุ์..."
-        autocomplete="off"
-      >
-
-    </div>
-
-
-    <!-- Pet Cards -->
-    <section
-      class="pet-cards"
-      id="petCardsContainer">
-
-      <div class="pet-loading">
-        กำลังโหลดข้อมูลสัตว์เลี้ยง...
-      </div>
-
-    </section>
-
-  </main>
-
-
-  <!-- ==================== PET DETAIL MODAL ==================== -->
-  <div
-    class="modal-overlay"
-    id="petDetailModal">
-
-    <div class="pet-modal">
-
-      <button
-        class="modal-close"
-        onclick="closeModal('petDetailModal')">
-        ×
-      </button>
-
-      <div class="pet-detail-header">
-
-        <div class="pet-detail-avatar" id="detailAvatar">
-          🐾
-        </div>
-
-        <div>
-          <h2 id="detailName">-</h2>
-          <p id="detailSpecies">-</p>
-        </div>
-
-      </div>
-
-      <div class="pet-detail-grid">
-
-        <div class="detail-item">
-          <span>สายพันธุ์</span>
-          <strong id="detailBreed">-</strong>
-        </div>
-
-        <div class="detail-item">
-          <span>เพศ</span>
-          <strong id="detailGender">-</strong>
-        </div>
-
-        <div class="detail-item">
-          <span>วันเกิด</span>
-          <strong id="detailBirthDate">-</strong>
-        </div>
-
-        <div class="detail-item">
-          <span>น้ำหนัก</span>
-          <strong id="detailWeight">-</strong>
-        </div>
-
-        <div class="detail-item detail-full">
-          <span>หมายเลข Microchip</span>
-          <strong id="detailMicrochip">-</strong>
-        </div>
-
-      </div>
-
-      <div class="pet-detail-actions">
-
-        <button
-          class="btn-edit-pet"
-          id="detailEditButton">
-          แก้ไขข้อมูล
-        </button>
-
-        <button
-          class="btn-delete-pet"
-          id="detailDeleteButton">
-          ลบข้อมูล
-        </button>
-
-      </div>
-
+            <div class="modal-actions">
+                <button class="secondary-button" type="button"
+                        onclick="closeModal('petDetailModal')">ปิด</button>
+                <button class="primary-button" type="button"
+                        onclick="editPet(currentPetId)">แก้ไขข้อมูล</button>
+                <button class="danger-button" type="button"
+                        onclick="deletePet(currentPetId)">ลบข้อมูล</button>
+            </div>
+        </section>
     </div>
 
-  </div>
+    <!-- Add pet modal -->
+    <div id="addPetModal" class="pet-modal" aria-hidden="true">
+        <div class="pet-modal-backdrop" onclick="closeModal('addPetModal')"></div>
 
+        <section class="pet-modal-dialog" role="dialog" aria-modal="true"
+                 aria-labelledby="addPetTitle">
+            <button class="modal-close" type="button"
+                    onclick="closeModal('addPetModal')" aria-label="ปิด">×</button>
 
-  <!-- ==================== ADD PET MODAL ==================== -->
-  <div
-    class="modal-overlay"
-    id="addPetModal">
+            <div class="modal-heading">
+                <span class="modal-icon">🐶</span>
+                <div>
+                    <span class="eyebrow">NEW COMPANION</span>
+                    <h2 id="addPetTitle">เพิ่มสัตว์เลี้ยง</h2>
+                    <p>กรอกข้อมูลพื้นฐานของสัตว์เลี้ยงของคุณ</p>
+                </div>
+            </div>
 
-    <div class="pet-modal">
+            <form id="addPetForm" class="pet-form">
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label for="petName">ชื่อสัตว์เลี้ยง *</label>
+                        <input id="petName" name="name" type="text"
+                               placeholder="เช่น Milo" required>
+                    </div>
 
-      <button
-        class="modal-close"
-        onclick="closeModal('addPetModal')">
-        ×
-      </button>
+                    <div class="form-field">
+                        <label for="petSpecies">ประเภทสัตว์ *</label>
+                        <select id="petSpecies" name="species" required>
+                            <option value="">เลือกประเภทสัตว์</option>
+                            <option value="Dog">สุนัข (Dog)</option>
+                            <option value="Cat">แมว (Cat)</option>
+                            <option value="Bird">นก (Bird)</option>
+                            <option value="Rabbit">กระต่าย (Rabbit)</option>
+                            <option value="Other">อื่น ๆ (Other)</option>
+                        </select>
+                    </div>
 
-      <h2>เพิ่มสัตว์เลี้ยง</h2>
+                    <div class="form-field">
+                        <label for="petBreed">สายพันธุ์</label>
+                        <input id="petBreed" name="breed" type="text"
+                               placeholder="ระบุสายพันธุ์">
+                    </div>
 
-      <form id="addPetForm">
+                    <div class="form-field">
+                        <label for="petGender">เพศ</label>
+                        <select id="petGender" name="gender">
+                            <option value="">เลือกเพศ</option>
+                            <option value="Male">เพศผู้</option>
+                            <option value="Female">เพศเมีย</option>
+                        </select>
+                    </div>
 
-        <div class="form-grid">
+                    <div class="form-field">
+                        <label for="petBirthDate">วันเกิด</label>
+                        <input id="petBirthDate" name="birthDate" type="date">
+                    </div>
 
-          <div class="form-group">
-            <label>ชื่อสัตว์เลี้ยง *</label>
+                    <div class="form-field">
+                        <label for="petWeight">น้ำหนัก (กก.)</label>
+                        <input id="petWeight" name="weight" type="number"
+                               min="0.01" step="0.01" placeholder="เช่น 4.5">
+                    </div>
 
-            <input
-              type="text"
-              name="name"
-              required>
-          </div>
+                    <div class="form-field form-full">
+                        <label for="petMicrochipNumber">หมายเลขไมโครชิป</label>
+                        <input id="petMicrochipNumber" name="microchipNumber"
+                               type="text" placeholder="ถ้ามี">
+                    </div>
 
-          <div class="form-group">
-            <label>ประเภท *</label>
+                    <div class="form-field form-full">
+                        <label for="petOwnerId">รหัสเจ้าของสัตว์เลี้ยง *</label>
+                        <input id="petOwnerId" name="ownerId" type="number"
+                               min="1" value="1" required>
+                        <small>กรุณาใช้รหัสเจ้าของที่มีอยู่ในฐานข้อมูล</small>
+                    </div>
+                </div>
 
-            <input
-              type="text"
-              name="species"
-              placeholder="เช่น Dog, Cat"
-              required>
-          </div>
-
-          <div class="form-group">
-            <label>สายพันธุ์</label>
-
-            <input
-              type="text"
-              name="breed">
-          </div>
-
-          <div class="form-group">
-            <label>เพศ</label>
-
-            <select name="gender">
-              <option value="">เลือกเพศ</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>วันเกิด</label>
-
-            <input
-              type="date"
-              name="birthDate">
-          </div>
-
-          <div class="form-group">
-            <label>น้ำหนัก (kg)</label>
-
-            <input
-              type="number"
-              name="weight"
-              step="0.1"
-              min="0">
-          </div>
-
-          <div class="form-group full">
-            <label>Microchip Number</label>
-
-            <input
-              type="text"
-              name="microchipNumber">
-          </div>
-
-          <div class="form-group full">
-            <label>Owner ID *</label>
-
-            <input
-              type="number"
-              name="ownerId"
-              value="1"
-              min="1"
-              required>
-          </div>
-
-        </div>
-
-        <div class="form-actions">
-
-          <button
-            type="button"
-            class="btn-cancel"
-            onclick="closeModal('addPetModal')">
-            ยกเลิก
-          </button>
-
-          <button
-            type="submit"
-            class="btn-submit-pet">
-            บันทึกสัตว์เลี้ยง
-          </button>
-
-        </div>
-
-      </form>
-
+                <div class="modal-actions">
+                    <button class="secondary-button" type="button"
+                            onclick="closeModal('addPetModal')">ยกเลิก</button>
+                    <button class="primary-button" type="submit">
+                        บันทึกข้อมูล
+                    </button>
+                </div>
+            </form>
+        </section>
     </div>
 
-  </div>
+    <footer class="pets-footer">
+        <span>🐾</span> PawCare Pet Clinic &amp; Vaccination
+        <span>Made with love for your pets ♡</span>
+    </footer>
 
-
-  <script src="js/pets.js"></script>
-
+    <script src="/js/pets.js"></script>
 </body>
 </html>
