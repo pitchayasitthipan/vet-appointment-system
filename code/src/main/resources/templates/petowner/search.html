@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ค้นหาข้อมูลของฉัน - PawCare</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/pawcare.css}">
+  <link rel="stylesheet" th:href="@{/css/icons.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar('owners')}"></nav>
+
+<main class="container">
+  <div class="page-bar">
+    <div class="titles">
+      <div class="crumbs">เจ้าของสัตว์เลี้ยง</div>
+      <h1>ค้นหาข้อมูลของฉัน</h1>
+    </div>
+    <div class="actions">
+      <a th:href="@{/owners/new}" class="btn-primary"><span class="icon i-plus"></span> ลงทะเบียนเจ้าของใหม่</a>
+    </div>
+  </div>
+
+  <!-- ข้อความหลังลบข้อมูล หรือเปิดแฟ้มที่ไม่มีอยู่ -->
+  <div th:if="${successMessage}" class="alert" th:text="${successMessage}"></div>
+  <div th:if="${errorMessage}" class="alert alert-warning" th:text="${errorMessage}"></div>
+
+  <div class="split">
+    <!-- ซ้าย: กรอกเบอร์โทรของตัวเอง (ส่งแบบ GET -> /owners?phone=...) -->
+    <div class="list-panel">
+      <form method="get" th:action="@{/owners}" class="search-bar">
+        <span class="icon i-magnifying-glass icon-sm"></span>
+        <input type="tel" name="phone" th:value="${phone}" maxlength="10" required autofocus
+               placeholder="เบอร์โทรศัพท์ เช่น 0812345678">
+        <button type="submit" class="btn-primary btn-sm">ค้นหา</button>
+      </form>
+      <div class="lookup-help">
+        <p><b>ไม่ต้องสมัครสมาชิก</b> ใช้เบอร์โทรศัพท์ที่เคยลงทะเบียนไว้กับคลินิกเพื่อดูข้อมูลของคุณ</p>
+        <p class="muted-note">ยังไม่เคยมาคลินิก? กด "ลงทะเบียนเจ้าของใหม่" ด้านบน</p>
+      </div>
+    </div>
+
+    <!-- ขวา: ผลการค้นหา -->
+    <!-- กรณี 1: เจอเบอร์ -> แสดงข้อมูลเจ้าของ + สัตว์เลี้ยงของคนนั้นคนเดียว -->
+    <div th:if="${owner}" class="sec" th:object="${owner}">
+      <div class="sec-h">
+        <span class="initials"><span th:replace="~{fragments/layout :: initials(${owner})}"></span></span>
+        <h2>
+          <span th:text="*{firstName + ' ' + lastName}">พิชยา สิทธิพันธ์</span>
+          <small class="muted-note" th:text="'· แฟ้ม #' + ${#numbers.formatInteger(owner.ownerId, 4)}">· แฟ้ม #0001</small>
+        </h2>
+        <a th:href="@{/owners/{id}(id=*{ownerId})}" class="btn-mini pink">
+          เปิดแฟ้มเต็ม <span class="icon i-arrow-right icon-sm"></span></a>
+      </div>
+      <div class="sec-b">
+        <p class="muted-note">หมวด 1 · ข้อมูลติดต่อ</p>
+        <div class="kv">
+          <span class="k"><span class="icon i-phone icon-sm icon-accent"></span> เบอร์โทร</span>
+          <span class="v"><span th:replace="~{fragments/layout :: phone(${owner.phone})}"></span></span>
+        </div>
+        <!-- ไม่แสดงอีเมล/ผู้ติดต่อฉุกเฉินในหน้าลูกค้า กันคนอื่นเอาเบอร์มาเปิดดูข้อมูลส่วนตัว -->
+        <p class="muted-note gap-top">อีเมล ที่อยู่ และผู้ติดต่อฉุกเฉิน แสดงเฉพาะเจ้าหน้าที่</p>
+
+        <!-- 2: ข้อมูลมาจากโมดูล Pet (ตอนนี้ยังไม่มี แสดงกล่องว่าง) -->
+        <p class="muted-note gap-top">หมวด 2 · สัตว์เลี้ยง</p>
+        <div class="empty">ยังไม่มีข้อมูลสัตว์เลี้ยง</div>
+
+        <div class="row">
+          <a th:href="@{/appointments/new(ownerId=*{ownerId})}" class="btn-primary btn-sm">
+            <span class="icon i-calendar-plus icon-sm"></span> นัดหมายใหม่</a>
+          <a th:href="@{/pets/new(ownerId=*{ownerId})}" class="btn-secondary btn-sm">
+            <span class="icon i-plus icon-sm"></span> เพิ่มสัตว์เลี้ยง</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- กรณี 2: ไม่เจอเบอร์ -> พาไปลงทะเบียน โดยส่งเบอร์ไปกรอกให้อัตโนมัติ -->
+    <div th:if="${notFound}" class="sec">
+      <div class="empty">
+        <span class="icon-bubble"><span class="icon i-warning icon-accent"></span></span>
+        <h3>ไม่พบเบอร์ <span th:replace="~{fragments/layout :: phone(${phone})}"></span> ในระบบ</h3>
+        <p>ถ้าเป็นการมาครั้งแรก ลงทะเบียนเจ้าของใหม่ได้เลย</p>
+        <a th:href="@{/owners/new(phone=${phone})}" class="btn-primary">
+          <span class="icon i-plus"></span> ลงทะเบียนด้วยเบอร์นี้</a>
+      </div>
+    </div>
+
+    <!-- กรณี 3: ยังไม่ได้ค้นหา -->
+    <div th:unless="${owner != null or notFound != null}" class="sec">
+      <div class="empty">
+        <span class="icon-bubble warm"><span class="icon i-phone icon-navy"></span></span>
+        <h3>กรอกเบอร์โทรศัพท์เพื่อดูข้อมูลของคุณ</h3>
+        <p class="muted-note">ข้อมูลจะแสดงที่นี่หลังจากกดค้นหา</p>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

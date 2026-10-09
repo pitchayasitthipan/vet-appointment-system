@@ -16,17 +16,21 @@ public class PetOwnerRequestDTO {
     private String lastName;
 
     @NotBlank(message = "กรุณากรอกอีเมล")
+    @Size(max = 100, message = "อีเมลต้องมีความยาวไม่เกิน 100 ตัวอักษร")
     @Email(message = "รูปแบบอีเมลไม่ถูกต้อง")
     private String email;
 
     @NotBlank(message = "กรุณากรอกเบอร์โทรศัพท์")
-    @Pattern(regexp = "^0[0-9]{8,9}$", message = "เบอร์โทรศัพท์ที่กรอกต้องไม่เกิน 10 หลัก (เช่น 0812345678)")
+    @Pattern(regexp = "^0[0-9]{8,9}$", message = "เบอร์โทรศัพท์ที่กรอกต้องขึ้นต้นด้วย 0 และ ไม่เกิน 10 หลัก (เช่น 0812345678)")
     private String phone;
 
     private String address;
+
+    @Size(max = 50, message = "ชื่อผู้ติดต่อฉุกเฉินต้องมีความยาวไม่เกิน 50 ตัวอักษร")
     private String emergencyContactName;
 
-    @Pattern(regexp = "^\\(|^0[0-9]{8,9}\\)", message = "เบอร์โทรศัพท์ที่กรอกต้องไม่เกิน 10 หลัก (เช่น 0812345678)")
+    @NotBlank(message = "กรุณากรอกเบอร์ติดต่อฉุกเฉิน")
+    @Pattern(regexp = "^0[0-9]{8,9}$", message = "เบอร์โทรศัพท์ที่กรอกต้องขึ้นต้นด้วย 0 และ ไม่เกิน 10 หลัก (เช่น 0812345678)")
     private String emergencyContactPhone;
 
     public PetOwnerRequestDTO() {

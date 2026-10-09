@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>จัดการรายชื่อเจ้าของ - PawCare</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/pawcare.css}">
+  <link rel="stylesheet" th:href="@{/css/icons.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar('staff')}"></nav>
+
+<main class="container">
+  <div class="page-bar">
+    <div class="titles">
+      <div class="crumbs">สำหรับเจ้าหน้าที่</div>
+      <h1>จัดการรายชื่อเจ้าของสัตว์เลี้ยง</h1>
+    </div>
+    <div class="actions">
+      <a th:href="@{/owners/new}" class="btn-primary"><span class="icon i-plus"></span> ลงทะเบียนเจ้าของใหม่</a>
+      <!-- ออกจากระบบเจ้าหน้าที่ -> กลับไปหน้ากรอกรหัส -->
+      <form method="post" th:action="@{/owners/staff/logout}">
+        <button type="submit" class="btn-ghost"><span class="icon i-sign-out icon-sm"></span> ออกจากระบบเจ้าหน้าที่</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ข้อความแสดงผลหลังลบ หรือเปิดแฟ้มที่ไม่มีอยู่ -->
+  <div th:if="${successMessage}" class="alert" th:text="${successMessage}"></div>
+  <div th:if="${errorMessage}" class="alert alert-warning" th:text="${errorMessage}"></div>
+
+  <div class="split">
+    <!-- ซ้าย: ช่องค้นหา + รายชื่อ + เลขหน้า -->
+    <div class="list-panel">
+      <!-- ค้นหาแบบ GET -> /owners/staff?phone=0812345678 -->
+      <form method="get" th:action="@{/owners/staff}" class="search-bar">
+        <span class="icon i-magnifying-glass icon-sm"></span>
+        <input type="tel" name="phone" th:value="${phone}" maxlength="10"
+               placeholder="ค้นหาเจ้าของสัตว์เลี้ยงด้วยเบอร์โทรศัพท์">
+      </form>
+
+      <p class="list-count" th:if="${phone == null or phone.isBlank()}"
+         th:text="'ทั้งหมด ' + ${totalItems} + ' คน · เรียงตามชื่อ'">ทั้งหมด 24 คน · เรียงตามชื่อ</p>
+      <p class="list-count" th:unless="${phone == null or phone.isBlank()}">
+        ผลค้นหาเบอร์ <b th:text="${phone}">0812345678</b> ·
+        <a th:href="@{/owners/staff}">ล้างการค้นหา</a>
+      </p>
+
+      <!-- ไม่พบข้อมูล: ถ้าค้นด้วยเบอร์ ให้ปุ่มลงทะเบียนด้วยเบอร์นั้น -->
+      <div class="empty" th:if="${#lists.isEmpty(owners)}">
+        <p th:text="${phone == null or phone.isBlank()} ? 'ยังไม่มีข้อมูล' : 'ไม่พบเบอร์นี้ในระบบ'">ยังไม่มีข้อมูล</p>
+        <a th:unless="${phone == null or phone.isBlank()}" th:href="@{/owners/new(phone=${phone})}" class="btn-mini pink">
+          <span class="icon i-plus icon-sm"></span> ลงทะเบียนด้วยเบอร์นี้</a>
+      </div>
+
+      <!-- แถวรายชื่อ: กดแล้วแสดงข้อมูลย่อฝั่งขวา (selected = ownerId) -->
+      <a th:each="owner : ${owners}" class="li"
+         th:classappend="${selectedOwner != null and owner.ownerId == selectedOwner.ownerId} ? 'sel'"
+         th:href="@{/owners/staff(page=${currentPage}, phone=${phone}, selected=${owner.ownerId})}">
+        <span class="initials"><span th:replace="~{fragments/layout :: initials(${owner})}"></span></span>
+        <span>
+          <b th:text="${owner.firstName + ' ' + owner.lastName}">พิชยา สิทธิพันธ์</b>
+          <small><span th:replace="~{fragments/layout :: phone(${owner.phone})}"></span></small>
+        </span>
+      </a>
+
+      <!-- เลขหน้า (Pagination) -->
+      <div class="pager" th:if="${totalPages > 1}">
+        <a th:if="${currentPage > 0}" th:href="@{/owners/staff(page=${currentPage - 1}, sortBy=${sortBy}, sortDir=${sortDir})}">
+          <span class="icon i-caret-left icon-sm"></span></a>
+        <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:text="${i + 1}"
+           th:classappend="${i == currentPage} ? 'active'"
+           th:href="@{/owners/staff(page=${i}, sortBy=${sortBy}, sortDir=${sortDir})}">1</a>
+        <a th:if="${currentPage < totalPages - 1}" th:href="@{/owners/staff(page=${currentPage + 1}, sortBy=${sortBy}, sortDir=${sortDir})}">
+          <span class="icon i-caret-right icon-sm"></span></a>
+      </div>
+    </div>
+
+    <!-- ขวา: ข้อมูลย่อของคนที่เลือก -->
+    <div class="sec" th:if="${selectedOwner}" th:object="${selectedOwner}">
+      <div class="sec-h">
+        <span class="initials"><span th:replace="~{fragments/layout :: initials(${selectedOwner})}"></span></span>
+        <h2>
+          <span th:text="*{firstName + ' ' + lastName}">พิชยา สิทธิพันธ์</span>
+          <small class="muted-note" th:text="'· แฟ้ม #' + ${#numbers.formatInteger(selectedOwner.ownerId, 4)}">· แฟ้ม #0001</small>
+        </h2>
+        <a th:href="@{/owners/{id}(id=*{ownerId})}" class="btn-mini pink">
+          เปิดแฟ้มเต็ม <span class="icon i-arrow-right icon-sm"></span></a>
+      </div>
+      <div class="sec-b">
+        <p class="muted-note">หมวด 1 · ข้อมูลติดต่อ</p>
+        <div class="kv">
+          <span class="k"><span class="icon i-phone icon-sm icon-accent"></span> เบอร์โทร</span>
+          <span class="v"><span th:replace="~{fragments/layout :: phone(${selectedOwner.phone})}"></span></span>
+          <span class="k"><span class="icon i-envelope icon-sm icon-accent"></span> อีเมล</span>
+          <span class="v" th:text="*{email}">pitchaya@example.com</span>
+        </div>
+
+        <p class="muted-note gap-top">หมวด 2 · ผู้ติดต่อฉุกเฉิน</p>
+        <div class="emer">
+          <span class="icon i-first-aid-kit"></span>
+          <span><b th:text="*{emergencyContactName} ?: '-'">อมลวรรณ พิมพิชัย</b> ·
+            <span th:replace="~{fragments/layout :: phone(${selectedOwner.emergencyContactPhone})}"></span></span>
+        </div>
+
+        <!-- หมวด 3: ข้อมูลมาจากโมดูล Pet (ตอนนี้ยังไม่มี แสดงกล่องว่าง) -->
+        <p class="muted-note gap-top">หมวด 3 · สัตว์เลี้ยง</p>
+        <div class="empty">ยังไม่มีข้อมูลสัตว์เลี้ยง</div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

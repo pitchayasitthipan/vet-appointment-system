@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เพิ่มประวัติการรักษา | PawCare</title>
+
+    <style>
+        /* รูปแบบฟอร์มเบื้องต้น */
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f9fc;
+            color: #263238;
+            padding: 32px;
+        }
+
+        .container {
+            max-width: 720px;
+            margin: auto;
+            background: white;
+            padding: 28px;
+            border-radius: 16px;
+        }
+
+        h1 { margin-top: 0; }
+
+        label {
+            display: block;
+            margin: 16px 0 6px;
+            font-weight: bold;
+        }
+
+        input, textarea {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            font: inherit;
+        }
+
+        textarea { min-height: 90px; }
+
+        .error {
+            color: #c62828;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        button, .back {
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font: inherit;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .back {
+            background: #e5e7eb;
+            color: #263238;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+        <!-- เปลี่ยนหัวข้ออัตโนมัติตามโหมดเพิ่มหรือแก้ไข -->
+        <h1 th:text="${recordId == null} ? 'เพิ่มประวัติการรักษา' : 'แก้ไขประวัติการรักษา'">
+            ประวัติการรักษา
+        </h1>
+        <p>บันทึกข้อมูลการรักษาและการฉีดวัคซีนของสัตว์เลี้ยง</p>
+
+        <!-- ส่งข้อมูลจากฟอร์มไปยัง Web Controller -->
+        <!-- ถ้ามี recordId จะส่งไปแก้ไข ถ้าไม่มีจะเป็นการเพิ่มข้อมูล -->
+        <form th:action="${recordId == null} ? @{/medical-records} : @{/medical-records/{id}/edit(id=${recordId})}"
+            th:object="${medicalRecord}"
+            method="post">
+
+            <label for="appointmentId">รหัสนัดหมาย *</label>
+            <input id="appointmentId" type="number" min="1"
+                   th:field="*{appointmentId}" required>
+            <div class="error" th:errors="*{appointmentId}"></div>
+
+            <label for="diagnosis">การวินิจฉัย</label>
+            <textarea id="diagnosis" maxlength="2000"
+                      th:field="*{diagnosis}"></textarea>
+            <div class="error" th:errors="*{diagnosis}"></div>
+
+            <label for="treatment">การรักษา</label>
+            <textarea id="treatment" maxlength="2000"
+                      th:field="*{treatment}"></textarea>
+            <div class="error" th:errors="*{treatment}"></div>
+
+            <label for="vaccineName">ชื่อวัคซีน</label>
+            <input id="vaccineName" type="text" maxlength="255"
+                   th:field="*{vaccineName}">
+            <div class="error" th:errors="*{vaccineName}"></div>
+
+            <label for="vaccineDate">วันที่ฉีดวัคซีน</label>
+            <input id="vaccineDate" type="date"
+                   th:field="*{vaccineDate}">
+
+            <label for="nextVaccineDate">วันที่นัดฉีดวัคซีนครั้งถัดไป</label>
+            <input id="nextVaccineDate" type="date"
+                   th:field="*{nextVaccineDate}">
+
+            <label for="notes">หมายเหตุ</label>
+            <textarea id="notes" maxlength="2000"
+                      th:field="*{notes}"></textarea>
+            <div class="error" th:errors="*{notes}"></div>
+
+            <div class="actions">
+                <button type="submit"
+                        th:text="${recordId == null} ? 'บันทึกข้อมูล' : 'บันทึกการแก้ไข'">
+                    บันทึกข้อมูล
+                </button>
+                <a class="back" th:href="@{/medical-records}">
+                    กลับหน้ารายการ
+                </a>
+            </div>
+        </form>
+    </main>
+</body>
+</html>
