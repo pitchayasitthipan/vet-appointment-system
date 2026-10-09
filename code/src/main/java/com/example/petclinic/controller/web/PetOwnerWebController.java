@@ -1,8 +1,8 @@
 package com.example.petclinic.controller.web;
+import com.example.petclinic.service.StaffPasscodeService;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +25,7 @@ import com.example.petclinic.exception.DuplicateResourceException;
 import com.example.petclinic.exception.ResourceNotFoundException;
 import com.example.petclinic.service.PetOwnerService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
@@ -40,13 +41,13 @@ public class PetOwnerWebController {
     private final PetOwnerService petOwnerService;
 
     // รหัสเจ้าหน้าที่ 8 หลัก (ใช้รหัสเดียวทั้งคลินิก)
-    // เปลี่ยนได้ใน application.properties -> clinic.staff-passcode=xxxxxxxx
-    private final String staffPasscode;
+    // อ่านรหัสจาก clinic.staff-passcode ซึ่งกำหนดผ่าน Environment Variable
+    private final StaffPasscodeService staffPasscodeService;
 
     public PetOwnerWebController(PetOwnerService petOwnerService,
-            @Value("${clinic.staff-passcode:12345678}") String staffPasscode) {
+            StaffPasscodeService staffPasscodeService) {
         this.petOwnerService = petOwnerService;
-        this.staffPasscode = staffPasscode;
+        this.staffPasscodeService = staffPasscodeService;
     }
 
     // ฝั่งลูกค้า: หน้าค้นหาข้อมูลของฉันด้วยเบอร์โทร
@@ -132,13 +133,31 @@ public class PetOwnerWebController {
     // ตรวจรหัสเจ้าหน้าที่: ถูก -> จำไว้ใน session
     // จนกว่าจะออกจากระบบหรือปิดเบราว์เซอร์
     @PostMapping("/staff/unlock")
-    public String unlockStaff(@RequestParam String passcode, HttpSession session,
+    public String unlockStaff(@RequestParam String passcode,
+            HttpSession session,
+            HttpServletRequest request,
             RedirectAttributes redirectAttributes) {
-        if (staffPasscode.equals(passcode)) {
+
+        String clientKey = request.getRemoteAddr();
+
+        StaffPasscodeService.Result result =
+                staffPasscodeService.verify(clientKey, passcode);
+
+        if (result.locked()) {
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "ลองรหัสผิดเกินจำนวนครั้งที่กำหนด กรุณารออีก "
+                            + result.remainingMinutes() + " นาที");
+            return "redirect:/owners/staff";
+        }
+
+        if (result.success()) {
             session.setAttribute(StaffAccess.SESSION_KEY, true);
             return "redirect:/owners/staff";
         }
-        redirectAttributes.addFlashAttribute("errorMessage", "รหัสเจ้าหน้าที่ไม่ถูกต้อง");
+
+        redirectAttributes.addFlashAttribute(
+                "errorMessage", "รหัสเจ้าหน้าที่ไม่ถูกต้อง");
         return "redirect:/owners/staff";
     }
 

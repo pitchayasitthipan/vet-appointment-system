@@ -1,22 +1,11 @@
 
 package com.example.petclinic.controller.web;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-import static org.mockito.ArgumentMatchers.anyLong;
-
 import java.util.List;
 
 import com.example.petclinic.dto.response.MedicalRecordResponseDTO;
-
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import com.example.petclinic.exception.ResourceNotFoundException;
+import com.example.petclinic.service.MedicalRecordService;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,8 +14,19 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.example.petclinic.exception.ResourceNotFoundException;
-import com.example.petclinic.service.MedicalRecordService;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @WebMvcTest(MedicalRecordWebController.class)
 class MedicalRecordWebControllerTest {
@@ -37,6 +37,8 @@ class MedicalRecordWebControllerTest {
     @MockitoBean
     private MedicalRecordService medicalRecordService;
 
+    // ===== Tests เดิม: จำลองว่าเข้าสู่ระบบ Staff แล้ว =====
+
     @Test
     @DisplayName("เปิดรายละเอียดที่ไม่มีอยู่จริง ต้อง Redirect กลับหน้ารายการ")
     void viewMedicalRecord_notFound_redirectsToList() throws Exception {
@@ -45,7 +47,8 @@ class MedicalRecordWebControllerTest {
                 .thenThrow(new ResourceNotFoundException(
                         "ไม่พบประวัติการรักษาที่มีรหัส: 999"));
 
-        mockMvc.perform(get("/medical-records/999"))
+        mockMvc.perform(get("/medical-records/999")
+                        .sessionAttr("isStaff", true))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/medical-records"))
                 .andExpect(flash().attribute(
@@ -60,7 +63,8 @@ class MedicalRecordWebControllerTest {
                 .thenThrow(new ResourceNotFoundException(
                         "ไม่พบประวัติการรักษาที่มีรหัส: 999"));
 
-        mockMvc.perform(get("/medical-records/999/edit"))
+        mockMvc.perform(get("/medical-records/999/edit")
+                        .sessionAttr("isStaff", true))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/medical-records"))
                 .andExpect(flash().attribute(
@@ -75,7 +79,8 @@ class MedicalRecordWebControllerTest {
                 .when(medicalRecordService)
                 .deleteMedicalRecord(999L);
 
-        mockMvc.perform(post("/medical-records/999/delete"))
+        mockMvc.perform(post("/medical-records/999/delete")
+                        .sessionAttr("isStaff", true))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/medical-records"))
                 .andExpect(flash().attribute(
@@ -89,52 +94,90 @@ class MedicalRecordWebControllerTest {
         when(medicalRecordService.updateMedicalRecord(
                 eq(999L),
                 org.mockito.ArgumentMatchers.any()))
-                .thenThrow(new ResourceNotFoundException("ไม่พบประวัติการรักษา"));
+                .thenThrow(new ResourceNotFoundException(
+                        "ไม่พบประวัติการรักษา"));
 
         mockMvc.perform(post("/medical-records/999/edit")
-                    .param("appointmentId", "1")
-                    .param("diagnosis", "ตรวจสุขภาพทั่วไป"))
+                        .param("appointmentId", "1")
+                        .param("diagnosis", "ตรวจสุขภาพทั่วไป")
+                        .sessionAttr("isStaff", true))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/medical-records"))
                 .andExpect(flash().attribute(
                         "errorMessage", "ไม่พบประวัติการรักษาที่ต้องการ"));
     }
 
-    // ตรวจว่า Thymeleaf แสดงหน้ารายการได้จริง
     @Test
     @DisplayName("GET /medical-records - ต้องแสดง HTML สำเร็จ")
     void listMedicalRecords_rendersHtml() throws Exception {
+
         when(medicalRecordService.getAllMedicalRecords())
                 .thenReturn(List.of());
 
-        mockMvc.perform(get("/medical-records"))
+        mockMvc.perform(get("/medical-records")
+                        .sessionAttr("isStaff", true))
                 .andExpect(status().isOk())
                 .andExpect(view().name("medicalrecord/list"))
                 .andExpect(content().contentTypeCompatibleWith("text/html"));
     }
 
-    // ตรวจว่า Thymeleaf แสดงฟอร์มเพิ่มข้อมูลได้จริง
     @Test
     @DisplayName("GET /medical-records/new - ต้องแสดง HTML สำเร็จ")
     void showCreateForm_rendersHtml() throws Exception {
-        mockMvc.perform(get("/medical-records/new"))
+
+        mockMvc.perform(get("/medical-records/new")
+                        .sessionAttr("isStaff", true))
                 .andExpect(status().isOk())
                 .andExpect(view().name("medicalrecord/form"))
                 .andExpect(content().contentTypeCompatibleWith("text/html"));
     }
 
-    // ตรวจว่า Thymeleaf แสดงหน้ารายละเอียดได้จริง
     @Test
     @DisplayName("GET /medical-records/{id} - ต้องแสดง HTML สำเร็จ")
     void viewMedicalRecord_rendersHtml() throws Exception {
+
         MedicalRecordResponseDTO record = new MedicalRecordResponseDTO();
 
         when(medicalRecordService.getMedicalRecordById(1L))
                 .thenReturn(record);
 
-        mockMvc.perform(get("/medical-records/1"))
+        mockMvc.perform(get("/medical-records/1")
+                        .sessionAttr("isStaff", true))
                 .andExpect(status().isOk())
                 .andExpect(view().name("medicalrecord/detail"))
                 .andExpect(content().contentTypeCompatibleWith("text/html"));
+    }
+
+    // ===== Tests ใหม่: ผู้ที่ไม่ได้เป็น Staff ต้องเข้าถึงไม่ได้ =====
+
+    @Test
+    @DisplayName("ผู้ที่ไม่ใช่ Staff ไม่สามารถดูรายการประวัติการรักษาได้")
+    void listMedicalRecords_withoutStaff_redirectsToLogin() throws Exception {
+
+        mockMvc.perform(get("/medical-records"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/owners/staff"));
+
+        verify(medicalRecordService, never()).getAllMedicalRecords();
+    }
+
+    @Test
+    @DisplayName("ผู้ที่ไม่ใช่ Staff ไม่สามารถเปิดฟอร์มเพิ่มประวัติได้")
+    void showCreateForm_withoutStaff_redirectsToLogin() throws Exception {
+
+        mockMvc.perform(get("/medical-records/new"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/owners/staff"));
+    }
+
+    @Test
+    @DisplayName("ผู้ที่ไม่ใช่ Staff ไม่สามารถลบประวัติการรักษาได้")
+    void deleteMedicalRecord_withoutStaff_redirectsToLogin() throws Exception {
+
+        mockMvc.perform(post("/medical-records/1/delete"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/owners/staff"));
+
+        verify(medicalRecordService, never()).deleteMedicalRecord(1L);
     }
 }

@@ -23,6 +23,8 @@ import com.example.petclinic.dto.response.MedicalRecordResponseDTO;
 import com.example.petclinic.service.MedicalRecordService;
 
 import jakarta.validation.Valid;
+import com.example.petclinic.controller.StaffAccess;
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/api/v1/medical-records")
@@ -39,13 +41,17 @@ public class MedicalRecordController {
 
     // ===== 1. ดูประวัติการรักษาแบบแบ่งหน้าและเรียงลำดับ =====
     // GET /api/v1/medical-records?page=0&size=10&sort=medicalRecordId,desc
-    @Operation(summary = "ดูประวัติการรักษาทั้งหมด",
-            description = "รองรับ Pagination และ Sorting ผ่าน page, size และ sort")
+    @Operation(
+        summary = "ดูประวัติการรักษาทั้งหมด",
+        description = "รองรับ Pagination และ Sorting ผ่าน page, size และ sort"
+    )
     @GetMapping
     public ResponseEntity<Page<MedicalRecordResponseDTO>> getAllMedicalRecords(
-            Pageable pageable) {
+            Pageable pageable,
+            HttpSession session) {
 
-        // รับ page, size และ sort จาก URL
+        StaffAccess.requireStaff(session);
+
         Page<MedicalRecordResponseDTO> medicalRecords =
                 medicalRecordService.getAllMedicalRecords(pageable);
 
@@ -58,7 +64,10 @@ public class MedicalRecordController {
             description = "ค้นหาประวัติการรักษาจากรหัสประวัติ")
     @GetMapping("/{id}")
     public ResponseEntity<MedicalRecordResponseDTO> getMedicalRecordById(
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            HttpSession session) {
+
+        StaffAccess.requireStaff(session);
 
         MedicalRecordResponseDTO medicalRecord =
                 medicalRecordService.getMedicalRecordById(id);
@@ -72,13 +81,16 @@ public class MedicalRecordController {
            description = "ค้นหาประวัติการรักษาทั้งหมดที่เกี่ยวข้องกับรหัสนัดหมาย")
     @GetMapping("/appointment/{appointmentId}")
     public ResponseEntity<List<MedicalRecordResponseDTO>> getMedicalRecordsByAppointmentId(
-            @PathVariable Long appointmentId) {
+            @PathVariable Long appointmentId,
+            HttpSession session) {
+
+        StaffAccess.requireStaff(session);
 
         List<MedicalRecordResponseDTO> medicalRecords =
                 medicalRecordService.getMedicalRecordsByAppointmentId(appointmentId);
 
         return ResponseEntity.ok(medicalRecords);
-    }
+    }   
 
     // ===== 4. เพิ่มประวัติการรักษา =====
     // POST /api/v1/medical-records
@@ -86,14 +98,15 @@ public class MedicalRecordController {
            description = "บันทึกข้อมูลการวินิจฉัย การรักษา และวัคซีน")
     @PostMapping
     public ResponseEntity<MedicalRecordResponseDTO> createMedicalRecord(
-            @Valid @RequestBody MedicalRecordRequestDTO requestDTO) {
+            @Valid @RequestBody MedicalRecordRequestDTO requestDTO,
+            HttpSession session) {
+
+        StaffAccess.requireStaff(session);
 
         MedicalRecordResponseDTO createdMedicalRecord =
                 medicalRecordService.createMedicalRecord(requestDTO);
 
-        return new ResponseEntity<>(
-                createdMedicalRecord,
-                HttpStatus.CREATED);
+        return new ResponseEntity<>(createdMedicalRecord, HttpStatus.CREATED);
     }
 
     // ===== 5. แก้ไขประวัติการรักษา =====
@@ -103,7 +116,10 @@ public class MedicalRecordController {
     @PutMapping("/{id}")
     public ResponseEntity<MedicalRecordResponseDTO> updateMedicalRecord(
             @PathVariable Long id,
-            @Valid @RequestBody MedicalRecordRequestDTO requestDTO) {
+            @Valid @RequestBody MedicalRecordRequestDTO requestDTO,
+            HttpSession session) {
+
+        StaffAccess.requireStaff(session);
 
         MedicalRecordResponseDTO updatedMedicalRecord =
                 medicalRecordService.updateMedicalRecord(id, requestDTO);
@@ -116,7 +132,11 @@ public class MedicalRecordController {
     @Operation(summary = "ลบประวัติการรักษา",
            description = "ลบประวัติการรักษาตามรหัสประวัติ")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMedicalRecord(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteMedicalRecord(
+            @PathVariable Long id,
+            HttpSession session) {
+
+        StaffAccess.requireStaff(session);
 
         medicalRecordService.deleteMedicalRecord(id);
 

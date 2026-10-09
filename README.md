@@ -143,6 +143,51 @@ cd vet-appointment-system
 * Hibernate สร้างตารางให้อัตโนมัติ (`spring.jpa.hibernate.ddl-auto=update`)
 * ไม่ควรเผยแพร่รหัสผ่านหรือข้อมูลสำคัญของระบบจริงลงใน Repository
 
+
+
+### ขั้นตอนที่ 3: ตั้งค่ารหัสเจ้าหน้าที่ (STAFF_PASSCODE)
+
+ระบบ PawCare ใช้รหัสผ่านสำหรับเจ้าหน้าที่ (Staff) เป็นตัวเลข 8 หลัก โดยอ่านค่าจาก Environment Variable ชื่อ `STAFF_PASSCODE` แทนการกำหนดรหัสเริ่มต้นไว้ใน Source Code เพื่อป้องกันการใช้รหัสที่เดาได้ง่าย
+
+**กรณีรันโปรเจกต์บน macOS / Linux**
+
+เปิด Terminal ในโฟลเดอร์ `code` แล้วรัน:
+
+```bash
+read -s "STAFF_PASSCODE?กรอกรหัส Staff 8 หลัก: " && echo && export STAFF_PASSCODE
+./mvnw spring-boot:run
+```
+
+คำสั่ง `read -s` ด้านบนใช้กับ Zsh (macOS) โดยจะไม่แสดงรหัสขณะพิมพ์ สำหรับ Bash ให้ใช้ `read -rs -p "กรอกรหัส Staff 8 หลัก: " STAFF_PASSCODE; echo; export STAFF_PASSCODE` แทน
+
+**กรณีรันโปรเจกต์บน Windows PowerShell**
+
+```powershell
+$secure = Read-Host "กรอกรหัส Staff 8 หลัก" -AsSecureString
+$env:STAFF_PASSCODE = [System.Net.NetworkCredential]::new("", $secure).Password
+.\mvnw.cmd spring-boot:run
+```
+
+**กรณี Deploy ด้วย Docker Compose**
+
+ต้องกำหนด `STAFF_PASSCODE` ใน Environment ของ Container ที่รัน Spring Boot ด้วย และตรวจว่า `docker-compose.yml` ส่งตัวแปรนี้เข้า Service ของแอปแล้ว เช่น:
+
+```yaml
+environment:
+  STAFF_PASSCODE: ${STAFF_PASSCODE:?Please set STAFF_PASSCODE}
+```
+
+จากนั้นตั้งค่า `STAFF_PASSCODE` บนเครื่องที่รัน Docker Compose ก่อนสั่ง `docker compose up --build`
+
+**ข้อควรระวัง**
+
+- ใช้รหัสตัวเลข 8 หลักที่กำหนดเอง ไม่ใช้รหัสที่เดาง่าย เช่น `12345678`
+- ห้าม Commit รหัสจริงลง GitHub หรือเขียนไว้ใน README
+- ผู้ที่เปิดเว็บผ่าน Browser ไม่จำเป็นต้องตั้ง Environment Variable เพียงกรอกรหัส Staff ที่คลินิกกำหนด
+- หาก Clone โปรเจกต์ไปรันบนเครื่องอื่น ต้องตั้งค่านี้ในเครื่องที่รันแอปด้วย
+- ระบบจะล็อกการลองรหัสชั่วคราวเมื่อกรอกผิดครบ 3 ครั้งภายใน 10 นาที
+- ต้องตั้งค่า STAFF_PASSCODE ก่อนเรียก Docker Compose มิฉะนั้น Compose จะแจ้งข้อผิดพลาดและไม่เริ่มระบบ
+
 ---
 
 ## How to Run
