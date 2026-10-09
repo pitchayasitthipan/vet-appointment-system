@@ -3,6 +3,7 @@ package com.example.petclinic.exception;
 import java.time.*;
 import java.util.*;
 import com.example.petclinic.controller.AppointmentController;
+import com.example.petclinic.controller.AppointmentGuestController;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 /** Uses the shared error shape without changing other modules' exception behavior. */
-@RestControllerAdvice(assignableTypes = AppointmentController.class)
+@RestControllerAdvice(assignableTypes = {AppointmentController.class, AppointmentGuestController.class})
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class AppointmentExceptionHandler {
     private final Clock clock;
