@@ -1781,8 +1781,9 @@ button,
   :is(button, [class*="btn"], .pager > a, .nav-links a, .home-link):is(:hover, :active) {
     transform: none;
   }
+}
 
-  /* ----- รายการสัตว์เลี้ยงในแฟ้มเจ้าของ (fragments/owner-pets.html) ----- */
+/* ----- รายการสัตว์เลี้ยงในแฟ้มเจ้าของ (fragments/owner-pets.html) ----- */
 .owner-pets {
   list-style: none;
   margin: 0;
@@ -1843,5 +1844,4 @@ button,
 .owner-pet-text small {
   color: #6b6d76;
   font-size: 13px;
-}
 }
