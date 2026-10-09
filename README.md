@@ -1,4 +1,12 @@
 ## Pet Clinic Appointment & Vaccination System
+
+**ระบบนัดหมายของอ้นพร้อมใช้งาน:** จองจากเบอร์โทร → เลือกสัตว์/หมอ/คิวว่าง → บันทึกจริง พร้อมหน้าดู/เลื่อน/ยกเลิกนัด.
+รวมโมดูลเจ้าของและสัตว์เลี้ยงของทีมเพื่อให้ลงทะเบียนแล้วกลับมาจองได้ครบ.
+อ่าน [วิธีรันและงานส่งมอบ Appointment](doc/appointment-delivery.md), [ผลทดสอบ](testresult/appointment-final.md),
+[Factory Method](doc/appointment-factory.md) และ [Sequence Diagrams 3 scenarios](doc/appointment-sequences.md).
+รันใน Windows ด้วย `.\scripts\start-local.ps1` (Java/Maven + PostgreSQL) แล้วเปิด `http://localhost:8080/appointment-create.html`.
+รัน tests ด้วย `mvn -f code/pom.xml test` — 115 tests ผ่าน; frontend 8 tests ผ่าน และ HTTP/PostgreSQL/browser ผ่าน.
+
 ### ระบบบริหารจัดการนัดหมายและประวัติการฉีดวัคซีนสำหรับคลินิกสัตว์เลี้ยง ### 
 **รายละเอียด:** ระบบจัดการข้อมูลและการนัดหมายสำหรับคลินิกสัตว์เลี้ยงที่พัฒนาด้วย Java 17 และ Spring Boot ตามสถาปัตยกรรมแบบ Layered Architecture เพื่อช่วยให้เจ้าของสัตว์เลี้ยงสามารถจัดการข้อมูลสัตว์เลี้ยง นัดหมายกับสัตวแพทย์ และตรวจสอบประวัติการรักษาและการฉีดวัคซีนได้อย่างสะดวก ตลอดจนช่วยสัตวแพทย์ให้จัดการตารางนัดและบันทึกประวัติได้อย่างเป็นระบบ เพื่อลดความซ้ำซ้อนของข้อมูลและเพิ่มประสิทธิภาพในการบริการ
 

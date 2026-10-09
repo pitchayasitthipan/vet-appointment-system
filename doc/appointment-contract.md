@@ -17,30 +17,32 @@ Guest Flow: เบอร์โทร → ownerId → สัตว์ของเ
 - ownerId ต้องตรงกับ Pet.petOwner.ownerId. รายการและรายละเอียดต้องระบุ ownerId.
 
 ## จุดเชื่อมทีม
-- เชอ: PetOwner/PetOwnerDetail มีแล้วใน develop แต่ยังไม่มี API; ใช้ appointment guest adapter ที่ค้นเบอร์โดยตัดช่องว่างและขีดทั้งค่ารับเข้าและค่าที่เก็บ. เบอร์ไทย 9-10 หลักขึ้นต้น 0; ไม่พบคืน 404, หลายแฟ้มคืน 409 เพื่อให้คลินิกตรวจสอบ ไม่เลือกแฟ้มแทน.
-- โอ่ง: develop ยังไม่มี Pet. เพิ่ม entity/repository ขั้นต่ำ `Pet(petId, petName, petOwner)` เพื่อให้ FK และ flow ทำงานจริง; ต้องตกลงชื่อ field เมื่อรวมโมดูล Pet (ไม่ทำ CRUD Pet ซ้ำ).
-- บูบู้: ใช้ DoctorRepository และ Doctor.workSchedule เดิม; ไม่เปลี่ยนหน้าสัตวแพทย์หรือ Singleton.
+- เชอ: รวมโมดูล PetOwner/PetOwnerDetail, CRUD และหน้าลงทะเบียนจาก 20baa33 แล้ว. Appointment guest adapter ตัดช่องว่างและขีดทั้งค่ารับเข้าและค่าที่เก็บ; เบอร์ไทย 9-10 หลักขึ้นต้น 0; ไม่พบคืน 404, หลายแฟ้มคืน 409.
+- โอ่ง: รวม Pet/CRUD/UI จาก cbb47b3 แล้ว ใช้ `Pet.name` (column name) ตามโมดูลทีม; Appointment DTO ส่งชื่อเป็น petName. Repository คงทั้ง query ของ Pet และ lock ของ Appointment.
+- บูบู้: ใช้ Doctor และ Singleton เดิม; ปุ่มจองบนหน้าหมอส่งไปหน้าจองจริงแทน modal ที่จำลองสำเร็จ.
 - เนย: อ้างอิง Appointment.appointmentId จาก MedicalRecord; สถานะ COMPLETED สงวนไว้สำหรับ flow บันทึกการรักษาที่ทีมจะเชื่อมภายหลัง.
 
-## API ที่จะใช้
+## API ที่ใช้งานจริง
 `/api/appointments`: POST, GET (ownerId, status, page, size, sort).
 `/api/appointments/{id}`: GET/PUT (ownerId), PATCH `/{id}/cancel` (ownerId).
 `/api/appointments/availability`: GET (doctorId, date).
 `/api/appointment-guests/lookup`: POST `{phone}` → ownerId, firstName, lastName.
 `/api/appointment-guests/{ownerId}/pets`: GET → petId, petName.
 
-หน้าลงทะเบียนเป็นงานเชอ: ตั้ง URL ผ่าน `/api/appointment-guests/config`; ค่าเริ่มต้น `/owners.html` พร้อม query `phone` และ `returnTo=/appointment-create.html`. หลังรวมงานต้องตรวจเส้นทางนี้กับหน้าจริงของเชอ.
+GET `/api/appointment-guests/config` คืน ownerRegistrationPath=`/owners/new` และ bookingReturnPath=`/appointment-create.html`.
+UI ส่ง `phone` และ `returnTo=appointment` ให้หน้าลงทะเบียนของเชอ. บันทึกแล้วส่ง ownerId ไป `/pets/new`,
+เพิ่มสัตว์แล้วกลับหน้าจอง. รับเฉพาะ returnTo ที่กำหนดไว้ ไม่ใช้ URL ปลายทางที่รับจากผู้ใช้ตรง ๆ.
 
-## API ที่ทำแล้ว ณ commit 11
+## กฎ API
 - GET รายการรับ `direction=asc|desc`, `sort=appointmentId|appointmentDateTime|status|serviceType`; size 1-100, page เริ่ม 0. ค่าเริ่มต้น size=10, sort=appointmentDateTime, direction=asc.
 - POST สร้างคืน 201 พร้อม Location และ version=0. PUT รับ version ล่าสุดและคืน version ที่เพิ่มแล้ว; ยกเลิกผ่าน PATCH ไม่ลบแฟ้ม.
 - error ใช้รูปแบบร่วม timestamp/status/error/message หรือ errors สำหรับ field validation.
 - Availability คืน array วันเวลา ISO ของช่องว่างฝั่งหมอ; create/update ตรวจคิวซ้ำฝั่งสัตว์อีกครั้ง. CANCELLED ไม่นับเป็นคิวที่ถูกจอง.
 - เวลาเวรหมอรองรับวันภาษาไทย เช่น `จันทร์ - ศุกร์: 09:00 - 17:00`, `ทุกวัน: 09:00 - 17:00` หรือหลายกะคั่นด้วย newline/semicolon. ไม่รองรับกะข้ามคืน. เวรที่อ่านไม่ได้ไม่เปิดช่องจอง.
-- เจ้าของสัตว์ทุกคนต้องใช้เบอร์ไม่ซ้ำเมื่อรวมกับโมดูลเชอ. ปัจจุบัน adapter ตรวจกรณีซ้ำได้ แต่ไม่ได้เปลี่ยน schema ของเพื่อน.
+- เจ้าของสัตว์ทุกคนใช้เบอร์ไม่ซ้ำตามโมดูลเชอที่รวมแล้ว. Adapter ยังตรวจกรณีข้อมูลเก่าที่หลายเบอร์ normalize แล้วตรงกัน.
 - Guest phone lookup เป็นการเลือกแฟ้มตามโจทย์ ไม่ใช่การยืนยันตัวตน. ownerId จำกัดผลตามแฟ้ม แต่ไม่ได้เป็นสิทธิ์เข้าถึงแบบระบบ Login.
-- กำหนด `appointments.owner-registration-path` เพื่อเปลี่ยนหน้าลงทะเบียนเมื่อทีมรวมหน้าจริง. ในรอบ 11 commits ยังไม่ได้ redirect จาก UI.
-- ตาราง Pet ขั้นต่ำยังต้องตรวจ field mapping เมื่อรวมกับโมดูลโอ่ง. API เจ้าของ/Pet CRUD และหน้าลงทะเบียนไม่ใช่งานใน branch นี้.
+- กำหนด `appointments.owner-registration-path` เพื่อเปลี่ยนเส้นทางในอนาคต. ปัจจุบันเชื่อม UI กับหน้าลงทะเบียนจริงแล้ว.
+- ไม่เพิ่ม User/Account. การรวมโมดูลเพื่อนเก็บประวัติ Git ต้นฉบับและไม่แก้ remote branch ของเพื่อน.
 
 ## ลำดับ commit
 1. scope/API contract 2. domain 3. repository 4. DTO validation 5. factory

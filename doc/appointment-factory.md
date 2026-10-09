@@ -25,12 +25,11 @@ classDiagram
   AppointmentFactory --> Appointment : creates
 ```
 
-## สถานะส่งงานรอบ 11 commits
+## สถานะส่งงานฉบับสมบูรณ์
 เสร็จ: เอกสารข้อตกลง, domain, repositories, DTO validation, Factory Method, กฎตารางเวร,
-Service สร้าง/ค้นหา/แก้ไข/ยกเลิก, REST API, Guest lookup, tests และโครงหน้าจองที่รองรับมือถือ.
-หน้า `/appointment-create.html` เป็น layout ใน commit 11 ปิดปุ่มและฟอร์มไว้ก่อน;
-การเชื่อมหน้าเว็บกับ API เป็น commit 12 ตามแผนเดิม ไม่แสดงการจองสำเร็จจำลอง.
-ยังเหลือในรอบถัดไป: การเชื่อมหน้าจอง, หน้ารายการ/แก้ไข/ยกเลิก, ทดสอบเพิ่มเติม และ Sequence Diagrams.
+Service สร้าง/ค้นหา/แก้ไข/ยกเลิก, REST API, Guest lookup, หน้าจอง/รายการที่ใช้งานจริงและรองรับมือถือ,
+tests และ Sequence Diagrams 3 scenarios. รวมโมดูลเจ้าของและสัตว์ของทีมแล้ว.
+หน้า `/appointment-create.html` เปิดค้นเบอร์ → เลือกสัตว์ → จองจริง; `/appointments.html` ดู/เลื่อน/ยกเลิก.
 
 ทดสอบทั้งหมดโดยใช้ H2 เฉพาะใน test scope ไม่ต้องเชื่อม PostgreSQL:
 ```powershell
@@ -44,4 +43,7 @@ Factory tests ครอบคลุมทุกประเภทบริกา
 ข้อมูลไม่ครบ อาการว่าง/ยาวเกิน และ factory registration ไม่ครบ/ซ้ำ.
 รอบแรกยังไม่ได้ตรวจ JPA queries/locking; รอบ 11 commits เพิ่ม integration tests ตรวจ mappings,
 queries, การเปลี่ยน version, การคืนคิว และ guest phone lookup กับ H2 แล้ว.
-ยังไม่ได้ทดสอบ PostgreSQL จริงหรือการแข่งขันระหว่างหลาย transaction พร้อมกัน.
+ผลตรวจรอบสุดท้าย 9 ตุลาคม 2026: Java 115 tests ผ่าน, frontend 8 tests ผ่าน.
+HTTP tests บน PostgreSQL 18 ผ่านทั้งลงทะเบียน/CRUD/คืนคิว และการแข่งขัน 2 requests
+กรณีหมอคนเดียวและสัตว์ตัวเดียว (201 หนึ่งคำขอ, 409 หนึ่งคำขอ).
+ตรวจจอง/เลื่อน/ยกเลิกจากเบราว์เซอร์จริงผ่าน. ดูรายละเอียดใน `testresult/appointment-final.md`.
