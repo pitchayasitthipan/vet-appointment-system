@@ -295,7 +295,7 @@ public class PetOwnerWebController {
         try {
             petOwnerService.deletePetOwner(id);
             redirectAttributes.addFlashAttribute("successMessage", "ลบข้อมูลเรียบร้อยแล้ว");
-        } catch (ResourceNotFoundException e) {
+        } catch (ResourceNotFoundException | DuplicateResourceException e) { // ไม่พบ Id หรือ ยังมีสัตว์เลี้ยงอยู่
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/owners/staff";

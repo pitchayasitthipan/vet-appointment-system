@@ -1,5 +1,6 @@
 package com.example.petclinic.service.impl;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -113,8 +114,17 @@ public class PetOwnerServiceImpl implements PetOwnerService {
         if (!petOwnerRepository.existsById(id)) {
             throw new ResourceNotFoundException("ไม่พบข้อมูลเจ้าของสัตว์เลี้ยงรหัส: " + id);
         }
-        // ใช้ CascadeType.ALL ใน petOwner ไป -> ลบ PetOwnerDetail ตามไปด้วย
-        petOwnerRepository.deleteById(id);
+        try {
+            petOwnerRepository.deleteById(id);
+            // flush = ส่งคำสั่งลบไปฐานข้อมูลทันที ถ้ายังมีสัตว์เลี้ยงอ้างถึง (FK owner_id)
+            // จะรู้ตรงนี้เลย
+            petOwnerRepository.flush();
+        } catch (DataIntegrityViolationException e) {
+            // ยังมีสัตว์เลี้ยง (หรือข้อมูลอื่น) ผูกกับเจ้าของคนนี้ -> ไม่ให้ลบ ตอบ 409
+            // พร้อมข้อความที่อ่านเข้าใจ
+            throw new DuplicateResourceException(
+                    "ไม่สามารถลบเจ้าของที่ยังมีสัตว์เลี้ยงในระบบได้ กรุณาลบหรือย้ายสัตว์เลี้ยงก่อน");
+        }
     }
 
     // ค้นหาเจ้าของตาม Id ถ้าไม่เจอ -> 404 (ใช้ร่วมกันใน getById และ update)

@@ -12,12 +12,14 @@ import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -339,5 +341,15 @@ class PetOwnerServiceImplTest {
         assertThrows(ResourceNotFoundException.class, () -> petOwnerService.deletePetOwner(99L));
         verify(petOwnerRepository, times(1)).existsById(99L);
         verify(petOwnerRepository, never()).deleteById(any());
+    }
+
+    @Test
+    @DisplayName("ลบข้อมูลเจ้าของสัตว์เลี้ยง: ยังมีสัตว์เลี้ยงอยู่ -> ลบไม่ได้")
+    void testDeletePetOwner_HasPets() {
+        when(petOwnerRepository.existsById(1L)).thenReturn(true);
+        // ฐานข้อมูลปฏิเสธเพราะ pet.owner_id ยังอ้างถึงเจ้าของคนนี้
+        doThrow(new DataIntegrityViolationException("fk_pet_owner")).when(petOwnerRepository).flush();
+
+        assertThrows(DuplicateResourceException.class, () -> petOwnerService.deletePetOwner(1L));
     }
 }

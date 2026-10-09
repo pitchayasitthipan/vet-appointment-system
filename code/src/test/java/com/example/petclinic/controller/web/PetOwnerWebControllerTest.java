@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +22,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.example.petclinic.dto.response.PetOwnerResponseDTO;
+import com.example.petclinic.exception.DuplicateResourceException;
 import com.example.petclinic.service.PetOwnerService;
 
 // ทดสอบการแบ่งสิทธิ์ 2 ฝั่ง: ลูกค้า (ค้นด้วยเบอร์ตัวเอง) และ เจ้าหน้าที่ (รหัส 8 หลัก)
@@ -152,5 +155,18 @@ class PetOwnerWebControllerTest {
                 .andExpect(redirectedUrl("/owners/staff"));
 
         verify(petOwnerService).deletePetOwner(1L);
+    }
+
+    @Test
+    @DisplayName("เจ้าหน้าที่: ลบเจ้าของที่ยังมีสัตว์เลี้ยง -> กลับหน้ารายชื่อพร้อมข้อความเตือน")
+    void testStaff_DeleteOwnerWithPets() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("isStaff", true);
+        doThrow(new DuplicateResourceException("ไม่สามารถลบเจ้าของที่ยังมีสัตว์เลี้ยงในระบบได้"))
+                .when(petOwnerService).deletePetOwner(1L);
+
+        mockMvc.perform(post("/owners/1/delete").session(session))
+                .andExpect(redirectedUrl("/owners/staff"))
+                .andExpect(flash().attribute("errorMessage", "ไม่สามารถลบเจ้าของที่ยังมีสัตว์เลี้ยงในระบบได้"));
     }
 }
