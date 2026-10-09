@@ -35,12 +35,12 @@ class AppointmentGuestServiceTest {
         verifyNoInteractions(owners);
     }
     @Test void returnsOnlyPetsOfSpecifiedOwner() {
-        Pet p = new Pet(); p.setPetId(2L); p.setPetName("มะลิ");
+        Pet p = new Pet(); p.setPetId(2L); p.setName("มะลิ");
         when(owners.existsById(1L)).thenReturn(true);
-        when(pets.findByPetOwnerOwnerIdOrderByPetNameAsc(1L)).thenReturn(List.of(p));
+        when(pets.findByPetOwnerOwnerIdOrderByNameAsc(1L)).thenReturn(List.of(p));
         assertThat(service.pets(1L)).hasSize(1);
         assertThat(service.pets(1L).get(0).petId()).isEqualTo(2L);
-        verify(pets, times(2)).findByPetOwnerOwnerIdOrderByPetNameAsc(1L);
+        verify(pets, times(2)).findByPetOwnerOwnerIdOrderByNameAsc(1L);
     }
     @Test void missingOwnerDoesNotListPets() {
         assertThatThrownBy(() -> service.pets(9L)).isInstanceOf(ResourceNotFoundException.class);

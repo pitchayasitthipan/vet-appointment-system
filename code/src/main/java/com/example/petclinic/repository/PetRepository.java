@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
 public interface PetRepository extends JpaRepository<Pet, Long> {
-    List<Pet> findByPetOwnerOwnerIdOrderByPetNameAsc(Long ownerId);
-
+    List<Pet> findByPetOwnerOwnerId(Long ownerId);
+    List<Pet> findByPetOwnerOwnerIdOrderByNameAsc(Long ownerId);
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from Pet p where p.petId = :id")
     Optional<Pet> findLockedById(@Param("id") Long id);

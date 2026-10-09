@@ -1,60 +1,34 @@
-package com.example.petclinic.domain.entity;
+package com.example.petclinic.dto.request;
 
 import java.time.LocalDate;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
-@Entity
-@Table(name = "pet")
-public class Pet {
+public class PetRequestDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "pet_id")
-    private Long petId;
-
-    @Column(name = "name", nullable = false, length = 100)
+    @NotBlank(message = "Pet name is required")
     private String name;
 
-    @Column(name = "species", nullable = false, length = 50)
+    @NotBlank(message = "Species is required")
     private String species;
 
-    @Column(name = "breed", length = 100)
     private String breed;
 
-    @Column(name = "gender", length = 20)
     private String gender;
 
-    @Column(name = "birth_date")
     private LocalDate birthDate;
 
-    @Column(name = "weight")
+    @Positive(message = "Weight must be greater than 0")
     private Double weight;
 
-    @Column(name = "microchip_number", unique = true, length = 100)
     private String microchipNumber;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id", nullable = false)
-    private PetOwner petOwner;
+    @NotNull(message = "Owner ID is required")
+    private Long ownerId;
 
-    public Pet() {
-    }
-
-    public Long getPetId() {
-        return petId;
-    }
-
-    public void setPetId(Long petId) {
-        this.petId = petId;
+    public PetRequestDTO() {
     }
 
     public String getName() {
@@ -113,11 +87,11 @@ public class Pet {
         this.microchipNumber = microchipNumber;
     }
 
-    public PetOwner getPetOwner() {
-        return petOwner;
+    public Long getOwnerId() {
+        return ownerId;
     }
 
-    public void setPetOwner(PetOwner petOwner) {
-        this.petOwner = petOwner;
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 }

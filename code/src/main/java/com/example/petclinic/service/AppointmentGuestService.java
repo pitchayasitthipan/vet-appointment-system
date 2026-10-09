@@ -37,7 +37,7 @@ public class AppointmentGuestService {
     public List<AppointmentGuestPetDTO> pets(Long ownerId) {
         if (ownerId == null || ownerId < 1) throw new InvalidAppointmentException("รหัสเจ้าของต้องเป็นจำนวนเต็มบวก");
         if (!owners.existsById(ownerId)) throw new ResourceNotFoundException("ไม่พบเจ้าของสัตว์เลี้ยง");
-        return pets.findByPetOwnerOwnerIdOrderByPetNameAsc(ownerId).stream()
-            .map(p -> new AppointmentGuestPetDTO(p.getPetId(), p.getPetName())).toList();
+        return pets.findByPetOwnerOwnerIdOrderByNameAsc(ownerId).stream()
+            .map(p -> new AppointmentGuestPetDTO(p.getPetId(), p.getName())).toList();
     }
 }

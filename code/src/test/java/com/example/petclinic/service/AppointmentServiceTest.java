@@ -31,7 +31,7 @@ class AppointmentServiceTest {
 
     @BeforeEach void setup() {
         PetOwner owner = new PetOwner(); owner.setOwnerId(1L);
-        pet = new Pet(); pet.setPetId(2L); pet.setPetName("มะลิ"); pet.setPetOwner(owner);
+        pet = new Pet(); pet.setPetId(2L); pet.setName("มะลิ"); pet.setPetOwner(owner);
         doctor = new Doctor(); doctor.setDoctorId(3L); doctor.setFirstName("หมอ"); doctor.setLastName("ใจดี");
         doctor.setWorkSchedule("จันทร์ - ศุกร์: 09:00 - 17:00");
         service = new AppointmentService(appointments, pets, doctors, new AppointmentFactoryRegistry(List.of(

@@ -1,52 +1,20 @@
-package com.example.petclinic.domain.entity;
+package com.example.petclinic.dto.response;
 
 import java.time.LocalDate;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+public class PetResponseDTO {
 
-@Entity
-@Table(name = "pet")
-public class Pet {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "pet_id")
     private Long petId;
-
-    @Column(name = "name", nullable = false, length = 100)
     private String name;
-
-    @Column(name = "species", nullable = false, length = 50)
     private String species;
-
-    @Column(name = "breed", length = 100)
     private String breed;
-
-    @Column(name = "gender", length = 20)
     private String gender;
-
-    @Column(name = "birth_date")
     private LocalDate birthDate;
-
-    @Column(name = "weight")
     private Double weight;
-
-    @Column(name = "microchip_number", unique = true, length = 100)
     private String microchipNumber;
+    private Long ownerId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id", nullable = false)
-    private PetOwner petOwner;
-
-    public Pet() {
+    public PetResponseDTO() {
     }
 
     public Long getPetId() {
@@ -113,11 +81,11 @@ public class Pet {
         this.microchipNumber = microchipNumber;
     }
 
-    public PetOwner getPetOwner() {
-        return petOwner;
+    public Long getOwnerId() {
+        return ownerId;
     }
 
-    public void setPetOwner(PetOwner petOwner) {
-        this.petOwner = petOwner;
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 }
