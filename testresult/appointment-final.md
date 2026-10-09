@@ -1,29 +1,37 @@
-# Appointment — ผลตรวจ PR เฉพาะงานอ้น
+# Appointment — ผลตรวจหลัง review รอบสอง / commit 16
 
 วันที่ 9 ตุลาคม 2026. Branch Nathapat_6733805834_04 จาก develop
-ไม่มี merge commits หรือ commits ของเพื่อนในช่วง develop..HEAD
+เฉพาะ commits งานอ้น ไม่มี merge หรือประวัติ commits ของเพื่อน
 
 ## Backend
-Maven clean test ผ่าน 61 tests, failures 0, errors 0, skipped 0
-JDK 26.0.2, target Java 17, Spring Boot 4.1.1, H2 เฉพาะ test scope
-ครอบคลุม Factory/Service/Schedule/REST API/Guest lookup และ JPA persistence/version/cancellation
-ตรวจ Spring startup พร้อม AppointmentPet projection และ repository ของเรา
+Maven clean test: 69 tests, failures 0, errors 0, skipped 0
+JDK 26.0.2 / target Java 17 / Spring Boot 4.1.1
+ครอบคลุม Factory/Service/Schedule/API/JPA/version/Guest และการปฏิเสธการปลอม ownerId ก่อนถึง service
+ตรวจ lookup เก็บ myOwnerId, lookup ไม่พบล้างแฟ้มเดิม, guest ไม่มี session ได้ 403
+ตรวจ API list/get/create/update/cancel และ pet selection ของคนอื่นได้ 403
+ObjectProvider ใช้ configured Clock หรือ Bangkok fallback; MVC slice ของโมดูลอื่นเปิดได้โดยไม่มี Clock
 
 ## Frontend
-Node --test ผ่าน 9 tests: booking payload/success, 409 refresh, stale phone lookup,
-registration contract, safe text rendering/current version, cancel confirmation,
-ไม่มีสัตว์/ไม่พบเจ้าของแจ้งรอเชื่อมทีมโดยไม่เปิดให้จอง, filtering/pagination
-ใช้ actual scripts ใน jsdom กับ API responses ที่ควบคุมไว้
+Node --test: 9 tests ผ่านบน actual scripts ใน jsdom
+API paths ทั้งหมดของ Appointment/Guest เป็น /api/v1; request ส่ง same-origin session cookies
+การจอง/409/stale lookup/แก้ไข/ยกเลิก/filtering/pagination และจุดเชื่อมที่ยังไม่พร้อมผ่าน
 
-## ขอบเขตผลตรวจ
-ผล 115 Java tests และ registration → Pet flow จาก branch เดิมไม่ใช่ผลของ PR นี้
-ไม่ได้ทดสอบ Owner/Pet registration เพราะไม่รวม implementation ของเพื่อน
-ไม่ได้รัน live PostgreSQL HTTP/browser ใหม่บน branch ที่แยกนี้; ผลตรวจข้างต้นเป็น Maven/H2 และ DOM tests
-HTTP script ถูกปรับให้ใช้ข้อมูลทดสอบที่มีอยู่ และสร้างเฉพาะ appointments สำหรับตรวจหลังทีมเชื่อมฐานข้อมูล
-Docker ยังไม่ได้รัน; ไม่มี load test จำนวนมาก
+## Compatibility กับ Owner
+สำเนาทดสอบแยกจาก PR #4 (20baa33) พร้อมโค้ด Appointment รุ่นนี้: 118 tests ผ่าน
+รวม Owner API/Web MVC tests ที่ไม่มี Clock bean
+ไม่ merge code หรือ commits ของเพื่อนเข้า branch; ไฟล์ compatibility อยู่ tmp ที่ไม่ commit
 
-## ตรวจขอบเขต Git
-PR จาก develop มีเฉพาะ commit author WillingAonon ของอ้น
-ไฟล์ PetOwner/Doctor/GlobalExceptionHandler และหน้าเว็บ/JavaScript ของเพื่อนเหมือน develop
-ไม่มี Pet.java, PetRepository.java, Pet CRUD หรือ PetOwner CRUD เพิ่มใน diff
-มีเพียง AppointmentPet/AppointmentPetRepository ซึ่งเป็น adapter ของงานนัดหมายเอง
+## HTTP และ PostgreSQL จริง
+ฐานข้อมูล appointment_review2 แยก, port แอปทดสอบ 8083
+HTTP script: CRUD/validation/version/cancel/idempotence/คืนคิว ผ่าน
+คำขอพร้อมกันคิวหมอซ้ำ และสัตว์ซ้ำ: 201 หนึ่งคำขอ, 409 อีกคำขอทั้งสองสถานการณ์
+Session owner 2 เข้าถึง/ยกเลิกนัด/เลือกสัตว์ owner 1 ได้ 403
+ละ ownerId แล้วเรียกรหัสนัดคนอื่นได้ 404 โดย scope จาก session
+Query isStaff=true ไม่ให้สิทธิ์; Swagger /v3/api-docs มี paths /api/v1 และ summaries ทุก Appointment endpoint
+Maven package ผ่าน
+
+## งานรอทีม
+Navbar กลาง, shared Owner lookup, shared Pet entity และ Staff clinic list/status รอ modules เข้า develop
+ตามเงื่อนไข reviewer; รายละเอียด doc/appointment-review2.md
+ยังไม่ได้ตรวจ browser ใหม่รอบนี้; DOM tests และ HTTP จริงผ่าน
+ไม่ใช่ load test จำนวนมาก; Docker ไม่ได้รัน

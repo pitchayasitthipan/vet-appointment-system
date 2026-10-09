@@ -2,8 +2,10 @@ package com.example.petclinic.exception;
 
 import java.time.*;
 import java.util.*;
-import com.example.petclinic.controller.AppointmentController;
-import com.example.petclinic.controller.AppointmentGuestController;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.example.petclinic.controller.api.AppointmentController;
+import com.example.petclinic.controller.api.AppointmentGuestController;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -18,7 +20,16 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class AppointmentExceptionHandler {
     private final Clock clock;
+    @Autowired
+    public AppointmentExceptionHandler(ObjectProvider<Clock> clocks) {
+        this(clocks.getIfAvailable(() -> Clock.system(ZoneId.of("Asia/Bangkok"))));
+    }
     public AppointmentExceptionHandler(Clock appointmentClock) { this.clock = appointmentClock; }
+
+    @ExceptionHandler(AppointmentAccessException.class)
+    public ResponseEntity<Map<String, Object>> forbidden(AppointmentAccessException ex) {
+        return error(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
 
     @ExceptionHandler(InvalidAppointmentException.class)
     public ResponseEntity<Map<String, Object>> invalid(InvalidAppointmentException ex) {

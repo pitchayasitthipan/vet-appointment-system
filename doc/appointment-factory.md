@@ -29,7 +29,7 @@ classDiagram
 เฉพาะงาน Appointment ของอ้น ไม่มีโมดูล Owner/Pet ของเพื่อนรวมใน branch
 ใช้ AppointmentPet projection กับ PetOwner/Doctor ที่มีอยู่; หน้าลงทะเบียนรอทีมเชื่อมแยก
 
-`mvn -f code/pom.xml clean test`: 61 tests ผ่านรวม Factory 13 tests
+`mvn -f code/pom.xml clean test`: 69 tests ผ่านรวม Factory 13 tests
 `pnpm --dir code/frontend-tests test`: 9 DOM tests ผ่าน
 Factory tests ตรวจทุกประเภท ข้อมูลขาด/ผิด อาการว่าง/ยาวเกิน และ registry ไม่ครบ/ซ้ำ
 ผลตรวจเฉพาะ branch นี้อยู่ใน testresult/appointment-final.md

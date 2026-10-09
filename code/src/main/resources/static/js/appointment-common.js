@@ -11,7 +11,7 @@ window.PawAppointments = (() => {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 15000);
     try {
-      const res = await fetch(url, { ...options, signal: controller.signal,
+      const res = await fetch(url, { ...options, credentials: "same-origin", signal: controller.signal,
         headers: { ...options.headers, ...(options.body ? { "Content-Type": "application/json" } : {}) } });
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new ApiError(data?.errors ? Object.values(data.errors).join(" · ")
@@ -46,10 +46,10 @@ window.PawAppointments = (() => {
     return new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", dateStyle: "medium", timeStyle: "short" }).format(new Date(`${value}+07:00`));
   }
   async function lookup(phone) {
-    return request("/api/appointment-guests/lookup", { method: "POST", body: JSON.stringify({phone}) });
+    return request("/api/v1/appointment-guests/lookup", { method: "POST", body: JSON.stringify({phone}) });
   }
   async function registration(phone) {
-    const config = await request("/api/appointment-guests/config");
+    const config = await request("/api/v1/appointment-guests/config");
     if (config.ownerRegistrationEnabled === "false") {
       throw new ApiError("ไม่พบเบอร์นี้ ขณะนี้ยังรอเชื่อมหน้าลงทะเบียนเจ้าของ กรุณาติดต่อคลินิก", 404);
     }

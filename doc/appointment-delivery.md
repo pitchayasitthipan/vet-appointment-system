@@ -1,6 +1,6 @@
 # ส่งงาน Appointment — อ้น / Nathapat 6733805834
 
-PR มีเฉพาะ 15 commits ของอ้นจาก develop ไม่มี merge commit หรือประวัติ commit ของเพื่อน
+PR มีเฉพาะ 16 commits ของอ้นจาก develop ไม่มี merge commit หรือประวัติ commit ของเพื่อน
 ประกอบด้วย backend/API/Guest lookup, หน้าจองและรายการ, Factory Method, tests และ sequence diagrams 3 สถานการณ์
 ส่วน Pet/Owner ที่ Appointment อ่านเป็น adapter ของเรา; ไม่เพิ่ม CRUD หรือหน้าเว็บของโมดูลทีม
 
@@ -44,7 +44,14 @@ MedicalRecord/สถานะ CONFIRMED และ COMPLETED รอทีมเ�
 - doc/sql/appointment-schema.sql: schema/FK/index อ้างอิง
 - testresult/appointment-final.md: ผลตรวจเฉพาะ branch นี้
 
-`mvn -f code/pom.xml clean test`: 61 tests ผ่าน
+`mvn -f code/pom.xml clean test`: 69 tests ผ่าน
 `pnpm --dir code/frontend-tests test`: 9 DOM tests ผ่าน
 HTTP script ใน test/appointment_http_test.py ใช้เฉพาะฐานข้อมูลทดสอบที่เตรียม owner/สัตว์สองตัว/หมอสองคนไว้แล้ว
 สร้างเฉพาะ appointments; ไม่มีการสร้างหรือแก้ข้อมูลโมดูลอื่น
+
+## Commit 16 — ปรับตาม review รอบสอง
+แก้ Clock fallback, session owner scoping, API /api/v1, package api/web, Swagger และ tests
+69 Java tests และ 9 DOM tests ผ่าน; ตรวจร่วม Owner ในสำเนาแยก 118 tests ผ่านโดยไม่ merge เข้า branch
+HTTP/PostgreSQL บนฐานข้อมูล appointment_review2 แยก: CRUD/validation/version/cancel/concurrency ผ่าน
+session เจ้าของคนที่สองอ่าน/ยกเลิก/เลือกสัตว์ของคนแรกไม่ได้; isStaff=true ใน URL ให้สิทธิ์ไม่ได้
+รายการรอ PR ทีมเข้า develop อยู่ใน doc/appointment-review2.md

@@ -24,13 +24,13 @@ CONFIRMED/COMPLETED สงวนให้ทีมเชื่อม flow หม
 Guest lookup เป็นการเลือกแฟ้มตามโจทย์ ไม่มี User/Account/login หรือการยืนยันตัวตน
 
 ## API
-- POST/GET `/api/appointments`
-- GET/PUT `/api/appointments/{id}?ownerId=...`
-- PATCH `/api/appointments/{id}/cancel?ownerId=...`
-- GET `/api/appointments/availability?doctorId=...&date=...`
-- POST `/api/appointment-guests/lookup` รับ `{phone}` คืน ownerId/ชื่อ; normalize ช่องว่าง/ขีด, ไม่พบ 404, หลายแฟ้ม 409
-- GET `/api/appointment-guests/{ownerId}/pets` คืน petId/petName
-- GET `/api/appointment-guests/config` คืนเส้นทางลงทะเบียนและ flags พร้อมใช้งาน
+- POST/GET `/api/v1/appointments`
+- GET/PUT `/api/v1/appointments/{id}?ownerId=...`
+- PATCH `/api/v1/appointments/{id}/cancel?ownerId=...`
+- GET `/api/v1/appointments/availability?doctorId=...&date=...`
+- POST `/api/v1/appointment-guests/lookup` รับ `{phone}` คืน ownerId/ชื่อ; normalize ช่องว่าง/ขีด, ไม่พบ 404, หลายแฟ้ม 409
+- GET `/api/v1/appointment-guests/{ownerId}/pets` คืน petId/petName
+- GET `/api/v1/appointment-guests/config` คืนเส้นทางลงทะเบียนและ flags พร้อมใช้งาน
 
 GET รายการ: ownerId, status, page >= 0, size 1–100, sort=appointmentId|appointmentDateTime|status|serviceType, direction=asc|desc
 POST คืน 201 พร้อม Location/version=0; ยกเลิกผ่าน PATCH ไม่ลบแถว
@@ -44,7 +44,19 @@ Availability คืน array ISO ของคิวหมอ; create/update ต�
 ลิงก์เพิ่มสัตว์ใช้ `/pets/new?ownerId=...&returnTo=appointment` เฉพาะเมื่อเปิด flag
 PR นี้ไม่มี implementation ของหน้าลงทะเบียนทั้งสอง
 
-## 15 commits ของอ้น
+## 16 commits ของอ้น
 1 scope/API 2 domain 3 queries/locks 4 DTO 5 Factory Method 6 schedule rules
 7 create/read 8 update/cancel 9 REST API 10 guest lookup 11 booking layout
 12 booking API connection 13 list/edit/cancel UI 14 tests 15 isolated adapters/diagrams/delivery
+
+## Session และ review รอบสอง (commit 16)
+POST lookup สำเร็จเก็บ Long ownerId ใน session key myOwnerId; lookup ไม่พบล้างค่าที่เลือกก่อนหน้า
+GET/list/PUT/PATCH และ POST นัด ใช้ session เป็นสิทธิ์ ไม่เชื่อ ownerId ใน query/body
+Guest ที่ยังไม่ค้นเบอร์หรือส่ง ownerId ต่างจาก session ได้ 403 ก่อนถึง service
+GET/list/PUT/PATCH ไม่ระบุ ownerId ได้ โดยใช้แฟ้มจาก session; Staff ต้องระบุ ownerId ที่ต้องการ
+session isStaff=true อนุญาตเลือกแฟ้มอื่นตาม contract ของทีม; query/body isStaff ไม่ให้สิทธิ์
+AppointmentAccess เป็น helper ของเรา รอเปลี่ยนไปใช้ StaffAccess หลัง PR #4 เข้า develop
+AppointmentExceptionHandler ใช้ ObjectProvider<Clock> พร้อม Bangkok fallback และคง constructor Clock สำหรับ tests
+REST controllers อยู่ controller/api; view controller อยู่ controller/web
+Swagger /swagger-ui.html ใช้ @Tag/@Operation ทุก Appointment/Guest endpoint
+เส้นทางเดิม /api/appointments และ /api/appointment-guests ถูกย้าย ต้องปรับ callers เป็น /api/v1/...

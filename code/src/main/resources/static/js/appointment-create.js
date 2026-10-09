@@ -29,7 +29,7 @@
     P.options(time, [], "กำลังตรวจคิวว่าง…"); ready();
     if (!owner || !doctor.value || !date.value) { P.options(time, [], "เลือกหมอและวันที่ก่อน"); return; }
     try {
-      const slots = await P.request(`/api/appointments/availability?${P.query({doctorId:doctor.value, date:date.value})}`);
+      const slots = await P.request(`/api/v1/appointments/availability?${P.query({doctorId:doctor.value, date:date.value})}`);
       if (version !== slotVersion) return;
       P.options(time, slots.map(slot => [slot, slot.slice(11, 16) + " น."]), slots.length ? "เลือกเวลา" : "ไม่มีคิวว่างในวันนี้");
       P.message(feedback, slots.length ? "" : "ไม่มีคิวที่รองรับในวันนี้ กรุณาเลือกวันที่หรือสัตวแพทย์อื่น");
@@ -44,7 +44,7 @@
     P.message(byId("owner-result"), "กำลังค้นหาข้อมูล…");
     try {
       const found = await P.lookup(phone.value.trim());
-      const pets = await P.request(`/api/appointment-guests/${found.ownerId}/pets`);
+      const pets = await P.request(`/api/v1/appointment-guests/${found.ownerId}/pets`);
       if (version !== lookupVersion) return;
       owner = found; P.setOwner(found);
       P.message(byId("owner-result"), `พบแฟ้ม ${found.firstName} ${found.lastName}`, "success");
@@ -53,7 +53,7 @@
       byId("time-fields").disabled = !pets.length || !doctorsReady;
       if (!pets.length) {
         P.message(feedback, "กรุณาเพิ่มสัตว์เลี้ยงก่อนจองนัดหมาย");
-        const config = await P.request("/api/appointment-guests/config");
+        const config = await P.request("/api/v1/appointment-guests/config");
         if (version !== lookupVersion) return;
         if (config.petRegistrationEnabled === "true") {
           const link = document.createElement("a"); link.href = `/pets/new?${P.query({ownerId:found.ownerId, returnTo:"appointment"})}`;
@@ -79,7 +79,7 @@
     saving = true; ready(); byId("owner-lookup-form").querySelector("fieldset").disabled = true;
     try {
       const serviceType = form.querySelector('input[name="serviceType"]:checked').value;
-      const result = await P.request("/api/appointments", { method: "POST", body: JSON.stringify({ownerId:bookedOwner.ownerId,
+      const result = await P.request("/api/v1/appointments", { method: "POST", body: JSON.stringify({ownerId:bookedOwner.ownerId,
         petId:Number(pet.value), doctorId:Number(doctor.value), appointmentDateTime:time.value,
         serviceType, symptoms:byId("symptoms").value.trim()}) });
       complete = true; byId("pet-fields").disabled = true; byId("time-fields").disabled = true;

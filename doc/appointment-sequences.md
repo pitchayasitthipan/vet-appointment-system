@@ -12,7 +12,7 @@ sequenceDiagram
     participant FM as AppointmentFactoryRegistry
     participant DB as PostgreSQL
     Guest->>UI: กรอกเบอร์โทร
-    UI->>GC: POST /api/appointment-guests/lookup
+    UI->>GC: POST /api/v1/appointment-guests/lookup
     GC->>GS: lookup(phone)
     GS->>DB: ค้นเบอร์ที่ normalize แล้ว
     alt ไม่พบแฟ้ม
@@ -29,7 +29,7 @@ sequenceDiagram
         AC->>AS: availability(doctorId, date)
         AS->>DB: อ่านนัด PENDING/CONFIRMED ของหมอ
         AS-->>UI: ช่องเวลาในเวรที่ยังว่าง
-        UI->>AC: POST /api/appointments
+        UI->>AC: POST /api/v1/appointments
         AC->>AS: create(valid DTO)
         AS->>DB: begin transaction; lock Doctor แล้ว Pet
         AS->>AS: ตรวจเจ้าของ เวลาเปิดคลินิก เวร และอนาคต
@@ -109,3 +109,7 @@ sequenceDiagram
 ## ขอบเขตการเชื่อมทีม
 เส้นทางลงทะเบียนใน diagram เป็น integration contract เมื่อเปิด flag หลัง Owner/Pet เข้า develop เท่านั้น
 ค่าเริ่มต้น flags ปิด; UI แจ้งรอเชื่อมโมดูลทีม ไม่มี controller หรือหน้าลงทะเบียนของเพื่อนใน PR นี้
+
+## Session authorization ใน API
+หลัง lookup เก็บ myOwnerId ใน server session ทุกคำขอข้อมูลส่วนตัวตรวจ session ก่อนเรียก Service
+ownerId ที่ส่งมาต่างจาก session หรือยังไม่เลือกแฟ้มคืน 403; Staff ใช้ isStaff ใน server session เท่านั้น

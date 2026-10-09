@@ -22,3 +22,7 @@ slot release and two concurrent races. Owner/Pet registration belongs to the tea
 
 Browser manual check: phone lookup → select pet/service/doctor/date/free slot → book → view list → edit → cancel.
 Registration destinations require the team's Owner/Pet modules to be merged into develop separately.
+
+API ของ Appointment/Guest ใช้ /api/v1. Guest ต้อง POST lookup เพื่อให้ server เลือก myOwnerId ใน session ก่อน
+HTTP script เก็บ session cookies และตรวจการแก้ ownerId ต้องได้ 403
+เมื่อ session หมดอายุหรือเปลี่ยนแฟ้มในแท็บอื่นต้องค้นเบอร์ใหม่; sessionStorage เป็นเพียง cache สำหรับ UI

@@ -37,7 +37,7 @@ const bookHandler=(url,options)=>{
   if(url.endsWith("/lookup"))return {body:owner};
   if(url.endsWith("/pets"))return {body:[{petId:2,petName:"มะลิ"}]};
   if(url.includes("/availability?"))return {body:[slot]};
-  if(options.method==="POST"&&url==="/api/appointments")return {status:201,body:appointment};
+  if(options.method==="POST"&&url==="/api/v1/appointments")return {status:201,body:appointment};
   throw new Error("Unexpected API: "+url);
 };
 async function chooseBooking(ui) {
@@ -55,14 +55,14 @@ test("booking submits selected owner/pet/slot and shows success only after API s
   try {
     await chooseBooking(ui);assert.equal(ui.el("submit-appointment").disabled,false);ui.submit("appointment-form");
     await until(()=>!ui.el("booking-result-links").hidden);
-    const posted=ui.calls.find(c=>c.url==="/api/appointments");
+    const posted=ui.calls.find(c=>c.url==="/api/v1/appointments");
     assert.deepEqual(JSON.parse(posted.options.body),{ownerId:1,petId:2,doctorId:3,appointmentDateTime:slot,serviceType:"VACCINE",symptoms:"วัคซีน"});
     assert.match(ui.el("booking-message").textContent,/บันทึกนัด #4/);
     assert.equal(ui.el("submit-appointment").disabled,true);
   } finally{ui.dom.window.close();}
 });
 test("conflict refreshes slots and never reports booking success",async()=>{
-  const ui=setup("appointment-create.html","appointment-create.js",(url,options)=>options.method==="POST"&&url==="/api/appointments"
+  const ui=setup("appointment-create.html","appointment-create.js",(url,options)=>options.method==="POST"&&url==="/api/v1/appointments"
     ? {status:409,body:{message:"คิวถูกจองแล้ว"}} : bookHandler(url,options));
   try{await chooseBooking(ui);ui.submit("appointment-form");await until(()=>ui.el("booking-message").textContent.includes("คิวถูกจองแล้ว"));
     assert.equal(ui.el("booking-result-links").hidden,true);
@@ -87,9 +87,9 @@ test("registration destination retains phone and appointment return flow",async(
 });
 const listHandler=(url,options)=>{
   if(url==="/api/doctors")return {body:doctors};
-  if(url.startsWith("/api/appointments/availability"))return {body:["2099-01-05T09:30:00"]};
-  if(url.startsWith("/api/appointments?"))return {body:{content:[appointment],totalPages:1,totalElements:1}};
-  if(url.startsWith("/api/appointments/4"))return {body:appointment};
+  if(url.startsWith("/api/v1/appointments/availability"))return {body:["2099-01-05T09:30:00"]};
+  if(url.startsWith("/api/v1/appointments?"))return {body:{content:[appointment],totalPages:1,totalElements:1}};
+  if(url.startsWith("/api/v1/appointments/4"))return {body:appointment};
   throw new Error("Unexpected API: "+url);
 };
 test("list renders names as text, scopes owner, and saves current version",async()=>{
@@ -113,7 +113,7 @@ test("cancel waits for confirmation and sends owner-scoped PATCH",async()=>{
     ui.el("appointment-list").querySelector(".danger").click();
     assert.equal(ui.el("cancel-dialog").open,true);assert.equal(ui.calls.some(c=>c.options.method==="PATCH"),false);
     ui.el("confirm-cancel").click();await until(()=>ui.calls.some(c=>c.options.method==="PATCH"));
-    assert.equal(ui.calls.find(c=>c.options.method==="PATCH").url,"/api/appointments/4/cancel?ownerId=1");
+    assert.equal(ui.calls.find(c=>c.options.method==="PATCH").url,"/api/v1/appointments/4/cancel?ownerId=1");
     await until(()=>!ui.el("cancel-dialog").open);
   }finally{ui.dom.window.close();}
 });
@@ -139,7 +139,7 @@ test("unknown phone stays on booking when owner registration is pending",async()
 });
 
 test("list filtering resets pagination and sends the selected status",async()=>{
-  const ui=setup("appointments.html","appointments.js",(url,options)=>url.startsWith("/api/appointments?")
+  const ui=setup("appointments.html","appointments.js",(url,options)=>url.startsWith("/api/v1/appointments?")
     ? {body:{content:[appointment],totalPages:2,totalElements:11}} : listHandler(url,options),true);
   try{await until(()=>!ui.el("next-page").disabled);ui.el("next-page").click();
     await until(()=>ui.el("page-info").textContent.startsWith("หน้า 2") && ui.el("list-message").hidden);

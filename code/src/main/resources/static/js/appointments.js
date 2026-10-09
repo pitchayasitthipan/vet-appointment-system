@@ -4,7 +4,7 @@
   let owner = P.owner(), page = 0, totalPages = 0, loadVersion = 0, editVersion = 0, selected = null, cancelling = null, saving = false;
   const editDialog = el("edit-dialog"), cancelDialog = el("cancel-dialog");
   function text(tag, value, className) { const node = document.createElement(tag); node.textContent = value; if (className) node.className = className; return node; }
-  function scoped(id) { return `/api/appointments/${id}?${P.query({ownerId:owner.ownerId})}`; }
+  function scoped(id) { return `/api/v1/appointments/${id}?${P.query({ownerId:owner.ownerId})}`; }
   function canChange(a) { return ["PENDING","CONFIRMED"].includes(a.status) && new Date(a.appointmentDateTime + "+07:00") > new Date(); }
   function render(rows) {
     const container = el("appointment-list"); container.replaceChildren();
@@ -33,7 +33,7 @@
     el("previous-page").disabled = true; el("next-page").disabled = true;
     P.message(el("list-message"), "กำลังโหลดนัดหมาย…");
     try {
-      const result = await P.request(`/api/appointments?${P.query({ownerId:owner.ownerId,page,size:10,status:el("status-filter").value,direction:el("sort-direction").value})}`);
+      const result = await P.request(`/api/v1/appointments?${P.query({ownerId:owner.ownerId,page,size:10,status:el("status-filter").value,direction:el("sort-direction").value})}`);
       if (version !== loadVersion) return;
       totalPages = result.totalPages;
       if (page > 0 && page >= totalPages) { page = Math.max(0,totalPages-1); return load(); }
@@ -64,7 +64,7 @@
     P.options(el("edit-time"), [], "กำลังตรวจคิว…"); el("save-edit").disabled = true;
     if (!selected || !el("edit-doctor").value || !el("edit-date").value) return;
     try {
-      const slots = await P.request(`/api/appointments/availability?${P.query({doctorId:el("edit-doctor").value,date:el("edit-date").value})}`);
+      const slots = await P.request(`/api/v1/appointments/availability?${P.query({doctorId:el("edit-doctor").value,date:el("edit-date").value})}`);
       if(version!==editVersion || !selected) return;
       const own = selected.appointmentDateTime;
       if(String(selected.doctorId)===el("edit-doctor").value && own.slice(0,10)===el("edit-date").value && !slots.includes(own)) slots.push(own);
@@ -110,7 +110,7 @@
   });
   el("confirm-cancel").addEventListener("click",async()=>{
     if(saving||!cancelling||!owner)return; busy(true);
-    try {await P.request(`/api/appointments/${cancelling.appointmentId}/cancel?${P.query({ownerId:owner.ownerId})}`,{method:"PATCH"});
+    try {await P.request(`/api/v1/appointments/${cancelling.appointmentId}/cancel?${P.query({ownerId:owner.ownerId})}`,{method:"PATCH"});
       cancelling=null;cancelDialog.close();await load();P.message(el("list-message"),"ยกเลิกนัดหมายแล้ว","success");}
     catch(e){P.message(el("cancel-message"),e.message,"error");}finally{busy(false);}
   });
