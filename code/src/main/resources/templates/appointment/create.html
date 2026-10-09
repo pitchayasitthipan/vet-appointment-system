@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="จองนัดหมายดูแลสุขภาพสัตว์เลี้ยงกับ PawCare เริ่มจากเบอร์โทรของเจ้าของ">
+  <title>จองนัดหมาย | PawCare</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/pawcare.css">
+  <link rel="stylesheet" href="/css/icons.css">
+  <link rel="stylesheet" href="/css/appointments.css">
+  <script src="/js/appointment-common.js" defer></script>
+  <script src="/js/appointment-create.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">ข้ามไปยังเนื้อหา</a>
+  <nav th:replace="~{fragments/layout :: navbar('appointments')}"></nav>
+  <main id="main" class="page-shell">
+    <section class="hero" aria-labelledby="page-title">
+      <div><p class="eyebrow">APPOINTMENT · PAWCARE</p><h1 id="page-title">นัดดูแลสุขภาพ<br>ให้เพื่อนตัวโปรด</h1><p>เริ่มจากเบอร์โทรที่ลงทะเบียนไว้ แล้วเลือกสัตว์เลี้ยง<br class="desktop-break"> สัตวแพทย์ และเวลาที่สะดวกสำหรับคุณ</p></div>
+      <div class="hero-art" aria-hidden="true"><span class="heart">♡</span><span class="paw"><span class="icon i-paw-print"></span></span><span class="art-label">ดูแลด้วยความใส่ใจ</span></div>
+    </section>
+    <div class="notice" id="booking-notice" role="status">กรอกเบอร์โทรเพื่อเลือกแฟ้มสัตว์เลี้ยงของคุณ หากยังไม่มีแฟ้ม ระบบจะพาไปลงทะเบียน</div>
+    <ol class="steps" aria-label="ขั้นตอนการจอง"><li class="current"><span>1</span>ค้นหาเจ้าของ</li><li><span>2</span>เลือกสัตว์และบริการ</li><li><span>3</span>เลือกวันเวลา</li></ol>
+    <div class="booking-layout">
+      <div class="form-column">
+        <section class="card" aria-labelledby="owner-heading">
+          <div class="section-title"><span class="section-number">01</span><div><h2 id="owner-heading">ค้นหาข้อมูลของคุณ</h2><p>ใช้เบอร์โทรของเจ้าของสัตว์เลี้ยงที่ลงทะเบียนกับคลินิก</p></div></div>
+          <form id="owner-lookup-form" aria-describedby="booking-notice">
+            <fieldset><legend class="visually-hidden">ค้นหาเจ้าของสัตว์เลี้ยง</legend>
+              <label for="owner-phone">เบอร์โทรศัพท์ <span class="required">*</span></label>
+              <div class="phone-row"><input id="owner-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" placeholder="เช่น 081-234-5678" required aria-describedby="phone-hint"><button type="submit" class="primary">ค้นหาเจ้าของ</button></div>
+              <p class="field-hint" id="phone-hint">เบอร์โทรศัพท์ไทย 9–10 หลัก สามารถใส่ขีดหรือช่องว่างได้</p>
+            </fieldset>
+          </form>
+          <div id="owner-result" class="owner-result" role="status" hidden></div>
+          <p class="registration-hint">ยังไม่มีข้อมูลกับคลินิก? ลงทะเบียนเจ้าของใหม่ก่อนจองนัดหมาย</p>
+          <div id="registration-link-container" hidden></div>
+        </section>
+        <form id="appointment-form" aria-describedby="booking-notice">
+          <section class="card" aria-labelledby="pet-heading">
+            <div class="section-title"><span class="section-number muted">02</span><div><h2 id="pet-heading">สัตว์เลี้ยงและประเภทบริการ</h2><p>ค้นหาเจ้าของก่อน เพื่อเลือกสัตว์เลี้ยงจากแฟ้มของคุณ</p></div></div>
+            <fieldset id="pet-fields" disabled><legend class="visually-hidden">ข้อมูลสัตว์เลี้ยงและบริการ</legend>
+              <label for="pet-id">สัตว์เลี้ยง <span class="required">*</span></label><select id="pet-id" name="petId" required><option value="">ค้นหาเจ้าของก่อนเลือกสัตว์เลี้ยง</option></select>
+              <div class="service-field"><span id="service-label" class="field-label">ประเภทบริการ <span class="required">*</span></span>
+                <div class="service-options" role="group" aria-labelledby="service-label">
+                  <label class="service-option"><input type="radio" name="serviceType" value="CONSULTATION" required><span><b>ตรวจทั่วไป</b><small>ตรวจสุขภาพและอาการป่วย</small></span></label>
+                  <label class="service-option"><input type="radio" name="serviceType" value="VACCINE" required><span><b>ฉีดวัคซีน</b><small>ดูแลตามกำหนดวัคซีน</small></span></label>
+                  <label class="service-option"><input type="radio" name="serviceType" value="SURGERY" required><span><b>ผ่าตัด</b><small>นัดพบเพื่อเตรียมการผ่าตัด</small></span></label>
+                </div>
+              </div>
+              <label for="symptoms">อาการหรือรายละเอียดที่ต้องการแจ้ง <span class="required">*</span></label><textarea id="symptoms" name="symptoms" rows="4" maxlength="1000" required placeholder="บอกอาการ หรือบริการที่ต้องการให้เราดูแล" aria-describedby="symptoms-hint"></textarea><p id="symptoms-hint" class="field-hint">ไม่เกิน 1,000 ตัวอักษร</p>
+            </fieldset>
+          </section>
+          <section class="card" aria-labelledby="time-heading">
+            <div class="section-title"><span class="section-number muted">03</span><div><h2 id="time-heading">สัตวแพทย์และวันเวลา</h2><p>เลือกเวลาจากตารางเวรและคิวว่างของสัตวแพทย์</p></div></div>
+            <fieldset id="time-fields" disabled><legend class="visually-hidden">สัตวแพทย์และวันเวลานัดหมาย</legend>
+              <label for="doctor-id">สัตวแพทย์ <span class="required">*</span></label><select id="doctor-id" name="doctorId" required><option value="">เลือกสัตวแพทย์</option></select>
+              <div class="two-fields"><div><label for="appointment-date">วันที่ <span class="required">*</span></label><input id="appointment-date" name="date" type="date" required></div><div><label for="appointment-time">เวลา <span class="required">*</span></label><select id="appointment-time" name="time" required><option value="">เลือกหมอและวันที่ก่อน</option></select></div></div>
+              <p class="field-hint">เวลาในประเทศไทย · ช่องนัดหมายละ 30 นาที</p>
+            </fieldset>
+          </section>
+          <div id="booking-message" role="status" tabindex="-1" hidden></div>
+          <div id="booking-result-links" class="form-actions" hidden><a href="/appointments">ดูนัดหมายของฉัน</a><a href="/appointments/new">จองนัดใหม่</a></div>
+          <div class="form-actions"><a href="/doctors.html">ดูรายชื่อสัตวแพทย์</a><button id="submit-appointment" type="submit" class="primary" disabled>ยืนยันการจองนัดหมาย</button></div>
+        </form>
+      </div>
+      <aside class="booking-aside" aria-label="ข้อมูลก่อนจอง">
+        <section class="card summary"><p class="eyebrow">YOUR VISIT</p><h2>เตรียมตัวก่อนมาพบกัน</h2><p class="aside-intro">การดูแลที่ดี เริ่มจากข้อมูลที่ครบถ้วน</p><ul class="checklist"><li>ใช้เบอร์โทรที่ลงทะเบียนกับคลินิก</li><li>เลือกสัตว์เลี้ยงจากแฟ้มของคุณ</li><li>แจ้งอาการและประวัติที่เกี่ยวข้อง</li><li>นำสมุดวัคซีนมาด้วยเมื่อฉีดวัคซีน</li></ul><div class="surgery-note"><strong>สำหรับนัดผ่าตัด</strong><p>ติดต่อคลินิกเพื่อรับคำแนะนำการเตรียมตัวเฉพาะจากสัตวแพทย์ก่อนวันนัด</p></div></section>
+        <div class="care-note"><span aria-hidden="true">♡</span><p>ทุกนัดหมายคืออีกหนึ่งก้าว<br>ของสุขภาพที่ดีสำหรับเพื่อนตัวโปรด</p></div>
+      </aside>
+    </div>
+  </main>
+  <noscript><p class="notice">กรุณาเปิด JavaScript ในเบราว์เซอร์เพื่อค้นหาแฟ้มและจองนัดหมาย</p></noscript>
+  <footer>PawCare Pet Clinic &amp; Vaccination <span>ดูแลทุกชีวิต ด้วยความใส่ใจ</span></footer>
+</body>
+</html>
