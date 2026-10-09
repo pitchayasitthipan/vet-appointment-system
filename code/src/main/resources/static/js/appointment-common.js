@@ -50,6 +50,9 @@ window.PawAppointments = (() => {
   }
   async function registration(phone) {
     const config = await request("/api/appointment-guests/config");
+    if (config.ownerRegistrationEnabled === "false") {
+      throw new ApiError("ไม่พบเบอร์นี้ ขณะนี้ยังรอเชื่อมหน้าลงทะเบียนเจ้าของ กรุณาติดต่อคลินิก", 404);
+    }
     const url = new URL(config.ownerRegistrationPath, location.origin);
     if (url.origin !== location.origin) throw new ApiError("เส้นทางลงทะเบียนไม่ถูกต้อง กรุณาติดต่อคลินิก", 0);
     url.searchParams.set("phone", phone.replace(/[ -]/g, ""));

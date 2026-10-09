@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import com.example.petclinic.domain.enums.ServiceType;
 import jakarta.validation.constraints.*;
 
-/** Pet and owner stay fixed when rescheduling; create a new booking for another pet. */
+/** AppointmentPet and owner stay fixed when rescheduling; create a new booking for another pet. */
 public record AppointmentUpdateDTO(
     @NotNull @Positive Long doctorId,
     @NotNull LocalDateTime appointmentDateTime,

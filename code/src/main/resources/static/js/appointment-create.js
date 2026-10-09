@@ -53,9 +53,13 @@
       byId("time-fields").disabled = !pets.length || !doctorsReady;
       if (!pets.length) {
         P.message(feedback, "กรุณาเพิ่มสัตว์เลี้ยงก่อนจองนัดหมาย");
-        const link = document.createElement("a"); link.href = `/pets/new?${P.query({ownerId:found.ownerId, returnTo:"appointment"})}`;
-        link.textContent = "เพิ่มสัตว์เลี้ยงแล้วกลับมาจอง";
-        byId("registration-link-container").replaceChildren(link); byId("registration-link-container").hidden = false;
+        const config = await P.request("/api/appointment-guests/config");
+        if (version !== lookupVersion) return;
+        if (config.petRegistrationEnabled === "true") {
+          const link = document.createElement("a"); link.href = `/pets/new?${P.query({ownerId:found.ownerId, returnTo:"appointment"})}`;
+          link.textContent = "เพิ่มสัตว์เลี้ยงแล้วกลับมาจอง";
+          byId("registration-link-container").replaceChildren(link); byId("registration-link-container").hidden = false;
+        } else P.message(feedback, "ยังไม่มีสัตว์เลี้ยงในแฟ้ม ขณะนี้ยังรอเชื่อมหน้าเพิ่มสัตว์เลี้ยง กรุณาติดต่อคลินิก");
       } else await loadSlots();
     } catch (e) {
       if (version !== lookupVersion) return;

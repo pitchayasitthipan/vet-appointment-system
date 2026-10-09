@@ -21,17 +21,17 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class AppointmentServiceTest {
     @Mock AppointmentRepository appointments;
-    @Mock PetRepository pets;
+    @Mock AppointmentPetRepository pets;
     @Mock AppointmentDoctorRepository doctors;
     AppointmentService service;
-    Pet pet;
+    AppointmentPet pet;
     Doctor doctor;
     final LocalDateTime time = LocalDateTime.of(2027, 1, 4, 9, 0);
     AppointmentRequestDTO request() { return new AppointmentRequestDTO(1L, 2L, 3L, time, ServiceType.VACCINE, "วัคซีน"); }
 
     @BeforeEach void setup() {
         PetOwner owner = new PetOwner(); owner.setOwnerId(1L);
-        pet = new Pet(); pet.setPetId(2L); pet.setPetName("มะลิ"); pet.setPetOwner(owner);
+        pet = new AppointmentPet(); pet.setPetId(2L); pet.setPetName("มะลิ"); pet.setPetOwner(owner);
         doctor = new Doctor(); doctor.setDoctorId(3L); doctor.setFirstName("หมอ"); doctor.setLastName("ใจดี");
         doctor.setWorkSchedule("จันทร์ - ศุกร์: 09:00 - 17:00");
         service = new AppointmentService(appointments, pets, doctors, new AppointmentFactoryRegistry(List.of(

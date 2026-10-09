@@ -10,7 +10,7 @@ import static org.mockito.Mockito.*;
 
 class AppointmentGuestServiceTest {
     AppointmentGuestOwnerRepository owners = mock(AppointmentGuestOwnerRepository.class);
-    PetRepository pets = mock(PetRepository.class);
+    AppointmentPetRepository pets = mock(AppointmentPetRepository.class);
     AppointmentGuestService service = new AppointmentGuestService(owners, pets);
     PetOwner owner() {
         PetOwner o = new PetOwner(); o.setOwnerId(1L); o.setFirstName("อ้น"); o.setLastName("ทดสอบ"); return o;
@@ -35,7 +35,7 @@ class AppointmentGuestServiceTest {
         verifyNoInteractions(owners);
     }
     @Test void returnsOnlyPetsOfSpecifiedOwner() {
-        Pet p = new Pet(); p.setPetId(2L); p.setPetName("มะลิ");
+        AppointmentPet p = new AppointmentPet(); p.setPetId(2L); p.setPetName("มะลิ");
         when(owners.existsById(1L)).thenReturn(true);
         when(pets.findByPetOwnerOwnerIdOrderByPetNameAsc(1L)).thenReturn(List.of(p));
         assertThat(service.pets(1L)).hasSize(1);

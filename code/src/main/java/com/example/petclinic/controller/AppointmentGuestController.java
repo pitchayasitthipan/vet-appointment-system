@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.*;
 public class AppointmentGuestController {
     private final AppointmentGuestService service;
     private final String registrationPath;
+    @Value("${appointments.owner-registration-enabled:false}")
+    private boolean registrationEnabled;
+    @Value("${appointments.pet-registration-enabled:false}")
+    private boolean petRegistrationEnabled;
     public AppointmentGuestController(AppointmentGuestService service,
             @Value("${appointments.owner-registration-path:/owners/new}") String registrationPath) {
         this.service = service; this.registrationPath = registrationPath;
@@ -26,6 +30,8 @@ public class AppointmentGuestController {
 
     @GetMapping("/config")
     public Map<String, String> config() {
-        return Map.of("ownerRegistrationPath", registrationPath, "bookingReturnPath", "/appointment-create.html");
+        return Map.of("ownerRegistrationPath", registrationPath, "bookingReturnPath", "/appointment-create.html",
+            "ownerRegistrationEnabled", Boolean.toString(registrationEnabled),
+            "petRegistrationEnabled", Boolean.toString(petRegistrationEnabled));
     }
 }

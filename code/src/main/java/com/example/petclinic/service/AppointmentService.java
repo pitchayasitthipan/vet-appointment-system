@@ -20,12 +20,12 @@ public class AppointmentService {
     private static final List<AppointmentStatus> ACTIVE = List.of(AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED);
     private static final Set<String> SORT_FIELDS = Set.of("appointmentId", "appointmentDateTime", "status", "serviceType");
     private final AppointmentRepository appointments;
-    private final PetRepository pets;
+    private final AppointmentPetRepository pets;
     private final AppointmentDoctorRepository doctors;
     private final AppointmentFactoryRegistry factories;
     private final AppointmentSchedulePolicy schedule;
 
-    public AppointmentService(AppointmentRepository appointments, PetRepository pets,
+    public AppointmentService(AppointmentRepository appointments, AppointmentPetRepository pets,
             AppointmentDoctorRepository doctors, AppointmentFactoryRegistry factories,
             AppointmentSchedulePolicy schedule) {
         this.appointments = appointments;
@@ -38,9 +38,9 @@ public class AppointmentService {
     public AppointmentResponseDTO create(AppointmentRequestDTO request) {
         requireId(request.ownerId());
         requireId(request.petId());
-        // Every booking writer locks Doctor, then Pet, before checking availability.
+        // Every booking writer locks Doctor, then AppointmentPet, before checking availability.
         Doctor doctor = lockedDoctor(request.doctorId());
-        Pet pet = pets.findLockedById(request.petId())
+        AppointmentPet pet = pets.findLockedById(request.petId())
             .orElseThrow(() -> new ResourceNotFoundException("ไม่พบสัตว์เลี้ยง"));
         if (!Objects.equals(pet.getPetOwner().getOwnerId(), request.ownerId())) {
             throw new ResourceNotFoundException("ไม่พบสัตว์เลี้ยงของเจ้าของที่ระบุ");
@@ -58,7 +58,7 @@ public class AppointmentService {
             throw new DuplicateResourceException("ข้อมูลนัดหมายเปลี่ยนแล้ว กรุณาโหลดข้อมูลล่าสุดก่อนแก้ไข");
         }
         Doctor doctor = lockedDoctor(request.doctorId());
-        Pet pet = pets.findLockedById(existing.getPet().getPetId())
+        AppointmentPet pet = pets.findLockedById(existing.getPet().getPetId())
             .orElseThrow(() -> new ResourceNotFoundException("ไม่พบสัตว์เลี้ยง"));
         schedule.validate(doctor, request.appointmentDateTime());
         requireFree(doctor.getDoctorId(), pet.getPetId(), request.appointmentDateTime(), id);

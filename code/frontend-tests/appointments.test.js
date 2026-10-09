@@ -33,6 +33,7 @@ function setup(page, script, handler, cached = false) {
 }
 const bookHandler=(url,options)=>{
   if(url==="/api/doctors")return {body:doctors};
+  if(url.endsWith("/config"))return {body:{ownerRegistrationPath:"/owners/new",ownerRegistrationEnabled:"false",petRegistrationEnabled:"false"}};
   if(url.endsWith("/lookup"))return {body:owner};
   if(url.endsWith("/pets"))return {body:[{petId:2,petName:"มะลิ"}]};
   if(url.includes("/availability?"))return {body:[slot]};
@@ -117,13 +118,23 @@ test("cancel waits for confirmation and sends owner-scoped PATCH",async()=>{
   }finally{ui.dom.window.close();}
 });
 
-test("owner without pets gets add-pet link and cannot submit booking",async()=>{
+test("owner without pets sees pending team integration and cannot submit booking",async()=>{
   const ui=setup("appointment-create.html","appointment-create.js",(url,options)=>url.endsWith("/pets")
     ? {body:[]} : bookHandler(url,options));
   try{ui.el("owner-phone").value="0812345678";ui.submit("owner-lookup-form");
-    await until(()=>!ui.el("registration-link-container").hidden);
+    await until(()=>ui.el("booking-message").textContent.includes("รอเชื่อมหน้าเพิ่มสัตว์เลี้ยง"));
     assert.equal(ui.el("pet-fields").disabled,true);assert.equal(ui.el("submit-appointment").disabled,true);
-    assert.match(ui.el("registration-link-container").querySelector("a").href,/ownerId=1/);
+    assert.equal(ui.el("registration-link-container").hidden,true);
+  }finally{ui.dom.window.close();}
+});
+
+test("unknown phone stays on booking when owner registration is pending",async()=>{
+  const ui=setup("appointment-create.html","appointment-create.js",(url,options)=>url.endsWith("/lookup")
+    ? {status:404,body:{message:"ไม่พบเบอร์นี้"}} : bookHandler(url,options));
+  try{ui.el("owner-phone").value="0812345678";ui.submit("owner-lookup-form");
+    await until(()=>ui.el("owner-result").textContent.includes("รอเชื่อมหน้าลงทะเบียน"));
+    assert.equal(ui.w.location.pathname,"/appointment-create.html");
+    assert.equal(ui.el("submit-appointment").disabled,true);
   }finally{ui.dom.window.close();}
 });
 

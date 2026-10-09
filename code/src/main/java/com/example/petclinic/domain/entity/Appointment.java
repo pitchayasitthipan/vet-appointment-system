@@ -15,7 +15,7 @@ public class Appointment {
     private Long appointmentId;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "pet_id", nullable = false)
-    private Pet pet;
+    private AppointmentPet pet;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
@@ -33,8 +33,8 @@ public class Appointment {
 
     public Long getAppointmentId() { return appointmentId; }
     public void setAppointmentId(Long id) { this.appointmentId = id; }
-    public Pet getPet() { return pet; }
-    public void setPet(Pet pet) { this.pet = pet; }
+    public AppointmentPet getPet() { return pet; }
+    public void setPet(AppointmentPet pet) { this.pet = pet; }
     public Doctor getDoctor() { return doctor; }
     public void setDoctor(Doctor doctor) { this.doctor = doctor; }
     public LocalDateTime getAppointmentDateTime() { return appointmentDateTime; }

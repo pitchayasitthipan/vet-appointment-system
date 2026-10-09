@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.*;
 class AppointmentPersistenceTest {
     @Autowired AppointmentService service;
     @Autowired PetOwnerRepository owners;
-    @Autowired PetRepository pets;
+    @Autowired AppointmentPetRepository pets;
     @Autowired AppointmentDoctorRepository doctors;
     @Autowired AppointmentRepository appointments;
     @Autowired AppointmentGuestService guests;
@@ -34,8 +34,8 @@ class AppointmentPersistenceTest {
         owner.setEmail("guest-test@example.com"); owner.setPhone("081-234-5678"); owners.saveAndFlush(owner);
         PetOwner other = new PetOwner(); other.setFirstName("อื่น"); other.setLastName("ทดสอบ");
         other.setEmail("other-guest@example.com"); other.setPhone("0899999999"); owners.saveAndFlush(other);
-        Pet pet = new Pet(); pet.setPetName("มะลิ"); pet.setPetOwner(owner); pets.saveAndFlush(pet);
-        Pet another = new Pet(); another.setPetName("ของคนอื่น"); another.setPetOwner(other); pets.saveAndFlush(another);
+        AppointmentPet pet = new AppointmentPet(); pet.setPetName("มะลิ"); pet.setPetOwner(owner); pets.saveAndFlush(pet);
+        AppointmentPet another = new AppointmentPet(); another.setPetName("ของคนอื่น"); another.setPetOwner(other); pets.saveAndFlush(another);
         assertThat(guests.lookup("081 234 5678").ownerId()).isEqualTo(owner.getOwnerId());
         assertThat(guests.pets(owner.getOwnerId())).hasSize(1);
         assertThat(guests.pets(owner.getOwnerId()).get(0).petId()).isEqualTo(pet.getPetId());
@@ -44,7 +44,7 @@ class AppointmentPersistenceTest {
     @Test void persistsReschedulesAndCancellationReleasesSlot() {
         PetOwner owner = new PetOwner(); owner.setFirstName("อ้น"); owner.setLastName("ทดสอบ");
         owner.setEmail("appointment-test@example.com"); owner.setPhone("0812345678"); owners.saveAndFlush(owner);
-        Pet pet = new Pet(); pet.setPetName("มะลิ"); pet.setPetOwner(owner); pets.saveAndFlush(pet);
+        AppointmentPet pet = new AppointmentPet(); pet.setPetName("มะลิ"); pet.setPetOwner(owner); pets.saveAndFlush(pet);
         Doctor doctor = new Doctor("หมอ", "ทดสอบ", "ทั่วไป", "0823456789", "appointment-doctor@example.com", "ทุกวัน: 09:00 - 17:00");
         doctors.saveAndFlush(doctor);
         LocalDateTime time = LocalDate.now(ZoneId.of("Asia/Bangkok")).with(TemporalAdjusters.next(java.time.DayOfWeek.MONDAY)).atTime(9, 0);

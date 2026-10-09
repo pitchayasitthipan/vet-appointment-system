@@ -12,7 +12,7 @@ public abstract class AppointmentFactory {
     protected abstract Appointment createAppointment();
 
     /** Common assembly; ownership, schedule and conflict checks belong to the service layer. */
-    public final Appointment create(Pet pet, Doctor doctor, LocalDateTime time, String symptoms) {
+    public final Appointment create(AppointmentPet pet, Doctor doctor, LocalDateTime time, String symptoms) {
         if (pet == null || doctor == null || time == null) {
             throw new InvalidAppointmentException("กรุณาระบุสัตว์เลี้ยง สัตวแพทย์ และวันเวลานัดหมาย");
         }

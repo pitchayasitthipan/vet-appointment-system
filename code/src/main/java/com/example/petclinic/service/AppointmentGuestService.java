@@ -12,8 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AppointmentGuestService {
     private final AppointmentGuestOwnerRepository owners;
-    private final PetRepository pets;
-    public AppointmentGuestService(AppointmentGuestOwnerRepository owners, PetRepository pets) {
+    private final AppointmentPetRepository pets;
+    public AppointmentGuestService(AppointmentGuestOwnerRepository owners, AppointmentPetRepository pets) {
         this.owners = owners; this.pets = pets;
     }
 

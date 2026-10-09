@@ -37,6 +37,8 @@ class AppointmentGuestControllerTest {
         when(service.pets(1L)).thenReturn(List.of(new AppointmentGuestPetDTO(2L, "มะลิ")));
         mvc.perform(get("/api/appointment-guests/1/pets")).andExpect(status().isOk()).andExpect(jsonPath("$[0].petId").value(2));
         mvc.perform(get("/api/appointment-guests/config")).andExpect(status().isOk())
-            .andExpect(jsonPath("$.ownerRegistrationPath").value("/owners.html"));
+            .andExpect(jsonPath("$.ownerRegistrationPath").value("/owners.html"))
+            .andExpect(jsonPath("$.ownerRegistrationEnabled").value("false"))
+            .andExpect(jsonPath("$.petRegistrationEnabled").value("false"));
     }
 }
