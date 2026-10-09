@@ -35,3 +35,15 @@ Navbar กลาง, shared Owner lookup, shared Pet entity และ Staff clin
 ตามเงื่อนไข reviewer; รายละเอียด doc/appointment-review2.md
 ยังไม่ได้ตรวจ browser ใหม่รอบนี้; DOM tests และ HTTP จริงผ่าน
 ไม่ใช่ load test จำนวนมาก; Docker ไม่ได้รัน
+
+## Commit 17 — ผลตรวจ Owner/Staff integration (9 ต.ค. 2026)
+
+- Rebase เฉพาะ 17 commit ของอ้นบน develop 104ec59; ไม่มี merge commit ในชุดงานเรา
+- Maven tests รวมกับ Owner/Doctor/MedicalRecord: 155 tests, 0 failures/errors/skipped
+- DOM tests: 12 ผ่าน ครอบคลุมการรับแฟ้มจาก session, cache หมดสิทธิ์ และ Staff ส่ง status/version
+- HTTP/PostgreSQL appointment_review3: 27 จุดตรวจผ่าน; Owner web search → /me, query owner อื่น 403, Guest เปลี่ยนสถานะ 403, Staff clinic pagination/filter, ยืนยัน version 0→1, รุ่นเก่า 409, ปิดก่อนเวลานัด 409, ปิดหลังถึงเวลา version 1→2, logout แล้ว list/status 403
+- ฟอร์ม/รายการ Thymeleaf แสดง navbar กลางจริง; legacy .html routes ตอบ 200 และรักษา query
+- Browser จริง: กดนัดหมายใหม่จากหน้า Owner แล้วแสดงแฟ้ม/สัตว์ทันที; ตรวจหน้าจอมือถือไม่มี horizontal overflow
+- Package ในสำเนาแยกและเปิดแอปทดสอบได้ เนื่องจาก jar แอปเดิมใน code/target ถูกใช้งานอยู่
+- ไม่เปลี่ยน Entity/schema ตาม PDF โดยอัตโนมัติ; Data Dictionary ระบุความต่างจากแบบ 6 Table และฐานข้อมูลจริง
+- ยังรอ Pet entity และการเชื่อม FK MedicalRecord; ไม่แก้โค้ดของโมดูลเพื่อน

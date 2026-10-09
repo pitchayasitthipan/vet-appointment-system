@@ -1,16 +1,17 @@
 package com.example.petclinic.controller.api;
 
 import com.example.petclinic.exception.AppointmentAccessException;
+import com.example.petclinic.controller.StaffAccess;
 import jakarta.servlet.http.HttpSession;
 
-/** Uses the team's session contract until StaffAccess is available on develop. */
+/** Resolves owner scope using the shared StaffAccess and server session. */
 final class AppointmentAccess {
     static final String OWNER_KEY = "myOwnerId";
     private AppointmentAccess() { }
 
     static Long owner(HttpSession session, Long requestedOwner) {
         // A client cannot set session attributes by passing query/body parameters.
-        if (Boolean.TRUE.equals(session.getAttribute("isStaff"))) {
+        if (StaffAccess.isStaff(session)) {
             if (requestedOwner == null || requestedOwner < 1) {
                 throw new AppointmentAccessException("กรุณาเลือกเจ้าของสัตว์เลี้ยงก่อนจัดการนัดหมาย");
             }

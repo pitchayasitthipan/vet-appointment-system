@@ -29,9 +29,9 @@ class AppointmentPersistenceTest {
     @Autowired AppointmentRepository appointments;
     @Autowired AppointmentGuestService guests;
 
-    @Test void guestLookupMatchesFormattedStoredPhoneAndListsOnlySelectedPets() {
+    @Test void guestLookupNormalizesInputForSharedOwnerServiceAndListsSelectedPets() {
         PetOwner owner = new PetOwner(); owner.setFirstName("อ้น"); owner.setLastName("ทดสอบ");
-        owner.setEmail("guest-test@example.com"); owner.setPhone("081-234-5678"); owners.saveAndFlush(owner);
+        owner.setEmail("guest-test@example.com"); owner.setPhone("0812345678"); owners.saveAndFlush(owner);
         PetOwner other = new PetOwner(); other.setFirstName("อื่น"); other.setLastName("ทดสอบ");
         other.setEmail("other-guest@example.com"); other.setPhone("0899999999"); owners.saveAndFlush(other);
         AppointmentPet pet = new AppointmentPet(); pet.setPetName("มะลิ"); pet.setPetOwner(owner); pets.saveAndFlush(pet);

@@ -1,15 +1,19 @@
 <!DOCTYPE html>
-<html lang="th">
+<html xmlns:th="http://www.thymeleaf.org" lang="th">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>นัดหมายของฉัน | PawCare</title><link rel="stylesheet" href="/css/appointments.css">
+  <title>นัดหมายของฉัน | PawCare</title><link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/pawcare.css">
+  <link rel="stylesheet" href="/css/icons.css">
+  <link rel="stylesheet" href="/css/appointments.css">
   <script src="/js/appointment-common.js" defer></script><script src="/js/appointments.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">ข้ามไปยังเนื้อหา</a>
-  <header class="site-header"><div class="header-inner"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true">🐾</span><span>PawCare<small>Pet Clinic &amp; Vaccination</small></span></a><nav aria-label="เมนูหลัก"><a href="/">หน้าหลัก</a><a href="/appointments.html" aria-current="page">นัดหมายของฉัน</a><a href="/appointment-create.html">จองนัดใหม่</a></nav></div></header>
+  <nav th:replace="~{fragments/layout :: navbar('appointments')}"></nav>
+  <div id="staff-tools" class="page-shell" hidden><button type="button" class="secondary" id="clinic-list">ดูนัดทั้งคลินิก</button><a href="/owners/staff">จัดการสิทธิ์เจ้าหน้าที่</a></div>
   <main id="main" class="page-shell">
-    <section class="hero"><div><p class="eyebrow">MY APPOINTMENTS</p><h1>นัดหมายของฉัน</h1><p>ติดตามวันนัด เลื่อนเวลา และจัดการนัดของเพื่อนตัวโปรด</p></div><a class="primary button-link" href="/appointment-create.html">+ จองนัดใหม่</a></section>
+    <section class="hero"><div><p class="eyebrow">MY APPOINTMENTS</p><h1>นัดหมายของฉัน</h1><p>ติดตามวันนัด เลื่อนเวลา และจัดการนัดของเพื่อนตัวโปรด</p></div><a class="primary button-link" href="/appointments/new">+ จองนัดใหม่</a></section>
     <section class="card" aria-labelledby="lookup-heading"><h2 id="lookup-heading">ค้นหาแฟ้มด้วยเบอร์โทร</h2><form id="list-lookup-form"><fieldset><legend class="visually-hidden">ค้นหาเจ้าของ</legend><label for="list-phone">เบอร์โทรที่ลงทะเบียน</label><div class="phone-row"><input id="list-phone" type="tel" autocomplete="tel" maxlength="20" required placeholder="081-234-5678"><button class="primary" type="submit">ค้นหานัดหมาย</button></div></fieldset></form><p id="selected-owner" class="field-hint"></p></section>
     <div id="list-message" role="status" hidden></div>
     <section id="list-section" hidden aria-label="รายการนัดหมาย">

@@ -26,8 +26,8 @@ public class AppointmentExceptionHandler {
     }
     public AppointmentExceptionHandler(Clock appointmentClock) { this.clock = appointmentClock; }
 
-    @ExceptionHandler(AppointmentAccessException.class)
-    public ResponseEntity<Map<String, Object>> forbidden(AppointmentAccessException ex) {
+    @ExceptionHandler({AppointmentAccessException.class, ForbiddenException.class})
+    public ResponseEntity<Map<String, Object>> forbidden(RuntimeException ex) {
         return error(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 

@@ -1,6 +1,8 @@
 # Review รอบสอง — Appointment commit 16
 
-ตรวจสถานะ PR #4 วันที่ 9 ต.ค. 2026: ยัง open และยังไม่ merge; develop ยัง b8f6db8
+บันทึกย้อนหลัง ณ commit 16: PR #4 ยัง open และ develop ยัง b8f6db8
+
+สถานะล่าสุดใน commit 17: PR #4 เข้า develop แล้ว (104ec59); ข้อ 5/6/8/10 และ StaffAccess กลางแก้แล้ว เพิ่ม /me และแยก service interface/impl รายละเอียดใน appointment-delivery.md; ข้อ 9 ยังรอ Pet entity
 ไม่รวมประวัติหรือ implementation ของเพื่อนเข้า branch อ้น
 
 | ข้อ | ผลรอบนี้ |

@@ -104,4 +104,25 @@ class AppointmentControllerTest {
             .andExpect(status().isForbidden());
         verify(service, times(1)).get(4L, 9L);
     }
+
+    @Test void staffEndpointsRejectGuestAndForgedFlag() throws Exception {
+        mvc.perform(get("/api/v1/appointments/staff").session(ownerSession)).andExpect(status().isForbidden());
+        mvc.perform(get("/api/v1/appointments/staff?isStaff=true")).andExpect(status().isForbidden());
+        mvc.perform(patch("/api/v1/appointments/4/status").session(ownerSession).contentType("application/json")
+            .content("{\"status\":\"CONFIRMED\",\"version\":0}")).andExpect(status().isForbidden());
+        verifyNoInteractions(service);
+    }
+    @Test void staffCanChangeStatusButCannotAfterLogout() throws Exception {
+        MockHttpSession staff = new MockHttpSession(); staff.setAttribute("isStaff", true);
+        when(service.changeStatus(eq(4L), any())).thenReturn(response());
+        mvc.perform(patch("/api/v1/appointments/4/status").session(staff).contentType("application/json")
+            .content("{\"status\":\"CONFIRMED\",\"version\":0}")).andExpect(status().isOk());
+        mvc.perform(patch("/api/v1/appointments/4/status").session(staff).contentType("application/json")
+            .content("{\"status\":\"COMPLETED\",\"version\":-1}")).andExpect(status().isBadRequest());
+        staff.removeAttribute("isStaff");
+        mvc.perform(patch("/api/v1/appointments/4/status").session(staff).contentType("application/json")
+            .content("{\"status\":\"COMPLETED\",\"version\":0}")).andExpect(status().isForbidden());
+        verify(service, times(1)).changeStatus(eq(4L), any());
+    }
+
 }

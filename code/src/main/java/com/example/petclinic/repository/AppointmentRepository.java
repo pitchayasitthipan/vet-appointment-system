@@ -10,6 +10,10 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
+    Page<Appointment> findByStatus(AppointmentStatus status, Pageable pageable);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select a from Appointment a where a.appointmentId = :id")
+    Optional<Appointment> findLockedById(@Param("id") Long id);
     Page<Appointment> findByPetPetOwnerOwnerId(Long ownerId, Pageable pageable);
     Page<Appointment> findByPetPetOwnerOwnerIdAndStatus(Long ownerId, AppointmentStatus status, Pageable pageable);
     Optional<Appointment> findByAppointmentIdAndPetPetOwnerOwnerId(Long id, Long ownerId);

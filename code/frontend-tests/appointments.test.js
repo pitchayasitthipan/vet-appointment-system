@@ -14,15 +14,16 @@ async function until(predicate) {
   for (let i = 0; i < 200; i++) { if (predicate()) return; await new Promise(r => setTimeout(r, 5)); }
   assert.fail("UI did not reach the expected state");
 }
-function setup(page, script, handler, cached = false) {
-  const dom = new JSDOM(readFileSync(new URL(page, root), "utf8"), {url:"http://localhost/" + page,
+function setup(page, script, handler, cached = false, session = cached ? {...owner,isStaff:false} : null, query = "") {
+  const dom = new JSDOM(readFileSync(new URL("../templates/appointment/"+(page==="appointment-create.html"?"create.html":"list.html"),root), "utf8"), {url:"http://localhost/" + page + query,
     runScripts:"outside-only", virtualConsole:new VirtualConsole()});
   const w = dom.window;
   w.HTMLDialogElement.prototype.showModal = function() {this.open=true;};
   w.HTMLDialogElement.prototype.close = function() {this.open=false;};
   if(cached) w.sessionStorage.setItem("pawcare.owner",JSON.stringify(owner));
   const calls=[];
-  w.fetch=async(url,options={})=>{calls.push({url,options}); const result=await handler(url,options);
+  w.confirm=()=>true;
+  w.fetch=async(url,options={})=>{calls.push({url,options}); const result=url.startsWith("/api/v1/appointment-guests/me?") ? (session ? {body:session} : {status:403,body:{message:"ค้นหาเบอร์ก่อน"}}) : await handler(url,options);
     return {ok:(result.status||200)<400,status:result.status||200,json:async()=>result.body};};
   w.eval(readFileSync(new URL("js/appointment-common.js",root),"utf8"));
   w.eval(readFileSync(new URL("js/"+script,root),"utf8"));
@@ -96,7 +97,7 @@ test("list renders names as text, scopes owner, and saves current version",async
   const ui=setup("appointments.html","appointments.js",listHandler,true);
   try{await until(()=>ui.el("appointment-list").querySelector("button"));
     assert.equal(ui.el("appointment-list").querySelector("script"),null);
-    assert.ok(ui.calls[0].url.includes("ownerId=1"));
+    assert.ok(ui.calls.some(c=>c.url.startsWith("/api/v1/appointments?")&&c.url.includes("ownerId=1")));
     ui.el("appointment-list").querySelector("button").click();
     await until(()=>ui.el("edit-dialog").open&&!ui.el("save-edit").disabled);
     assert.equal(ui.el("edit-time").value,slot); // existing occupied slot must remain selectable
@@ -146,5 +147,39 @@ test("list filtering resets pagination and sends the selected status",async()=>{
     ui.change("status-filter","CANCELLED");
     await until(()=>ui.el("page-info").textContent.startsWith("หน้า 1") && ui.el("list-message").hidden);
     const filtered=ui.calls.findLast(c=>c.url.includes("status=CANCELLED"));assert.ok(filtered.url.includes("page=0"));
+  }finally{ui.dom.window.close();}
+});
+
+test("booking restores Owner session without requiring another phone search",async()=>{
+  const ui=setup("appointment-create.html","appointment-create.js",bookHandler,false,{...owner,isStaff:false},"?ownerId=1");
+  try{
+    await until(()=>!ui.el("pet-fields").disabled);
+    assert.equal(ui.calls.some(c=>c.url.endsWith("/lookup")),false);
+    assert.ok(ui.calls.some(c=>c.url==="/api/v1/appointment-guests/me?ownerId=1"));
+    assert.match(ui.el("owner-result").textContent,/อ้น/);
+  }finally{ui.dom.window.close();}
+});
+test("expired session cannot restore cached private appointment list",async()=>{
+  const ui=setup("appointments.html","appointments.js",listHandler,true,null);
+  try{
+    await until(()=>ui.el("list-message").textContent.includes("ค้นหาเบอร์ก่อน"));
+    assert.equal(ui.calls.some(c=>c.url.startsWith("/api/v1/appointments?")),false);
+    assert.equal(ui.w.PawAppointments.owner(),null);
+  }finally{ui.dom.window.close();}
+});
+test("staff loads clinic appointments and confirms with the current version",async()=>{
+  let posted;
+  const ui=setup("appointments.html","appointments.js",(url,options)=>{
+    if(url.startsWith("/api/v1/appointments/staff?"))return {body:{content:[appointment],totalPages:1,totalElements:1}};
+    if(url.endsWith("/status")){posted=JSON.parse(options.body);return {body:{...appointment,status:"CONFIRMED",version:1}};}
+    return listHandler(url,options);
+  },false,{ownerId:null,isStaff:true});
+  try{
+    await until(()=>ui.el("appointment-list").querySelector("button.primary"));
+    assert.equal(ui.el("staff-tools").hidden,false);
+    ui.el("appointment-list").querySelector("button.primary").click();
+    await until(()=>posted);
+    assert.deepEqual(posted,{status:"CONFIRMED",version:0});
+    await until(()=>ui.el("list-message").textContent.includes("เปลี่ยนสถานะนัดหมายแล้ว"));
   }finally{ui.dom.window.close();}
 });

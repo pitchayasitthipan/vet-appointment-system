@@ -58,4 +58,25 @@ class AppointmentGuestControllerTest {
             .content("{\"phone\":\"0899999999\"}")).andExpect(status().isNotFound())
             .andExpect(request().sessionAttributeDoesNotExist("myOwnerId"));
     }
+
+    @Test void meUsesSessionAndRejectsForgedOwner() throws Exception {
+        MockHttpSession selected = new MockHttpSession(); selected.setAttribute("myOwnerId", 1L);
+        when(service.owner(1L)).thenReturn(new AppointmentGuestOwnerDTO(1L, "อ้น", "ทดสอบ"));
+        mvc.perform(get("/api/v1/appointment-guests/me").session(selected)).andExpect(status().isOk())
+            .andExpect(jsonPath("$.ownerId").value(1)).andExpect(jsonPath("$.isStaff").value(false));
+        mvc.perform(get("/api/v1/appointment-guests/me?ownerId=9").session(selected)).andExpect(status().isForbidden());
+        mvc.perform(get("/api/v1/appointment-guests/me?isStaff=true")).andExpect(status().isForbidden());
+        verify(service, never()).owner(9L);
+    }
+    @Test void staffMeSupportsOwnerSelectionAndLogout() throws Exception {
+        MockHttpSession staff = new MockHttpSession(); staff.setAttribute("isStaff", true);
+        mvc.perform(get("/api/v1/appointment-guests/me").session(staff)).andExpect(status().isOk())
+            .andExpect(jsonPath("$.isStaff").value(true));
+        when(service.owner(9L)).thenReturn(new AppointmentGuestOwnerDTO(9L, "เจ้าของ", "อื่น"));
+        mvc.perform(get("/api/v1/appointment-guests/me?ownerId=9").session(staff)).andExpect(status().isOk())
+            .andExpect(jsonPath("$.ownerId").value(9));
+        staff.removeAttribute("isStaff");
+        mvc.perform(get("/api/v1/appointment-guests/me?ownerId=9").session(staff)).andExpect(status().isForbidden());
+    }
+
 }

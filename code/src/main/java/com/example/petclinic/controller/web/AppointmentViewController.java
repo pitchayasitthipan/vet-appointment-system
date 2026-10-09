@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 public class AppointmentViewController {
-    @GetMapping("/appointments") public String appointments() { return "redirect:/appointments.html"; }
-    @GetMapping("/appointments/new") public String create() { return "redirect:/appointment-create.html"; }
+    @GetMapping({"/appointments", "/appointments.html"})
+    public String appointments() { return "appointment/list"; }
+    @GetMapping({"/appointments/new", "/appointment-create.html"})
+    public String create() { return "appointment/create"; }
 }

@@ -48,6 +48,15 @@ window.PawAppointments = (() => {
   async function lookup(phone) {
     return request("/api/v1/appointment-guests/lookup", { method: "POST", body: JSON.stringify({phone}) });
   }
+  async function session() {
+    const requested = new URLSearchParams(location.search).get("ownerId");
+    if (requested !== null && !/^[1-9][0-9]*$/.test(requested)) {
+      throw new ApiError("รหัสเจ้าของไม่ถูกต้อง", 400);
+    }
+    const selected = await request(`/api/v1/appointment-guests/me?${query({ownerId:requested})}`);
+    if (selected.ownerId) setOwner(selected); else clearOwner();
+    return selected;
+  }
   async function registration(phone) {
     const config = await request("/api/v1/appointment-guests/config");
     if (config.ownerRegistrationEnabled === "false") {
@@ -59,5 +68,5 @@ window.PawAppointments = (() => {
     url.searchParams.set("returnTo", "appointment");
     return url.pathname + url.search;
   }
-  return { request, query, owner, setOwner, clearOwner, message, options, bangkokToday, formatDate, services, statuses, lookup, registration };
+  return { request, query, owner, setOwner, clearOwner, message, options, bangkokToday, formatDate, services, statuses, lookup, session, registration };
 })();

@@ -5,6 +5,7 @@ import com.example.petclinic.dto.request.PhoneLookupRequestDTO;
 import com.example.petclinic.dto.response.*;
 import com.example.petclinic.service.AppointmentGuestService;
 import jakarta.validation.Valid;
+import com.example.petclinic.controller.StaffAccess;
 import jakarta.servlet.http.HttpSession;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class AppointmentGuestController {
     private final AppointmentGuestService service;
     private final String registrationPath;
-    @Value("${appointments.owner-registration-enabled:false}")
+    @Value("${appointments.owner-registration-enabled:true}")
     private boolean registrationEnabled;
     @Value("${appointments.pet-registration-enabled:false}")
     private boolean petRegistrationEnabled;
@@ -39,10 +40,19 @@ public class AppointmentGuestController {
         return service.pets(AppointmentAccess.owner(session, ownerId));
     }
 
+    @GetMapping("/me")
+    @Operation(summary = "อ่านแฟ้มที่ค้นหาแล้วและสิทธิ์ Staff จาก session ปัจจุบัน")
+    public AppointmentGuestSessionDTO me(@RequestParam(required = false) Long ownerId, HttpSession session) {
+        boolean staff = StaffAccess.isStaff(session);
+        if (staff && ownerId == null) return new AppointmentGuestSessionDTO(null, null, null, true);
+        AppointmentGuestOwnerDTO owner = service.owner(AppointmentAccess.owner(session, ownerId));
+        return new AppointmentGuestSessionDTO(owner.ownerId(), owner.firstName(), owner.lastName(), staff);
+    }
+
     @GetMapping("/config")
     @Operation(summary = "อ่านเส้นทางและสถานะความพร้อมของจุดเชื่อมหน้าลงทะเบียน")
     public Map<String, String> config() {
-        return Map.of("ownerRegistrationPath", registrationPath, "bookingReturnPath", "/appointment-create.html",
+        return Map.of("ownerRegistrationPath", registrationPath, "bookingReturnPath", "/appointments/new",
             "ownerRegistrationEnabled", Boolean.toString(registrationEnabled),
             "petRegistrationEnabled", Boolean.toString(petRegistrationEnabled));
     }

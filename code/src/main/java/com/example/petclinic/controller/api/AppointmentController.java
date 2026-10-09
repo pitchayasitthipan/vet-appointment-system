@@ -8,6 +8,7 @@ import com.example.petclinic.dto.request.*;
 import com.example.petclinic.dto.response.*;
 import com.example.petclinic.service.AppointmentService;
 import jakarta.validation.Valid;
+import com.example.petclinic.controller.StaffAccess;
 import jakarta.servlet.http.HttpSession;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -68,5 +69,22 @@ public class AppointmentController {
     public AppointmentResponseDTO cancel(@PathVariable Long id, @RequestParam(required = false) Long ownerId,
             HttpSession session) {
         return service.cancel(id, AppointmentAccess.owner(session, ownerId));
+    }
+    @GetMapping("/staff")
+    @Operation(summary = "ดูนัดทั้งคลินิก พร้อมกรองและแบ่งหน้า [เฉพาะเจ้าหน้าที่]")
+    public AppointmentPageDTO clinic(@RequestParam(required = false) AppointmentStatus status,
+            @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "appointmentDateTime") String sort,
+            @RequestParam(defaultValue = "asc") String direction, HttpSession session) {
+        StaffAccess.requireStaff(session);
+        return service.listClinic(status, page, size, sort, direction);
+    }
+
+    @PatchMapping("/{id}/status")
+    @Operation(summary = "ยืนยันหรือปิดนัด โดยตรวจ version [เฉพาะเจ้าหน้าที่]")
+    public AppointmentResponseDTO changeStatus(@PathVariable Long id,
+            @Valid @RequestBody AppointmentStatusUpdateDTO request, HttpSession session) {
+        StaffAccess.requireStaff(session);
+        return service.changeStatus(id, request);
     }
 }

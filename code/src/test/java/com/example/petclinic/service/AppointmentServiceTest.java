@@ -1,6 +1,7 @@
 package com.example.petclinic.service;
 
 import java.time.*;
+import com.example.petclinic.service.impl.AppointmentServiceImpl;
 import java.util.*;
 import com.example.petclinic.domain.entity.*;
 import com.example.petclinic.domain.enums.*;
@@ -34,9 +35,9 @@ class AppointmentServiceTest {
         pet = new AppointmentPet(); pet.setPetId(2L); pet.setPetName("มะลิ"); pet.setPetOwner(owner);
         doctor = new Doctor(); doctor.setDoctorId(3L); doctor.setFirstName("หมอ"); doctor.setLastName("ใจดี");
         doctor.setWorkSchedule("จันทร์ - ศุกร์: 09:00 - 17:00");
-        service = new AppointmentService(appointments, pets, doctors, new AppointmentFactoryRegistry(List.of(
+        service = new AppointmentServiceImpl(appointments, pets, doctors, new AppointmentFactoryRegistry(List.of(
             new ConsultationAppointmentFactory(), new VaccineAppointmentFactory(), new SurgeryAppointmentFactory())),
-            new AppointmentSchedulePolicy(new ClinicConfigService(), Clock.fixed(Instant.parse("2027-01-04T01:00:00Z"), ZoneId.of("Asia/Bangkok"))));
+            new AppointmentSchedulePolicy(new ClinicConfigService(), Clock.fixed(Instant.parse("2027-01-04T01:00:00Z"), ZoneId.of("Asia/Bangkok"))), Clock.fixed(Instant.parse("2027-01-04T01:00:00Z"), ZoneId.of("Asia/Bangkok")));
     }
     void bookingResources() {
         when(doctors.findLockedById(3L)).thenReturn(Optional.of(doctor));
@@ -150,4 +151,39 @@ class AppointmentServiceTest {
         assertThatThrownBy(() -> service.cancel(4L, 9L)).isInstanceOf(ResourceNotFoundException.class);
         verify(appointments, never()).saveAndFlush(any());
     }
+
+    @Test void confirmsPendingAndRepeatingConfirmationDoesNotWriteAgain() {
+        Appointment existing = spy(appointment()); when(existing.getVersion()).thenReturn(0L);
+        when(appointments.findLockedById(4L)).thenReturn(Optional.of(existing));
+        when(appointments.saveAndFlush(existing)).thenReturn(existing);
+        var request = new com.example.petclinic.dto.request.AppointmentStatusUpdateDTO(AppointmentStatus.CONFIRMED, 0L);
+        assertThat(service.changeStatus(4L, request).status()).isEqualTo(AppointmentStatus.CONFIRMED);
+        service.changeStatus(4L, request);
+        verify(appointments, times(1)).saveAndFlush(existing);
+    }
+    @Test void completesConfirmedOnlyAfterStartTime() {
+        Appointment existing = spy(appointment()); when(existing.getVersion()).thenReturn(0L);
+        existing.setStatus(AppointmentStatus.CONFIRMED);
+        when(appointments.findLockedById(4L)).thenReturn(Optional.of(existing));
+        var request = new com.example.petclinic.dto.request.AppointmentStatusUpdateDTO(AppointmentStatus.COMPLETED, 0L);
+        assertThatThrownBy(() -> service.changeStatus(4L, request)).isInstanceOf(DuplicateResourceException.class);
+        existing.setAppointmentDateTime(time.minusDays(1));
+        when(appointments.saveAndFlush(existing)).thenReturn(existing);
+        assertThat(service.changeStatus(4L, request).status()).isEqualTo(AppointmentStatus.COMPLETED);
+    }
+    @Test void rejectsStaleVersionAndInvalidTransitionsWithoutWriting() {
+        Appointment existing = spy(appointment()); when(existing.getVersion()).thenReturn(1L);
+        when(appointments.findLockedById(4L)).thenReturn(Optional.of(existing));
+        assertThatThrownBy(() -> service.changeStatus(4L, new com.example.petclinic.dto.request.AppointmentStatusUpdateDTO(AppointmentStatus.CONFIRMED, 0L)))
+            .isInstanceOf(DuplicateResourceException.class);
+        assertThatThrownBy(() -> service.changeStatus(4L, new com.example.petclinic.dto.request.AppointmentStatusUpdateDTO(AppointmentStatus.COMPLETED, 1L)))
+            .isInstanceOf(DuplicateResourceException.class);
+        existing.setStatus(AppointmentStatus.CANCELLED);
+        assertThatThrownBy(() -> service.changeStatus(4L, new com.example.petclinic.dto.request.AppointmentStatusUpdateDTO(AppointmentStatus.CONFIRMED, 1L)))
+            .isInstanceOf(DuplicateResourceException.class);
+        assertThatThrownBy(() -> service.changeStatus(4L, new com.example.petclinic.dto.request.AppointmentStatusUpdateDTO(AppointmentStatus.PENDING, 1L)))
+            .isInstanceOf(InvalidAppointmentException.class);
+        verify(appointments, never()).saveAndFlush(any());
+    }
+
 }

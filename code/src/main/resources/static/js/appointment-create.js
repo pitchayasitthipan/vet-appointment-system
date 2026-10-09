@@ -36,15 +36,8 @@
     } catch (e) { if (version === slotVersion) { P.options(time, [], "ตรวจคิวไม่สำเร็จ"); P.message(feedback, e.message, "error"); } }
     ready();
   }
-  byId("owner-lookup-form").addEventListener("submit", async event => {
-    event.preventDefault(); resetOwner();
-    const version = lookupVersion;
-    const lookupButton = event.currentTarget.querySelector("button");
-    lookupButton.disabled = true;
-    P.message(byId("owner-result"), "กำลังค้นหาข้อมูล…");
-    try {
-      const found = await P.lookup(phone.value.trim());
-      const pets = await P.request(`/api/v1/appointment-guests/${found.ownerId}/pets`);
+  async function selectOwner(found, version) {
+    const pets = await P.request(`/api/v1/appointment-guests/${found.ownerId}/pets`);
       if (version !== lookupVersion) return;
       owner = found; P.setOwner(found);
       P.message(byId("owner-result"), `พบแฟ้ม ${found.firstName} ${found.lastName}`, "success");
@@ -61,6 +54,16 @@
           byId("registration-link-container").replaceChildren(link); byId("registration-link-container").hidden = false;
         } else P.message(feedback, "ยังไม่มีสัตว์เลี้ยงในแฟ้ม ขณะนี้ยังรอเชื่อมหน้าเพิ่มสัตว์เลี้ยง กรุณาติดต่อคลินิก");
       } else await loadSlots();
+  }
+  byId("owner-lookup-form").addEventListener("submit", async event => {
+    event.preventDefault(); resetOwner();
+    const version = lookupVersion;
+    const lookupButton = event.currentTarget.querySelector("button");
+    lookupButton.disabled = true;
+    P.message(byId("owner-result"), "กำลังค้นหาข้อมูล…");
+    try {
+      const found = await P.lookup(phone.value.trim());
+      await selectOwner(found, version);
     } catch (e) {
       if (version !== lookupVersion) return;
       if (e.status === 404) {
@@ -91,8 +94,20 @@
     } finally { saving = false; byId("owner-lookup-form").querySelector("fieldset").disabled = false; ready(); }
   });
   date.min = P.bangkokToday();
-  const cached = P.owner();
-  if (cached) { P.message(byId("booking-notice"), "กรอกเบอร์โทรของคุณเพื่อเลือกแฟ้มและเริ่มจองนัดหมาย"); }
+  const sessionVersion = lookupVersion;
+  P.session().then(async current => {
+    if (sessionVersion !== lookupVersion) return;
+    if (current.ownerId) {
+      await selectOwner(current, sessionVersion);
+      P.message(byId("booking-notice"), "ใช้แฟ้มที่เลือกจากหน้าเจ้าของแล้ว สามารถเลือกสัตว์และจองนัดได้เลย", "success");
+    } else if (current.isStaff) {
+      P.message(byId("booking-notice"), "เจ้าหน้าที่: ค้นหาเบอร์เพื่อเลือกแฟ้มก่อนจองนัด");
+    }
+  }).catch(e => {
+    if (sessionVersion !== lookupVersion) return;
+    P.clearOwner();
+    P.message(byId("booking-notice"), e.message, e.status === 403 ? "info" : "error");
+  });
   P.request("/api/doctors").then(doctors => {
     P.options(doctor, doctors.map(d => [d.doctorId, `${d.firstName} ${d.lastName} · ${d.specialization || "สัตวแพทย์"}`]), doctors.length ? "เลือกสัตวแพทย์" : "ยังไม่มีสัตวแพทย์ในระบบ");
     doctorsReady = doctors.length > 0;

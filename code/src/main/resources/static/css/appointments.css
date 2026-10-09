@@ -93,7 +93,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   gap:28px
 }
 
-.brand {
+.site-header .brand {
   display:flex;
   align-items:center;
   gap:12px;
@@ -104,7 +104,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   line-height:1.1
 }
 
-.brand small {
+.site-header .brand small {
   display:block;
   font-size:11px;
   letter-spacing:.5px;
@@ -123,19 +123,19 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   font-size:26px
 }
 
-nav {
+.site-header nav {
   display:flex;
   gap:28px
 }
 
-nav a {
+.site-header nav a {
   color:var(--muted);
   font-size:14px;
   text-decoration:none;
   padding:9px 0
 }
 
-nav a[aria-current] {
+.site-header nav a[aria-current] {
   color:var(--accent);
   border-bottom:2px solid var(--accent);
   font-weight:700
@@ -698,3 +698,8 @@ footer {
     padding:20px 18px
   }
 }
+
+body { font-family: "Prompt", "Segoe UI", Tahoma, sans-serif; }
+.hero-art .icon { width: 100px; height: 100px; }
+#staff-tools { display: flex; align-items: center; gap: 16px; padding-bottom: 0; }
+#staff-tools[hidden] { display: none; }
