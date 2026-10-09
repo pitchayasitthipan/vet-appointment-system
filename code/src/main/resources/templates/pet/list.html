@@ -26,21 +26,11 @@
                 <p class="pets-owner-name">ของคุณ <strong th:text="${owner.firstName + ' ' + owner.lastName}">John Doe</strong></p>
                 <p>จัดการข้อมูลสัตว์เลี้ยงของคุณ ดูรายละเอียดและข้อมูลสุขภาพเบื้องต้นได้ในที่เดียว</p>
 
-                <!-- ไอคอนในป้ายใช้ <i> เพราะ .hero-highlights span ใน pets.css จะทำให้ไอคอนกลายเป็นป้ายซ้อน -->
                 <div class="hero-highlights">
                     <span><i class="icon i-paw-print icon-sm icon-pink"></i> ข้อมูลสัตว์เลี้ยง</span>
                     <span><i class="icon i-eye icon-sm icon-pink"></i> ดูรายละเอียดได้ง่าย</span>
                     <span><i class="icon i-note-pencil icon-sm icon-pink"></i> จัดการข้อมูลได้สะดวก</span>
                 </div>
-            </div>
-
-            <div class="pets-hero-art" aria-hidden="true">
-                <div class="hero-art-circle">
-                    <span class="icon i-dog icon-pink"></span>
-                </div>
-                <span class="icon i-paw-print hero-paw paw-one"></span>
-                <span class="icon i-heart hero-paw paw-two"></span>
-                <span class="icon i-bone hero-sparkle"></span>
             </div>
         </section>
 
@@ -99,7 +89,7 @@
                     onclick="closeModal('petDetailModal')" aria-label="ปิด"><span class="icon i-x icon-sm icon-pink"></span></button>
 
             <div class="modal-heading">
-                <span class="modal-icon"><span class="icon i-paw-print icon-lg icon-pink"></span></span>
+                <span class="modal-icon" id="detailPetIcon"><span class="icon i-paw-print icon-lg icon-pink"></span></span>
                 <div>
                     <span class="eyebrow">PET PROFILE</span>
                     <h2 id="petDetailTitle">รายละเอียดสัตว์เลี้ยง</h2>
@@ -161,9 +151,9 @@
             <div class="modal-heading">
                 <span class="modal-icon"><span class="icon i-dog icon-lg icon-pink"></span></span>
                 <div>
-                    <span class="eyebrow">NEW COMPANION</span>
+                    <span class="eyebrow" id="addPetEyebrow">NEW COMPANION</span>
                     <h2 id="addPetTitle">เพิ่มสัตว์เลี้ยง</h2>
-                    <p>กรอกข้อมูลพื้นฐานของสัตว์เลี้ยงของคุณ</p>
+                    <p id="addPetSubtitle">กรอกข้อมูลพื้นฐานของสัตว์เลี้ยงของคุณ</p>
                 </div>
             </div>
 
@@ -222,7 +212,7 @@
                 <div class="modal-actions">
                     <button class="secondary-button" type="button"
                             onclick="closeModal('addPetModal')">ยกเลิก</button>
-                    <button class="primary-button" type="submit">
+                    <button class="primary-button" type="submit" id="addPetSubmit">
                         บันทึกข้อมูล
                     </button>
                 </div>
