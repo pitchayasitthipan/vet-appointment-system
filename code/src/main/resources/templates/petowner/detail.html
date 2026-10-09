@@ -71,6 +71,7 @@
         <div class="sec-h"><span class="no">1</span><h2>ข้อมูลติดต่อ</h2></div>
         <div class="sec-b kv">
           <span class="k"><span class="icon i-phone icon-sm icon-accent"></span> เบอร์โทร</span>
+          <span class="v"><span th:replace="~{fragments/layout :: phone(${owner.phone})}"></span></span>
           <!-- อีเมล/ที่อยู่ แสดงเฉพาะเจ้าหน้าที่ กันคนอื่นเอาเบอร์มาเปิดดูข้อมูลส่วนตัว -->
           <th:block th:if="${isStaff}">
             <span class="k"><span class="icon i-envelope icon-sm icon-accent"></span> อีเมล</span>
@@ -78,9 +79,8 @@
             <span class="k"><span class="icon i-map-pin icon-sm icon-accent"></span> ที่อยู่</span>
             <span class="v" th:text="${owner.address} ?: '-'"></span>
           </th:block>
-                  <p th:unless="${isStaff}" class="sec-b muted-note">อีเมล ที่อยู่ และผู้ติดต่อฉุกเฉิน แสดงเฉพาะเจ้าหน้าที่ หากต้องการตรวจสอบหรือแก้ไข กรุณาติดต่อคลินิก</p>
-          <span class="v" th:text="${owner.address} ?: '-'"></span>
         </div>
+        <p th:unless="${isStaff}" class="sec-b muted-note">อีเมล ที่อยู่ และผู้ติดต่อฉุกเฉิน แสดงเฉพาะเจ้าหน้าที่ หากต้องการตรวจสอบหรือแก้ไข กรุณาติดต่อคลินิก</p>
       </div>
 
       <!-- 2. ผู้ติดต่อฉุกเฉิน (โทนแดง) -->
