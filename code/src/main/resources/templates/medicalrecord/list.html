@@ -1,0 +1,127 @@
+
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ประวัติการรักษา | PawCare</title>
+
+    <style>
+        /* จัดรูปแบบหน้าเว็บเบื้องต้น */
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f9fc;
+            color: #263238;
+            margin: 0;
+            padding: 32px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        h1 { margin-bottom: 8px; }
+
+        .subtitle {
+            color: #667085;
+            margin-bottom: 24px;
+        }
+
+        .table-wrapper {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th { background: #f2f5f9; }
+
+        .empty {
+            text-align: center;
+            color: #667085;
+            padding: 32px;
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <h1>ประวัติการรักษาและวัคซีน</h1>
+        <p class="subtitle">PawCare | Medical Records</p>
+        
+        <!-- เปิดหน้าฟอร์มเพิ่มประวัติการรักษา -->
+        <p>
+            <a th:href="@{/medical-records/new}">
+                + เพิ่มประวัติการรักษา
+            </a>
+        </p>
+
+        <!-- แสดงข้อความหลังบันทึกสำเร็จ -->
+        <p th:if="${successMessage}"
+            th:text="${successMessage}"
+            style="color: green;"></p>
+            
+        <!-- แจ้งเตือนเมื่อไม่พบประวัติการรักษา -->
+        <p th:if="${errorMessage}"
+            th:text="${errorMessage}"
+            style="color: red;"></p>
+
+        <section class="table-wrapper">
+            <!-- Thymeleaf รับรายการ medicalRecords จาก Web Controller -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>รหัสประวัติ</th>
+                        <th>รหัสนัดหมาย</th>
+                        <th>การวินิจฉัย</th>
+                        <th>การรักษา</th>
+                        <th>วัคซีน</th>
+                        <th>วันที่ฉีดวัคซีน</th>
+                        <th>นัดวัคซีนครั้งถัดไป</th>
+                        <th>หมายเหตุ</th>
+                        <th>จัดการ</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <!-- วนแสดงข้อมูลประวัติการรักษาทีละรายการ -->
+                    <tr th:each="record : ${medicalRecords}">
+                        <td th:text="${record.medicalRecordId}"></td>
+                        <td th:text="${record.appointmentId}"></td>
+                        <td th:text="${record.diagnosis} ?: '-'"></td>
+                        <td th:text="${record.treatment} ?: '-'"></td>
+                        <td th:text="${record.vaccineName} ?: '-'"></td>
+                        <td th:text="${record.vaccineDate} ?: '-'"></td>
+                        <td th:text="${record.nextVaccineDate} ?: '-'"></td>
+                        <td th:text="${record.notes} ?: '-'"></td>
+                        <!-- เปิดหน้ารายละเอียดของรายการที่เลือก -->
+                        <td>
+                            <a th:href="@{/medical-records/{id}(id=${record.medicalRecordId})}">
+                                ดูรายละเอียด
+                            </a>
+                        </td>
+                    </tr>
+
+                    <!-- แสดงข้อความเมื่อยังไม่มีข้อมูล -->
+                    <tr th:if="${#lists.isEmpty(medicalRecords)}">
+                        <td colspan="9" class="empty">
+                            ยังไม่มีประวัติการรักษา
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</body>
+</html>
