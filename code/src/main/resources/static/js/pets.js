@@ -3,8 +3,14 @@
 let petsList = [];
 let currentPetId = null;
 
-// Change this if the logged-in owner's ID is available later.
-const CURRENT_OWNER_ID = 1;
+// Use the owner's selected guest file; never default to another owner's ID.
+const petPageParams = new URLSearchParams(location.search);
+let storedPetOwner = null;
+try { storedPetOwner = JSON.parse(sessionStorage.getItem("pawcare.owner")); } catch {}
+const CURRENT_OWNER_ID = Number(petPageParams.get("ownerId") || storedPetOwner?.ownerId);
+if (Number.isSafeInteger(CURRENT_OWNER_ID) && CURRENT_OWNER_ID > 0) {
+    try { sessionStorage.setItem("pawcare.owner", JSON.stringify({ownerId:CURRENT_OWNER_ID})); } catch {}
+}
 
 
 // ==================== LOAD PETS ====================
@@ -14,6 +20,10 @@ async function loadPets() {
     const container = document.getElementById("petCardsContainer");
 
     if (!container) return;
+    if (!Number.isSafeInteger(CURRENT_OWNER_ID) || CURRENT_OWNER_ID < 1) {
+        location.replace("/owners");
+        return;
+    }
 
     try {
 
@@ -258,8 +268,7 @@ async function handleAddPet(event) {
         microchipNumber:
             form.microchipNumber.value.trim() || null,
 
-        ownerId:
-            Number(form.ownerId.value)
+        ownerId: CURRENT_OWNER_ID
     };
 
 
@@ -297,6 +306,7 @@ async function handleAddPet(event) {
         form.reset();
 
         await loadPets();
+        if (petPageParams.get("returnTo") === "appointment") location.assign("/appointment-create.html");
 
     } catch (error) {
 
@@ -615,6 +625,9 @@ document.addEventListener(
             });
 
 
+        const petOwnerInput = document.getElementById("petOwnerId");
+        if (petOwnerInput) { petOwnerInput.value = CURRENT_OWNER_ID; petOwnerInput.readOnly = true; }
         loadPets();
+        if (petPageParams.get("new") === "1") openAddPetModal();
     }
 );

@@ -177,11 +177,13 @@ public class PetOwnerWebController {
     // 3. หน้าฟอร์มเพิ่มข้อมูลใหม่ (Create Form)
     // ถ้าค้นหาเบอร์แล้วไม่เจอ จะส่ง ?phone= มาด้วย -> ก็จะกรอกเบอร์ให้อัตโนมัติ
     @GetMapping("/new")
-    public String showCreateForm(@RequestParam(required = false) String phone, Model model) {
+    public String showCreateForm(@RequestParam(required = false) String phone,
+            @RequestParam(required = false) String returnTo, Model model) {
         PetOwnerRequestDTO requestDTO = new PetOwnerRequestDTO();
         requestDTO.setPhone(phone);
         model.addAttribute("ownerRequest", requestDTO);
         model.addAttribute("isEdit", false);
+        model.addAttribute("returnTo", "appointment".equals(returnTo) ? "appointment" : "");
         return "petowner/form";
     }
 
@@ -224,9 +226,12 @@ public class PetOwnerWebController {
             @Valid @ModelAttribute("ownerRequest") PetOwnerRequestDTO requestDTO,
             BindingResult bindingResult,
             @RequestParam(required = false) String next,
+            @RequestParam(required = false) String returnTo,
             HttpSession session,
             Model model,
             RedirectAttributes redirectAttributes) {
+
+        model.addAttribute("returnTo", "appointment".equals(returnTo) ? "appointment" : "");
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("isEdit", false);
@@ -238,6 +243,9 @@ public class PetOwnerWebController {
             if (!isStaff(session)) {
                 // ลูกค้าลงทะเบียนเอง -> จำไว้ว่าเป็นแฟ้มของเบราว์เซอร์นี้
                 session.setAttribute(MY_OWNER_ID, savedOwner.getOwnerId());
+            }
+            if ("appointment".equals(returnTo)) {
+                return "redirect:/pets/new?ownerId=" + savedOwner.getOwnerId() + "&returnTo=appointment";
             }
             if ("pet".equals(next)) {
                 // ส่ง ownerId ต่อให้หน้าเพิ่มสัตว์เลี้ยง

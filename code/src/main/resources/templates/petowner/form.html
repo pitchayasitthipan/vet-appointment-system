@@ -48,6 +48,7 @@
   <!-- isEdit = false -> POST /owners (เพิ่ม), isEdit = true -> POST /owners/{id} (แก้ไข) -->
   <form class="form-calm" method="post" th:object="${ownerRequest}"
         th:action="${isEdit} ? @{/owners/{id}(id=${ownerId})} : @{/owners}">
+    <input type="hidden" name="returnTo" th:value="${returnTo}">
 
     <!-- หมวด 1 ข้อมูลเจ้าของ -->
     <div class="sec">

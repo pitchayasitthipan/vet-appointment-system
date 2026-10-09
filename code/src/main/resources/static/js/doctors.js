@@ -538,41 +538,8 @@ function renderWeeklyMatrixTable() {
 
 // Open Appointment Booking Modal
 function openBookingModal(doctorId) {
-  const modal = document.getElementById("bookingModal");
-  if (!modal) return;
-
-  const list = (doctorsList && doctorsList.length > 0) ? doctorsList : DEFAULT_DOCTORS;
-  const targetId = doctorId || currentSelectedDoctorId || list[0].doctorId;
-
-  const selectEl = document.getElementById("bookingDoctorSelect");
-  if (selectEl) {
-    selectEl.innerHTML = list.map(d => `
-      <option value="${d.doctorId}" ${d.doctorId == targetId ? 'selected' : ''}>
-        ${d.titlePrefix || 'สพ.'} ${d.firstName} ${d.lastName} (${d.specialization})
-      </option>
-    `).join("");
-  }
-
-  onBookingDoctorChange(targetId);
-
-  const dateInput = document.getElementById("bookingDate");
-  if (dateInput && !dateInput.value) {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    dateInput.value = tomorrow.toISOString().split("T")[0];
-    dateInput.min = new Date().toISOString().split("T")[0];
-  }
-
-  const successBox = document.getElementById("bookingSuccessBox");
-  if (successBox) successBox.style.display = "none";
-
-  const submitBtn = document.getElementById("btnSubmitBooking");
-  if (submitBtn) {
-    submitBtn.disabled = false;
-    submitBtn.innerText = "ยืนยันการนัดหมาย";
-  }
-
-  modal.classList.add("show");
+  const bookingId = doctorId || currentSelectedDoctorId;
+  window.location.assign("/appointment-create.html" + (bookingId ? "?doctorId=" + encodeURIComponent(bookingId) : ""));
 }
 
 function onBookingDoctorChange(docId) {
@@ -591,24 +558,7 @@ function onBookingDoctorChange(docId) {
 
 function handleBookingSubmit(event) {
   event.preventDefault();
-  const successBox = document.getElementById("bookingSuccessBox");
-  const submitBtn = document.getElementById("btnSubmitBooking");
-
-  if (successBox) successBox.style.display = "block";
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.innerText = "บันทึกเรียบร้อย ✓";
-  }
-
-  setTimeout(() => {
-    closeModal("bookingModal");
-    if (event.target) event.target.reset();
-    if (successBox) successBox.style.display = "none";
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.innerText = "ยืนยันการนัดหมาย";
-    }
-  }, 1600);
+  openBookingModal(document.getElementById("bookingDoctorSelect")?.value);
 }
 
 function closeModal(modalId) {
