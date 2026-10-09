@@ -27,6 +27,19 @@ class AppointmentPersistenceTest {
     @Autowired PetRepository pets;
     @Autowired AppointmentDoctorRepository doctors;
     @Autowired AppointmentRepository appointments;
+    @Autowired AppointmentGuestService guests;
+
+    @Test void guestLookupMatchesFormattedStoredPhoneAndListsOnlySelectedPets() {
+        PetOwner owner = new PetOwner(); owner.setFirstName("อ้น"); owner.setLastName("ทดสอบ");
+        owner.setEmail("guest-test@example.com"); owner.setPhone("081-234-5678"); owners.saveAndFlush(owner);
+        PetOwner other = new PetOwner(); other.setFirstName("อื่น"); other.setLastName("ทดสอบ");
+        other.setEmail("other-guest@example.com"); other.setPhone("0899999999"); owners.saveAndFlush(other);
+        Pet pet = new Pet(); pet.setPetName("มะลิ"); pet.setPetOwner(owner); pets.saveAndFlush(pet);
+        Pet another = new Pet(); another.setPetName("ของคนอื่น"); another.setPetOwner(other); pets.saveAndFlush(another);
+        assertThat(guests.lookup("081 234 5678").ownerId()).isEqualTo(owner.getOwnerId());
+        assertThat(guests.pets(owner.getOwnerId())).hasSize(1);
+        assertThat(guests.pets(owner.getOwnerId()).get(0).petId()).isEqualTo(pet.getPetId());
+    }
 
     @Test void persistsReschedulesAndCancellationReleasesSlot() {
         PetOwner owner = new PetOwner(); owner.setFirstName("อ้น"); owner.setLastName("ทดสอบ");
