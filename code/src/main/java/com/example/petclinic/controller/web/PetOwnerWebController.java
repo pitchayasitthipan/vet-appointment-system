@@ -49,13 +49,6 @@ public class PetOwnerWebController {
         this.staffPasscode = staffPasscode;
     }
 
-    // ส่งค่า isStaff ไปทุกหน้าในคลาสนี้ ใช้เลือกปุ่ม/ลิงก์ตามฝั่ง (ลูกค้า หรือ
-    // เจ้าหน้าที่)
-    @ModelAttribute("isStaff")
-    public boolean addIsStaff(HttpSession session) {
-        return isStaff(session);
-    }
-
     // ฝั่งลูกค้า: หน้าค้นหาข้อมูลของฉันด้วยเบอร์โทร
     @GetMapping
     public String searchByPhone(@RequestParam(required = false) String phone, HttpSession session, Model model) {
