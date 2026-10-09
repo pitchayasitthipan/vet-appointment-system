@@ -3,8 +3,31 @@
 let petsList = [];
 let currentPetId = null;
 
-// Change this if the logged-in owner's ID is available later.
-const CURRENT_OWNER_ID = 1;
+// สัตว์ที่กำลังแก้ไข (null = ฟอร์มอยู่ในโหมดเพิ่มสัตว์ใหม่)
+let editingPetId = null;
+
+// เจ้าของที่กำลังดู: Controller ใส่ไว้ใน <body data-owner-id> (ลูกค้ามาจาก session)
+const CURRENT_OWNER_ID = Number(document.body.dataset.ownerId);
+
+// REST API ของโมดูล Pet
+const PETS_API = "/api/v1/pets";
+
+// ในฐานข้อมูลเก็บเป็นภาษาอังกฤษ แสดงผลเป็นภาษาไทย
+const SPECIES_LABELS = {
+    Dog: "สุนัข",
+    Cat: "แมว",
+    Other: "อื่น ๆ"
+};
+
+const GENDER_LABELS = {
+    Male: "เพศผู้",
+    Female: "เพศเมีย"
+};
+
+const THAI_MONTHS = [
+    "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.",
+    "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."
+];
 
 
 // ==================== LOAD PETS ====================
@@ -18,7 +41,7 @@ async function loadPets() {
     try {
 
         const response =
-            await fetch(`/api/pets/owner/${CURRENT_OWNER_ID}`);
+            await fetch(`${PETS_API}/owner/${CURRENT_OWNER_ID}`);
 
         if (!response.ok) {
             throw new Error("Failed to load pets");
@@ -33,8 +56,8 @@ async function loadPets() {
         console.error("Error loading pets:", error);
 
         container.innerHTML = `
-            <div class="pet-empty">
-                <div class="pet-empty-icon">🐾</div>
+            <div class="pet-empty-state">
+                <span class="icon i-warning icon-lg icon-pink"></span>
                 <h3>ไม่สามารถโหลดข้อมูลได้</h3>
                 <p>กรุณาตรวจสอบการเชื่อมต่อกับระบบ</p>
             </div>
@@ -51,7 +74,7 @@ function renderPets(pets) {
         document.getElementById("petCardsContainer");
 
     const count =
-        document.getElementById("petCount");
+        document.getElementById("petCountText");
 
     if (!container) return;
 
@@ -63,8 +86,8 @@ function renderPets(pets) {
     if (!pets || pets.length === 0) {
 
         container.innerHTML = `
-            <div class="pet-empty">
-                <div class="pet-empty-icon">🐾</div>
+            <div class="pet-empty-state">
+                <span class="icon i-paw-print icon-lg icon-pink"></span>
                 <h3>ยังไม่มีข้อมูลสัตว์เลี้ยง</h3>
                 <p>กด "เพิ่มสัตว์เลี้ยง" เพื่อเพิ่มข้อมูล</p>
             </div>
@@ -74,82 +97,71 @@ function renderPets(pets) {
     }
 
 
+    // ชื่อ class ตรงกับที่มีใน pets.css (pet-card-header, pet-card-details, ...)
     container.innerHTML = pets.map(pet => `
 
         <article class="pet-card">
 
-            <div class="pet-card-icon">
-                ${getPetIcon(pet.species)}
+            <div class="pet-card-header">
+
+                <div class="pet-card-icon">
+                    ${getPetIcon(pet.species)}
+                </div>
+
+                <div class="pet-card-heading">
+                    <h3>${escapeHtml(pet.name || "-")}</h3>
+
+                    <span class="pet-species">
+                        ${escapeHtml(speciesLabel(pet.species))}
+                    </span>
+                </div>
+
+                <span class="pet-card-id">
+                    #${pet.petId}
+                </span>
+
             </div>
 
-            <div class="pet-card-content">
 
-                <div class="pet-card-header">
+            <div class="pet-card-details">
 
-                    <div>
-                        <h3>${escapeHtml(pet.name || "-")}</h3>
-
-                        <span class="pet-species">
-                            ${escapeHtml(pet.species || "-")}
-                        </span>
-                    </div>
-
-                    <span class="pet-id">
-                        #${pet.petId}
-                    </span>
-
+                <div>
+                    <span>สายพันธุ์</span>
+                    <strong>${escapeHtml(pet.breed || "-")}</strong>
                 </div>
 
-
-                <div class="pet-info-grid">
-
-                    <div>
-                        <span>สายพันธุ์</span>
-                        <strong>
-                            ${escapeHtml(pet.breed || "-")}
-                        </strong>
-                    </div>
-
-                    <div>
-                        <span>เพศ</span>
-                        <strong>
-                            ${escapeHtml(pet.gender || "-")}
-                        </strong>
-                    </div>
-
-                    <div>
-                        <span>น้ำหนัก</span>
-                        <strong>
-                            ${pet.weight != null
-                                ? pet.weight + " kg"
-                                : "-"}
-                        </strong>
-                    </div>
-
+                <div>
+                    <span>เพศ</span>
+                    <strong>${escapeHtml(genderLabel(pet.gender))}</strong>
                 </div>
 
+                <div>
+                    <span>น้ำหนัก</span>
+                    <strong>${pet.weight != null ? pet.weight + " กก." : "-"}</strong>
+                </div>
 
-                <div class="pet-card-actions">
+                <div>
+                    <span>อายุ</span>
+                    <strong>${escapeHtml(petAge(pet.birthDate))}</strong>
+                </div>
 
-                    <button
-                        class="btn-view-pet"
-                        onclick="viewPet(${pet.petId})">
-                        ดูรายละเอียด
-                    </button>
+            </div>
 
-                    <button
-                        class="btn-card-edit"
-                        onclick="editPet(${pet.petId})">
-                        แก้ไข
-                    </button>
 
-                    <button
-                        class="btn-card-delete"
+            <div class="pet-card-actions">
+
+                <button type="button" onclick="viewPet(${pet.petId})">
+                    ดูรายละเอียด
+                </button>
+
+                <button type="button" onclick="editPet(${pet.petId})">
+                    แก้ไข
+                </button>
+
+                <button type="button" class="danger-button"
                         onclick="deletePet(${pet.petId})">
-                        ลบ
-                    </button>
-
-                </div>
+                    ลบ
+                </button>
 
             </div>
 
@@ -166,7 +178,7 @@ async function viewPet(id) {
     try {
 
         const response =
-            await fetch(`/api/pets/${id}`);
+            await fetch(`${PETS_API}/${id}`);
 
         if (!response.ok) {
             throw new Error("Pet not found");
@@ -176,37 +188,33 @@ async function viewPet(id) {
 
         currentPetId = pet.petId;
 
-        document.getElementById("detailName").innerText =
-            pet.name || "-";
-
-        document.getElementById("detailSpecies").innerText =
-            pet.species || "-";
-
-        document.getElementById("detailBreed").innerText =
-            pet.breed || "-";
-
-        document.getElementById("detailGender").innerText =
-            pet.gender || "-";
-
-        document.getElementById("detailBirthDate").innerText =
-            pet.birthDate || "-";
-
-        document.getElementById("detailWeight").innerText =
-            pet.weight != null
-                ? `${pet.weight} kg`
-                : "-";
-
-        document.getElementById("detailMicrochip").innerText =
-            pet.microchipNumber || "-";
-
-        document.getElementById("detailAvatar").innerText =
+        document.getElementById("detailPetIcon").innerHTML =
             getPetIcon(pet.species);
 
-        document.getElementById("detailEditButton").onclick =
-            () => editPet(pet.petId);
+        document.getElementById("detailPetName").innerText =
+            pet.name || "-";
 
-        document.getElementById("detailDeleteButton").onclick =
-            () => deletePet(pet.petId);
+        document.getElementById("detailPetSpecies").innerText =
+            speciesLabel(pet.species);
+
+        document.getElementById("detailPetBreed").innerText =
+            pet.breed || "-";
+
+        document.getElementById("detailPetGender").innerText =
+            genderLabel(pet.gender);
+
+        document.getElementById("detailPetBirthDate").innerText =
+            pet.birthDate
+                ? `${formatThaiDate(pet.birthDate)} (${petAge(pet.birthDate)})`
+                : "-";
+
+        document.getElementById("detailPetWeight").innerText =
+            pet.weight != null
+                ? `${pet.weight} กก.`
+                : "-";
+
+        document.getElementById("detailPetMicrochip").innerText =
+            pet.microchipNumber || "-";
 
         openModal("petDetailModal");
 
@@ -219,16 +227,36 @@ async function viewPet(id) {
 }
 
 
-// ==================== ADD PET ====================
+// ==================== ADD / EDIT FORM ====================
+
+// ฟอร์มเดียวใช้ทั้งเพิ่มและแก้ไข: เปลี่ยนแค่หัวข้อกับปุ่มบันทึก
+function setPetFormMode(isEdit) {
+
+    document.getElementById("addPetEyebrow").innerText =
+        isEdit ? "EDIT COMPANION" : "NEW COMPANION";
+
+    document.getElementById("addPetTitle").innerText =
+        isEdit ? "แก้ไขข้อมูลสัตว์เลี้ยง" : "เพิ่มสัตว์เลี้ยง";
+
+    document.getElementById("addPetSubtitle").innerText =
+        isEdit
+            ? "แก้ไขข้อมูลแล้วกดบันทึก"
+            : "กรอกข้อมูลพื้นฐานของสัตว์เลี้ยงของคุณ";
+
+    document.getElementById("addPetSubmit").innerText =
+        isEdit ? "บันทึกการแก้ไข" : "บันทึกข้อมูล";
+}
+
 
 function openAddPetModal() {
 
-    const modal =
-        document.getElementById("addPetModal");
+    editingPetId = null;
 
-    if (modal) {
-        modal.classList.add("show");
-    }
+    document.getElementById("addPetForm").reset();
+
+    setPetFormMode(false);
+
+    openModal("addPetModal");
 }
 
 
@@ -238,7 +266,7 @@ async function handleAddPet(event) {
 
     const form = event.target;
 
-    const newPet = {
+    const petData = {
 
         name: form.name.value.trim(),
 
@@ -258,23 +286,24 @@ async function handleAddPet(event) {
         microchipNumber:
             form.microchipNumber.value.trim() || null,
 
-        ownerId:
-            Number(form.ownerId.value)
+        ownerId: CURRENT_OWNER_ID
     };
+
+    const isEdit = editingPetId !== null;
 
 
     try {
 
         const response =
-            await fetch("/api/pets", {
+            await fetch(isEdit ? `${PETS_API}/${editingPetId}` : PETS_API, {
 
-                method: "POST",
+                method: isEdit ? "PUT" : "POST",
 
                 headers: {
                     "Content-Type": "application/json"
                 },
 
-                body: JSON.stringify(newPet)
+                body: JSON.stringify(petData)
             });
 
 
@@ -285,16 +314,22 @@ async function handleAddPet(event) {
 
             throw new Error(
                 errorData.message ||
-                "ไม่สามารถเพิ่มสัตว์เลี้ยงได้"
+                (isEdit
+                    ? "ไม่สามารถแก้ไขข้อมูลได้"
+                    : "ไม่สามารถเพิ่มสัตว์เลี้ยงได้")
             );
         }
 
 
-        alert("เพิ่มข้อมูลสัตว์เลี้ยงสำเร็จ!");
+        alert(isEdit
+            ? "แก้ไขข้อมูลสัตว์เลี้ยงสำเร็จ!"
+            : "เพิ่มข้อมูลสัตว์เลี้ยงสำเร็จ!");
 
         closeModal("addPetModal");
 
         form.reset();
+
+        editingPetId = null;
 
         await loadPets();
 
@@ -309,12 +344,13 @@ async function handleAddPet(event) {
 
 // ==================== EDIT PET ====================
 
+// เปิดฟอร์มเดียวกับตอนเพิ่ม พร้อมค่าเดิม แก้ได้ทุกช่อง
 async function editPet(id) {
 
     try {
 
         const response =
-            await fetch(`/api/pets/${id}`);
+            await fetch(`${PETS_API}/${id}`);
 
         if (!response.ok) {
             throw new Error("Pet not found");
@@ -322,87 +358,29 @@ async function editPet(id) {
 
         const pet = await response.json();
 
-        const name =
-            prompt("ชื่อสัตว์เลี้ยง:", pet.name || "");
+        const form = document.getElementById("addPetForm");
 
-        if (name === null) return;
+        form.name.value = pet.name || "";
+        form.species.value = pet.species || "";
+        form.breed.value = pet.breed || "";
+        form.gender.value = pet.gender || "";
+        form.birthDate.value = pet.birthDate || "";
+        form.weight.value = pet.weight != null ? pet.weight : "";
+        form.microchipNumber.value = pet.microchipNumber || "";
 
+        editingPetId = pet.petId;
 
-        const breed =
-            prompt("สายพันธุ์:", pet.breed || "");
-
-        if (breed === null) return;
-
-
-        const weightInput =
-            prompt(
-                "น้ำหนัก (kg):",
-                pet.weight != null ? pet.weight : ""
-            );
-
-        if (weightInput === null) return;
-
-
-        const updatedPet = {
-
-            name: name.trim(),
-
-            species: pet.species,
-
-            breed: breed.trim(),
-
-            gender: pet.gender,
-
-            birthDate: pet.birthDate,
-
-            weight:
-                weightInput.trim()
-                    ? Number(weightInput)
-                    : null,
-
-            microchipNumber:
-                pet.microchipNumber,
-
-            ownerId: pet.ownerId
-        };
-
-
-        const updateResponse =
-            await fetch(`/api/pets/${id}`, {
-
-                method: "PUT",
-
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify(updatedPet)
-            });
-
-
-        if (!updateResponse.ok) {
-
-            const errorData =
-                await updateResponse.json().catch(() => ({}));
-
-            throw new Error(
-                errorData.message ||
-                "ไม่สามารถแก้ไขข้อมูลได้"
-            );
-        }
-
-
-        alert("แก้ไขข้อมูลสัตว์เลี้ยงสำเร็จ!");
+        setPetFormMode(true);
 
         closeModal("petDetailModal");
 
-        await loadPets();
+        openModal("addPetModal");
 
     } catch (error) {
 
         console.error(error);
 
-        alert(error.message);
+        alert("ไม่สามารถโหลดข้อมูลสัตว์เลี้ยงได้");
     }
 }
 
@@ -429,7 +407,7 @@ async function deletePet(id) {
     try {
 
         const response =
-            await fetch(`/api/pets/${id}`, {
+            await fetch(`${PETS_API}/${id}`, {
 
                 method: "DELETE"
             });
@@ -475,6 +453,7 @@ function searchPets() {
         input.value.trim().toLowerCase();
 
 
+    // ค้นได้ทั้งชื่อ สายพันธุ์ และประเภท (พิมพ์ "แมว" หรือ "cat" ก็เจอ)
     const filtered =
         petsList.filter(pet => {
 
@@ -484,12 +463,16 @@ function searchPets() {
             const species =
                 (pet.species || "").toLowerCase();
 
+            const speciesThai =
+                speciesLabel(pet.species);
+
             const breed =
                 (pet.breed || "").toLowerCase();
 
             return (
                 name.includes(keyword) ||
                 species.includes(keyword) ||
+                speciesThai.includes(keyword) ||
                 breed.includes(keyword)
             );
         });
@@ -527,31 +510,73 @@ function closeModal(id) {
 
 function getPetIcon(species) {
 
-    const value =
-        (species || "").toLowerCase();
+    // ไอคอน Phosphor (icons.css) ชุดเดียวกับหน้าอื่นของเว็บ
+    // สัตว์มี 3 ประเภท: สุนัข (Dog) แมว (Cat) อื่น ๆ (Other ใช้รอยเท้า)
+    let iconName = "i-paw-print";
 
-    if (value.includes("cat") ||
-        value.includes("แมว")) {
-        return "🐱";
+    if (species === "Dog") {
+        iconName = "i-dog";
     }
 
-    if (value.includes("dog") ||
-        value.includes("หมา") ||
-        value.includes("สุนัข")) {
-        return "🐶";
+    if (species === "Cat") {
+        iconName = "i-cat";
     }
 
-    if (value.includes("bird") ||
-        value.includes("นก")) {
-        return "🐦";
+    return `<span class="icon ${iconName} icon-lg icon-pink"></span>`;
+}
+
+
+function speciesLabel(species) {
+
+    return SPECIES_LABELS[species] || species || "-";
+}
+
+
+function genderLabel(gender) {
+
+    return GENDER_LABELS[gender] || gender || "-";
+}
+
+
+// 2023-05-01 -> 1 พ.ค. 2566 (ปี พ.ศ. = ค.ศ. + 543) ให้เหมือนหน้าอื่นของเว็บ
+function formatThaiDate(isoDate) {
+
+    if (!isoDate) return "-";
+
+    const [year, month, day] =
+        isoDate.split("-").map(Number);
+
+    return `${day} ${THAI_MONTHS[month - 1]} ${year + 543}`;
+}
+
+
+// อายุจากวันเกิด เช่น "2 ปี 5 เดือน" หรือ "3 เดือน"
+function petAge(isoDate) {
+
+    if (!isoDate) return "-";
+
+    const [year, month, day] =
+        isoDate.split("-").map(Number);
+
+    const today = new Date();
+
+    let months =
+        (today.getFullYear() - year) * 12 +
+        (today.getMonth() + 1 - month);
+
+    if (today.getDate() < day) {
+        months--;
     }
 
-    if (value.includes("rabbit") ||
-        value.includes("กระต่าย")) {
-        return "🐰";
-    }
+    if (months < 1) return "น้อยกว่า 1 เดือน";
 
-    return "🐾";
+    const years = Math.floor(months / 12);
+    const restMonths = months % 12;
+
+    if (years === 0) return `${restMonths} เดือน`;
+    if (restMonths === 0) return `${years} ปี`;
+
+    return `${years} ปี ${restMonths} เดือน`;
 }
 
 
@@ -597,24 +622,11 @@ document.addEventListener(
         }
 
 
-        document
-            .querySelectorAll(".modal-overlay")
-            .forEach(modal => {
-
-                modal.addEventListener(
-                    "click",
-                    event => {
-
-                        if (event.target === modal) {
-                            modal.classList.remove("show");
-                        }
-
-                    }
-                );
-
-            });
-
-
         loadPets();
+
+        // มาจาก /pets/new -> เปิดฟอร์มเพิ่มสัตว์ทันที
+        if (document.body.dataset.openAdd === "true") {
+            openAddPetModal();
+        }
     }
 );
