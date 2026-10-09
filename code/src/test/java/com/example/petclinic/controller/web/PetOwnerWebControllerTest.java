@@ -30,6 +30,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.petclinic.dto.response.PetOwnerResponseDTO;
 import com.example.petclinic.exception.DuplicateResourceException;
 import com.example.petclinic.service.PetOwnerService;
+import com.example.petclinic.service.StaffPasscodeService;
+import static org.mockito.ArgumentMatchers.anyString;
 
 // ทดสอบการแบ่งสิทธิ์ 2 ฝั่ง: ลูกค้า (ค้นด้วยเบอร์ตัวเอง) และ เจ้าหน้าที่ (รหัส 8 หลัก)
 @WebMvcTest(PetOwnerWebController.class)
@@ -40,6 +42,9 @@ class PetOwnerWebControllerTest {
 
     @MockitoBean
     private PetOwnerService petOwnerService;
+
+    @MockitoBean
+    private StaffPasscodeService staffPasscodeService;
 
     private PetOwnerResponseDTO owner;
 
@@ -69,6 +74,9 @@ class PetOwnerWebControllerTest {
     void testUnlock_WrongPasscode() throws Exception {
         MockHttpSession session = new MockHttpSession();
 
+        given(staffPasscodeService.verify(anyString(), anyString()))
+                .willReturn(new StaffPasscodeService.Result(false, false, 0));
+
         mockMvc.perform(post("/owners/staff/unlock").param("passcode", "11111111").session(session))
                 .andExpect(redirectedUrl("/owners/staff"));
 
@@ -80,6 +88,9 @@ class PetOwnerWebControllerTest {
     void testUnlock_CorrectPasscode() throws Exception {
         MockHttpSession session = new MockHttpSession();
         given(petOwnerService.getAllPetOwners(any(Pageable.class))).willReturn(new PageImpl<>(List.of(owner)));
+
+        given(staffPasscodeService.verify(anyString(), anyString()))
+                .willReturn(new StaffPasscodeService.Result(true, false, 0));
 
         mockMvc.perform(post("/owners/staff/unlock").param("passcode", "12345678").session(session))
                 .andExpect(redirectedUrl("/owners/staff"));
