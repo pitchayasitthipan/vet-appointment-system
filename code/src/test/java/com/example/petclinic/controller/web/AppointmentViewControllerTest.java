@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.mock.web.MockHttpSession;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.*;
@@ -18,6 +19,17 @@ import static org.hamcrest.Matchers.*;
 @AutoConfigureMockMvc
 class AppointmentViewControllerTest {
     @Autowired MockMvc mvc;
+    @Test void usesSharedStylesAndLatestStaffNavbarOnBothAppointmentPages() throws Exception {
+        MockHttpSession staff = new MockHttpSession(); staff.setAttribute("isStaff", true);
+        for (String url : new String[]{"/appointments", "/appointments/new"}) {
+            mvc.perform(get(url).session(staff)).andExpect(status().isOk())
+                .andExpect(content().string(containsString("/css/pawcare.css")))
+                .andExpect(content().string(containsString("/css/icons.css")))
+                .andExpect(content().string(containsString("href=\"/medical-records\"")));
+            mvc.perform(get(url)).andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("href=\"/medical-records\""))));
+        }
+    }
     @Test void bookingRendersSharedNavbarAndKeepsOwnerQueryWithoutRedirect() throws Exception {
         mvc.perform(get("/appointments/new?ownerId=1")).andExpect(status().isOk())
             .andExpect(view().name("appointment/create"))

@@ -21,18 +21,48 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AppointmentServiceTest {
+    @Test void medicalRecordRequiresExistingPositiveAppointment() {
+        assertThatThrownBy(() -> service.requireCompletedForMedicalRecord(0L))
+            .isInstanceOf(IllegalArgumentException.class);
+        when(appointments.findLockedById(99L)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> service.requireCompletedForMedicalRecord(99L))
+            .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test void medicalRecordRejectsEveryUncompletedStatus() {
+        Appointment existing = appointment();
+        when(appointments.findLockedById(4L)).thenReturn(Optional.of(existing));
+        for (AppointmentStatus status : List.of(AppointmentStatus.PENDING,
+                AppointmentStatus.CONFIRMED, AppointmentStatus.CANCELLED)) {
+            existing.setStatus(status);
+            assertThatThrownBy(() -> service.requireCompletedForMedicalRecord(4L))
+                .isInstanceOf(DuplicateResourceException.class);
+        }
+        verify(appointments, never()).saveAndFlush(any());
+    }
+
+    @Test void medicalRecordReturnsCompletedAppointmentAndSharedPetIdentity() {
+        Appointment existing = appointment(); existing.setStatus(AppointmentStatus.COMPLETED);
+        when(appointments.findLockedById(4L)).thenReturn(Optional.of(existing));
+        var result = service.requireCompletedForMedicalRecord(4L);
+        assertThat(result.appointmentId()).isEqualTo(4L);
+        assertThat(result.petId()).isEqualTo(2L);
+        assertThat(result.ownerId()).isEqualTo(1L);
+        assertThat(result.status()).isEqualTo(AppointmentStatus.COMPLETED);
+        verify(appointments, never()).saveAndFlush(any());
+    }
     @Mock AppointmentRepository appointments;
     @Mock AppointmentPetRepository pets;
     @Mock AppointmentDoctorRepository doctors;
     AppointmentService service;
-    AppointmentPet pet;
+    Pet pet;
     Doctor doctor;
     final LocalDateTime time = LocalDateTime.of(2027, 1, 4, 9, 0);
     AppointmentRequestDTO request() { return new AppointmentRequestDTO(1L, 2L, 3L, time, ServiceType.VACCINE, "วัคซีน"); }
 
     @BeforeEach void setup() {
         PetOwner owner = new PetOwner(); owner.setOwnerId(1L);
-        pet = new AppointmentPet(); pet.setPetId(2L); pet.setPetName("มะลิ"); pet.setPetOwner(owner);
+        pet = new Pet(); pet.setPetId(2L); pet.setName("มะลิ"); pet.setPetOwner(owner);
         doctor = new Doctor(); doctor.setDoctorId(3L); doctor.setFirstName("หมอ"); doctor.setLastName("ใจดี");
         doctor.setWorkSchedule("จันทร์ - ศุกร์: 09:00 - 17:00");
         service = new AppointmentServiceImpl(appointments, pets, doctors, new AppointmentFactoryRegistry(List.of(

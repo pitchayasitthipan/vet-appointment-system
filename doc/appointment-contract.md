@@ -1,6 +1,6 @@
 # Appointment module — อ้น (Nathapat 6733805834)
 
-Base: develop 104ec59 (รวม Owner/Staff กลางแล้ว). Branch: Nathapat_6733805834_04. Java 17+, Spring Boot 4.1.1.
+Base: develop 8b52f96 (รวม Owner/Staff, navbar ล่าสุด และ Pet จาก PR #9 แล้ว). Branch: Nathapat_6733805834_04. Java 17+, Spring Boot 4.1.1.
 
 ## ขอบเขตของ PR
 เฉพาะ Appointment Entity/Repository/DTO/Factory/Service/Controller, Guest lookup, หน้าจองและรายการ,
@@ -12,15 +12,16 @@ tests และเอกสาร ไม่รวม merge commit, Pet CRUD, Pet
 - บริการ CONSULTATION/VACCINE/SURGERY; สถานะ PENDING/CONFIRMED/COMPLETED/CANCELLED
 - วันเวลา ISO ใน Asia/Bangkok; ช่อง 30 นาทีตรงนาที 00/30 อยู่ในเวลาคลินิกและเวรหมอ
 - PENDING/CONFIRMED จองคิว; CANCELLED คืนคิว; COMPLETED แก้ไขไม่ได้
-- ตรวจเจ้าของสัตว์ คิวหมอและสัตว์ซ้ำ; ล็อก Doctor แล้ว AppointmentPet ก่อนตรวจและบันทึก
+- ตรวจเจ้าของสัตว์ คิวหมอและสัตว์ซ้ำ; ล็อก Doctor แล้ว Pet ก่อนตรวจและบันทึก
 - PUT รับ version ล่าสุดและป้องกันการแก้ไขข้อมูลเก่า
 
 ## จุดเชื่อมทีม
 อ่าน PetOwner/Doctor ที่มีอยู่ใน develop โดยไม่แก้ entity หรือ repository ของเพื่อน
-`AppointmentPet` เป็น projection @Immutable เฉพาะ Appointment ของตาราง pet (pet_id, name, owner_id)
-ชื่อ Java ไม่ชนกับ Pet ของทีม และไม่มี Pet CRUD; `AppointmentPetRepository` ใช้ค้นสัตว์/ล็อกแถวเท่านั้นใน production
-การเพิ่มเจ้าของหรือสัตว์ต้องรอ PR ของผู้รับผิดชอบเข้า develop แยกกันก่อน
-Staff เปลี่ยน PENDING → CONFIRMED ก่อนถึงเวลานัด และ CONFIRMED → COMPLETED เมื่อถึงเวลานัดแล้ว; MedicalRecord FK ยังรอโมดูลทีมเชื่อม
+ใช้ `Pet` entity ของทีมโดยตรง; ลบ AppointmentPet projection ที่ map ตารางซ้ำแล้ว
+`AppointmentPetRepository` เป็น Repository<Pet, Long> เฉพาะอ่าน/ล็อก ไม่มี save/delete และไม่แก้ PetRepository ของทีม
+Pet ที่เพิ่มผ่านโมดูล Pet ปรากฏในรายการเลือกสัตว์ของ Appointment ตามเจ้าของ; tests ใช้ species ที่บังคับตาม schema
+Staff เปลี่ยน PENDING → CONFIRMED ก่อนถึงเวลานัด และ CONFIRMED → COMPLETED เมื่อถึงเวลานัดแล้ว
+ฝั่ง MedicalRecord เรียก requireCompletedForMedicalRecord ภายใน write transaction เพื่อตรวจนัดจริงและ COMPLETED; ดู [contract](appointment-medical-record-contract.md) งานเรียกใช้และ FK ยังเป็นของเจ้าของ MedicalRecord
 Guest lookup เป็นการเลือกแฟ้มตามโจทย์ ไม่มี User/Account/login หรือการยืนยันตัวตน
 
 ## API
@@ -42,16 +43,17 @@ Availability คืน array ISO ของคิวหมอ; create/update ต�
 ## ลงทะเบียนที่รอเชื่อมทีม
 ค่าเริ่มต้น `appointments.owner-registration-enabled=true` และ `appointments.pet-registration-enabled=false`
 เมื่อไม่มีแฟ้ม หน้าเว็บพาไปลงทะเบียน Owner กลาง; หากไม่มีสัตว์ยังแจ้งว่ารอโมดูล Pet และไม่ส่งไปหน้าที่ไม่มีอยู่
-เปิด pet-registration-enabled เมื่อโมดูล Pet เข้า develop และรองรับเส้นทางเพิ่มสัตว์แล้ว
+Pet เข้า develop แล้ว แต่ยังไม่เปิด pet-registration-enabled จนหน้าเพิ่มสัตว์รองรับ session เจ้าของและ /pets/new; PR #9 ปัจจุบันยังเลือก ownerId=1 และไม่มีเส้นทางนี้
 `appointments.owner-registration-path` ค่าเริ่มต้น `/owners/new`; ส่ง phone ที่ normalize และ returnTo=appointment
 ลิงก์เพิ่มสัตว์ใช้ `/pets/new?ownerId=...&returnTo=appointment` เฉพาะเมื่อเปิด flag
 PR นี้ไม่มี implementation ของหน้าลงทะเบียนทั้งสอง
 
-## 17 commits ของอ้น
+## 18 commits ของอ้น
 1 scope/API 2 domain 3 queries/locks 4 DTO 5 Factory Method 6 schedule rules
 7 create/read 8 update/cancel 9 REST API 10 guest lookup 11 booking layout
 12 booking API connection 13 list/edit/cancel UI 14 tests 15 isolated adapters/diagrams/delivery
 16 session/API/team review fixes; 17 Owner/Staff integration, shared templates, service interface และ [Appointment Data Dictionary](appointment-data-dictionary.md)
+18 ใช้ Pet entity กลางจาก PR #9, เตรียม MedicalRecord contract สำหรับ PR #12, Staff passcode environment และ tests จุดเชื่อม
 
 ## Session และ review รอบสอง (commit 16)
 POST lookup สำเร็จเก็บ Long ownerId ใน session key myOwnerId; lookup ไม่พบล้างค่าที่เลือกก่อนหน้า

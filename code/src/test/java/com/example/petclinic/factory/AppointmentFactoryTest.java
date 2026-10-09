@@ -15,7 +15,7 @@ class AppointmentFactoryTest {
     private final List<AppointmentFactory> factories = List.of(new ConsultationAppointmentFactory(),
         new VaccineAppointmentFactory(), new SurgeryAppointmentFactory());
     private final AppointmentFactoryRegistry registry = new AppointmentFactoryRegistry(factories);
-    private final AppointmentPet pet = new AppointmentPet();
+    private final Pet pet = new Pet();
     private final Doctor doctor = new Doctor();
     private final LocalDateTime time = LocalDateTime.of(2027, 1, 4, 9, 0);
 

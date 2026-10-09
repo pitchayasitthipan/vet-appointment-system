@@ -106,7 +106,9 @@ class AppointmentControllerTest {
     }
 
     @Test void staffEndpointsRejectGuestAndForgedFlag() throws Exception {
-        mvc.perform(get("/api/v1/appointments/staff").session(ownerSession)).andExpect(status().isForbidden());
+        mvc.perform(get("/api/v1/appointments/staff").session(ownerSession)).andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.path").value("/api/v1/appointments/staff"))
+            .andExpect(jsonPath("$.error").value("Forbidden"));
         mvc.perform(get("/api/v1/appointments/staff?isStaff=true")).andExpect(status().isForbidden());
         mvc.perform(patch("/api/v1/appointments/4/status").session(ownerSession).contentType("application/json")
             .content("{\"status\":\"CONFIRMED\",\"version\":0}")).andExpect(status().isForbidden());

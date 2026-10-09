@@ -38,7 +38,7 @@ public class AppointmentGuestService {
 
     public List<AppointmentGuestPetDTO> pets(Long ownerId) {
         owner(ownerId);
-        return pets.findByPetOwnerOwnerIdOrderByPetNameAsc(ownerId).stream()
-            .map(p -> new AppointmentGuestPetDTO(p.getPetId(), p.getPetName())).toList();
+        return pets.findByPetOwnerOwnerIdOrderByNameAsc(ownerId).stream()
+            .map(p -> new AppointmentGuestPetDTO(p.getPetId(), p.getName())).toList();
     }
 }

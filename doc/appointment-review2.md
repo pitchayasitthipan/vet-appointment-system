@@ -2,7 +2,7 @@
 
 บันทึกย้อนหลัง ณ commit 16: PR #4 ยัง open และ develop ยัง b8f6db8
 
-สถานะล่าสุดใน commit 17: PR #4 เข้า develop แล้ว (104ec59); ข้อ 5/6/8/10 และ StaffAccess กลางแก้แล้ว เพิ่ม /me และแยก service interface/impl รายละเอียดใน appointment-delivery.md; ข้อ 9 ยังรอ Pet entity
+สถานะล่าสุดรอบปรับ PR #9: develop 8b52f96 รวม Pet และ navbar ใหม่แล้ว; ใช้ Pet entity กลางและลบ AppointmentPet projection, เพิ่ม MedicalRecord contract และตรวจ handler กลาง ดู testresult/appointment-pet-integration.md ส่วนตารางด้านล่างเป็นบันทึก review รอบก่อน
 ไม่รวมประวัติหรือ implementation ของเพื่อนเข้า branch อ้น
 
 | ข้อ | ผลรอบนี้ |

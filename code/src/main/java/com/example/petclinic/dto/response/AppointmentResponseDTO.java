@@ -9,7 +9,7 @@ public record AppointmentResponseDTO(Long appointmentId, Long ownerId, Long petI
     AppointmentStatus status, String symptoms, String preparationInstructions, Long version) {
     public static AppointmentResponseDTO fromEntity(Appointment a) {
         return new AppointmentResponseDTO(a.getAppointmentId(), a.getPet().getPetOwner().getOwnerId(),
-            a.getPet().getPetId(), a.getPet().getPetName(), a.getDoctor().getDoctorId(),
+            a.getPet().getPetId(), a.getPet().getName(), a.getDoctor().getDoctorId(),
             a.getDoctor().getFirstName() + " " + a.getDoctor().getLastName(),
             a.getAppointmentDateTime(), a.getServiceType(), a.getStatus(), a.getSymptoms(),
             a.getPreparationInstructions(), a.getVersion());

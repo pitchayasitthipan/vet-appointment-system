@@ -27,7 +27,7 @@ classDiagram
 
 ## สถานะและการทดสอบ
 เฉพาะงาน Appointment ของอ้น ไม่มีโมดูล Owner/Pet ของเพื่อนรวมใน branch
-ใช้ AppointmentPet projection กับ PetOwner/Doctor ที่มีอยู่; หน้าลงทะเบียนรอทีมเชื่อมแยก
+ใช้ Pet entity กลางจาก PR #9 กับ PetOwner/Doctor; หน้าเพิ่มสัตว์ยังรอ session และเส้นทาง /pets/new
 
 `mvn -f code/pom.xml clean test`: 69 tests ผ่านรวม Factory 13 tests
 `pnpm --dir code/frontend-tests test`: 9 DOM tests ผ่าน

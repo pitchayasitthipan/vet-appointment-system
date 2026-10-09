@@ -1,11 +1,15 @@
 # ส่งงาน Appointment — อ้น / Nathapat 6733805834
 
-PR มีเฉพาะ 17 commits ของอ้นจาก develop ไม่มี merge commit หรือประวัติ commit ของเพื่อน
+ชุดส่งงานมีเฉพาะ 18 commits ของอ้นเทียบ develop ไม่มี merge commit เพิ่มในชุดงานของเรา
 ประกอบด้วย backend/API/Guest lookup, หน้าจองและรายการ, Factory Method, tests และ sequence diagrams 3 สถานการณ์
-ใช้ PetOwnerService และ StaffAccess กลางจาก develop; Pet ยังอ่านผ่าน adapter ของเรา; ไม่เพิ่ม CRUD หรือแก้หน้าเว็บโมดูลทีม
+ใช้ PetOwnerService, StaffAccess และ Pet entity กลางจาก develop 8b52f96; ไม่เพิ่ม CRUD หรือแก้หน้าเว็บโมดูลทีม
 
 ## เปิดใช้งาน
+สถานะ integration ล่าสุด: ใช้ Pet entity กลางแล้ว, CSS/icons/navbar ตรง develop 8b52f96, และเตรียม [MedicalRecord contract](appointment-medical-record-contract.md)
+หน้าเพิ่ม Pet ยังไม่เปิดลิงก์จนรองรับ session ของเจ้าของและ /pets/new; ดู [ผลตรวจล่าสุด](../testresult/appointment-pet-integration.md)
+
 Windows ที่มี JDK 17+, Maven และ PostgreSQL:
+ตั้ง STAFF_PASSCODE เป็นตัวเลข 8 หลักก่อนรันเพื่อรองรับ PR #12; หากยังไม่ตั้ง script จะถามแบบซ่อนรหัส ไม่พิมพ์รหัสลง log หรือใส่ใน command line ของ Java
 ```powershell
 cd C:\pp\Ppgf
 .\scripts\start-local.ps1
@@ -31,7 +35,7 @@ appointments.owner-registration-path=/owners/new
 งานลงทะเบียนและเพิ่มสัตว์ไม่ได้อยู่ใน PR นี้; หน้าหมอและหน้าสัตว์ของเพื่อนไม่ถูกแก้
 
 ## ข้อตกลงข้อมูล
-AppointmentPet เป็น @Immutable projection ตาราง pet อ่าน pet_id/name/owner_id โดยไม่ชนชื่อ Pet ของทีม
+Appointment อ้าง Pet entity ของทีมโดยตรง; AppointmentPetRepository อ่าน/ล็อกแถว Pet เท่านั้น ไม่มี entity ตาราง pet ซ้ำ
 ใช้ PetOwner และ Doctor จาก develop; Appointment เก็บความสัมพันธ์/FK ไปตารางทั้งสอง
 30 นาทีคือช่องนัดพบ/เตรียมการ รวม SURGERY ไม่ใช่ระยะผ่าตัดทั้งหมด
 คิวอนาคตใน Asia/Bangkok อยู่ในเวรหมอและเวลาคลินิก; ไม่รองรับเวรข้ามคืน

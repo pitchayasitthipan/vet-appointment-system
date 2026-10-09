@@ -26,7 +26,8 @@ public class AppointmentExceptionHandler {
     }
     public AppointmentExceptionHandler(Clock appointmentClock) { this.clock = appointmentClock; }
 
-    @ExceptionHandler({AppointmentAccessException.class, ForbiddenException.class})
+    // Shared StaffAccess ForbiddenException is handled by GlobalExceptionHandler.
+    @ExceptionHandler(AppointmentAccessException.class)
     public ResponseEntity<Map<String, Object>> forbidden(RuntimeException ex) {
         return error(HttpStatus.FORBIDDEN, ex.getMessage());
     }

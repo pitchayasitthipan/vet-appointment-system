@@ -5,6 +5,15 @@ param(
     [int]$DatabasePort = 55432
 )
 $ErrorActionPreference = 'Stop'
+if (-not $env:STAFF_PASSCODE) {
+    $taskStaffSecret = Read-Host 'Set Staff passcode (8 digits)' -AsSecureString
+    $env:STAFF_PASSCODE = [System.Net.NetworkCredential]::new('', $taskStaffSecret).Password
+}
+if ($env:STAFF_PASSCODE -notmatch '^[0-9]{8}$') {
+    throw 'STAFF_PASSCODE must contain exactly 8 digits.'
+}
+# Spring's environment spelling of clinic.staff-passcode also supports the current develop controller.
+$env:CLINIC_STAFFPASSCODE = $env:STAFF_PASSCODE
 $taskProjectRoot = Split-Path $PSScriptRoot -Parent
 $taskDatabasePath = Join-Path $taskProjectRoot 'tmp/appointment-pg'
 $taskDatabaseLog = Join-Path $taskProjectRoot 'tmp/appointment-pg.log'

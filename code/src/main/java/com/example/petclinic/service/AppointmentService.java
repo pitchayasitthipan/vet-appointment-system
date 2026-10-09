@@ -15,4 +15,6 @@ public interface AppointmentService {
     List<LocalDateTime> availability(Long doctorId, LocalDate date);
     AppointmentPageDTO listClinic(AppointmentStatus status, int page, int size, String sort, String direction);
     AppointmentResponseDTO changeStatus(Long id, AppointmentStatusUpdateDTO request);
+    /** Call inside the MedicalRecord write transaction, after checking Staff access. */
+    AppointmentResponseDTO requireCompletedForMedicalRecord(Long appointmentId);
 }

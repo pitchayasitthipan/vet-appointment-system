@@ -25,7 +25,7 @@ public class AppointmentFactoryRegistry {
         factories = Map.copyOf(registered);
     }
 
-    public Appointment create(AppointmentRequestDTO request, AppointmentPet pet, Doctor doctor) {
+    public Appointment create(AppointmentRequestDTO request, Pet pet, Doctor doctor) {
         if (request == null || request.serviceType() == null) {
             throw new InvalidAppointmentException("กรุณาเลือกประเภทบริการ");
         }

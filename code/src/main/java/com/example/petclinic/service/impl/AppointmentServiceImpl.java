@@ -15,10 +15,25 @@ import com.example.petclinic.repository.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 
 @Service
 @Transactional
 public class AppointmentServiceImpl implements AppointmentService {
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
+    public AppointmentResponseDTO requireCompletedForMedicalRecord(Long appointmentId) {
+        // GlobalExceptionHandler also maps this to 400 for MedicalRecord callers.
+        if (appointmentId == null || appointmentId < 1) {
+            throw new IllegalArgumentException("รหัสนัดหมายต้องเป็นจำนวนเต็มบวก");
+        }
+        Appointment appointment = appointments.findLockedById(appointmentId)
+            .orElseThrow(() -> new ResourceNotFoundException("ไม่พบนัดหมายสำหรับบันทึกประวัติการรักษา"));
+        if (appointment.getStatus() != AppointmentStatus.COMPLETED) {
+            throw new DuplicateResourceException("บันทึกประวัติการรักษาได้เฉพาะนัดที่เสร็จสิ้นแล้ว (COMPLETED)");
+        }
+        return AppointmentResponseDTO.fromEntity(appointment);
+    }
     private static final List<AppointmentStatus> ACTIVE = List.of(AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED);
     private static final Set<String> SORT_FIELDS = Set.of("appointmentId", "appointmentDateTime", "status", "serviceType");
     private final AppointmentRepository appointments;
@@ -42,9 +57,9 @@ public class AppointmentServiceImpl implements AppointmentService {
     public AppointmentResponseDTO create(AppointmentRequestDTO request) {
         requireId(request.ownerId());
         requireId(request.petId());
-        // Every booking writer locks Doctor, then AppointmentPet, before checking availability.
+        // Every booking writer locks Doctor, then shared Pet, before checking availability.
         Doctor doctor = lockedDoctor(request.doctorId());
-        AppointmentPet pet = pets.findLockedById(request.petId())
+        Pet pet = pets.findLockedById(request.petId())
             .orElseThrow(() -> new ResourceNotFoundException("ไม่พบสัตว์เลี้ยง"));
         if (!Objects.equals(pet.getPetOwner().getOwnerId(), request.ownerId())) {
             throw new ResourceNotFoundException("ไม่พบสัตว์เลี้ยงของเจ้าของที่ระบุ");
@@ -62,7 +77,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new DuplicateResourceException("ข้อมูลนัดหมายเปลี่ยนแล้ว กรุณาโหลดข้อมูลล่าสุดก่อนแก้ไข");
         }
         Doctor doctor = lockedDoctor(request.doctorId());
-        AppointmentPet pet = pets.findLockedById(existing.getPet().getPetId())
+        Pet pet = pets.findLockedById(existing.getPet().getPetId())
             .orElseThrow(() -> new ResourceNotFoundException("ไม่พบสัตว์เลี้ยง"));
         schedule.validate(doctor, request.appointmentDateTime());
         requireFree(doctor.getDoctorId(), pet.getPetId(), request.appointmentDateTime(), id);

@@ -55,7 +55,7 @@ Branch: `Nathapat_6733805834_04`
 | `idx_appointment_pet_time` | Index บน `(pet_id, appointment_date_time)` ช่วยค้นนัดสัตว์และตรวจคิว |
 | `idx_pet_owner` | Index บน `pet(owner_id)` สำหรับค้นสัตว์ในแฟ้มเจ้าของ; เป็น index ของตารางที่โมดูลนี้อ่าน ไม่ใช่คอลัมน์เพิ่มใน appointment |
 
-FK ใน SQL อ้างอิงไม่ได้กำหนด `ON DELETE CASCADE`; โมดูลนี้ยกเลิกนัดด้วยการเปลี่ยนสถานะ ไม่ลบ appointment ส่วนตาราง `pet` ปัจจุบันอ่านผ่าน `AppointmentPet` ซึ่งเป็น `@Immutable` projection เฉพาะ `pet_id`, `name`, `owner_id` รอเปลี่ยนไปใช้ Pet entity ของทีมหลังรวมโมดูล
+FK ใน SQL อ้างอิงไม่ได้กำหนด `ON DELETE CASCADE`; โมดูลนี้ยกเลิกนัดด้วยการเปลี่ยนสถานะ ไม่ลบ appointment ส่วนตาราง `pet` ใช้ Pet entity ของทีมจาก PR #9 โดยตรงแล้ว ไม่มี projection entity ซ้ำ
 
 ## กฎ API ที่เกี่ยวข้องกับข้อมูล
 
@@ -63,7 +63,7 @@ FK ใน SQL อ้างอิงไม่ได้กำหนด `ON DELETE 
 - `ownerId` ใช้เลือก/ตรวจแฟ้ม ไม่บันทึกเป็นคอลัมน์ใน appointment; Guest ต้องตรงกับ session `myOwnerId` ส่วน Staff ตรวจจาก session `isStaff` ฝั่งเซิร์ฟเวอร์
 - เลื่อนนัดผ่าน `PUT /api/v1/appointments/{id}` รับ `doctorId`, `appointmentDateTime`, `serviceType`, `symptoms`, `version`; คงรหัสนัด สัตว์ และสถานะเดิม
 - `appointmentDateTime` ส่งเป็น ISO local date-time เช่น `2026-12-01T09:30:00` โดยไม่มี offset; ตัวอย่างเป็นรูปแบบข้อมูล การจองจริงยังต้องผ่านตารางเวรและเวลาคลินิก
-- คิวชนเมื่อหมอเดียวกัน **หรือ** สัตว์เดียวกันมีนัดเวลาเริ่มเดียวกันในสถานะ `PENDING` / `CONFIRMED`; ใช้ transaction และการล็อกแถว Doctor แล้ว AppointmentPet ก่อนตรวจและบันทึก ไม่ได้มี unique constraint ของคิวในฐานข้อมูล
+- คิวชนเมื่อหมอเดียวกัน **หรือ** สัตว์เดียวกันมีนัดเวลาเริ่มเดียวกันในสถานะ `PENDING` / `CONFIRMED`; ใช้ transaction และการล็อกแถว Doctor แล้ว Pet ก่อนตรวจและบันทึก ไม่ได้มี unique constraint ของคิวในฐานข้อมูล
 - Session เก็บแฟ้มที่ค้นหาด้วยเบอร์โทร; ไม่เพิ่มตาราง User/Login หรือคอลัมน์ session ใน appointment
 - MedicalRecord สามารถอ้างอิง `appointment_id` เมื่อรวมโมดูล แต่ branch นี้ยังไม่ได้เพิ่ม FK หรือเปลี่ยนตาราง MedicalRecord ของทีม
 
