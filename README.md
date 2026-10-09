@@ -138,6 +138,27 @@ cd vet-appointment-system
 
 ### ขั้นตอนที่ 2: การกำหนดค่าฐานข้อมูล (Database Configuration)
 
+### หมายเหตุสำหรับฐานข้อมูลเดิม
+
+ตาราง `medical_record` มี Foreign Key ชื่อ
+`fk_medical_record_appointment` ที่อ้างอิงตาราง `appointment`
+
+หากฐานข้อมูลเดิมมีประวัติการรักษาที่อ้างอิงรหัสนัดหมายซึ่งไม่มีอยู่จริง
+Hibernate อาจไม่สามารถสร้าง Foreign Key ได้
+
+ตรวจสอบข้อมูลที่อ้างอิงไม่ถูกต้องใน PostgreSQL ด้วยคำสั่ง:
+
+```sql
+SELECT mr.medical_record_id, mr.appointment_id
+FROM medical_record mr
+LEFT JOIN appointment a
+    ON mr.appointment_id = a.appointment_id
+WHERE a.appointment_id IS NULL;
+
+หากพบข้อมูล ให้สำรองฐานข้อมูลก่อน แล้วตรวจสอบและแก้ไขข้อมูลที่อ้างอิงไม่ถูกต้อง หรือเลือกลบเฉพาะข้อมูลที่ไม่จำเป็นหลังตรวจสอบแล้ว
+
+ข้อควรระวัง: ไม่ควรลบข้อมูลโดยไม่สำรองและตรวจสอบก่อน
+
 * ค่าการเชื่อมต่อฐานข้อมูลอยู่ใน `code/src/main/resources/application.properties` และอ่านค่าจาก Environment Variable ได้
 * ค่าเริ่มต้น: ฐานข้อมูล `petclinic_db` ที่ `localhost:5432` ผู้ใช้ `postgres` รหัสผ่าน `postgres` (ตรงกับ `docker-compose.yml`)
 * Hibernate สร้างตารางให้อัตโนมัติ (`spring.jpa.hibernate.ddl-auto=update`)

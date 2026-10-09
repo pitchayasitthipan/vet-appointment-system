@@ -14,17 +14,27 @@ import com.example.petclinic.dto.response.MedicalRecordResponseDTO;
 import com.example.petclinic.exception.ResourceNotFoundException;
 import com.example.petclinic.repository.MedicalRecordRepository;
 import com.example.petclinic.service.MedicalRecordService;
+import com.example.petclinic.service.AppointmentService;
 
 @Service
 @Transactional
 public class MedicalRecordServiceImpl implements MedicalRecordService {
 
+    // Repository สำหรับจัดการข้อมูลประวัติการรักษา
     private final MedicalRecordRepository medicalRecordRepository;
 
-    // ===== Constructor Injection =====
-    // รับ Repository เข้ามาใช้งานใน Service
-    public MedicalRecordServiceImpl(MedicalRecordRepository medicalRecordRepository) {
+    // Service ของ Appointment ใช้ตรวจสอบข้อมูลนัดหมายก่อนบันทึกประวัติ
+    private final AppointmentService appointmentService;
+
+    // Constructor Injection
+    // รับ Repository และ Service ผ่าน Constructor
+    // เพื่อให้ Spring จัดการ Dependency และสะดวกต่อการเขียน Unit Test
+    public MedicalRecordServiceImpl(
+            MedicalRecordRepository medicalRecordRepository,
+            AppointmentService appointmentService) {
+
         this.medicalRecordRepository = medicalRecordRepository;
+        this.appointmentService = appointmentService;
     }
 
     // ===== ส่วนค้นหาข้อมูลทั้งหมด =====
@@ -74,6 +84,10 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     public MedicalRecordResponseDTO createMedicalRecord(
             MedicalRecordRequestDTO requestDTO) {
 
+        // ตรวจว่านัดหมายมีจริงและเสร็จสิ้นแล้วก่อนสร้างประวัติ
+        appointmentService.requireCompletedForMedicalRecord(
+                requestDTO.getAppointmentId());
+
         // ใช้ Builder Pattern สร้างประวัติการรักษาจากข้อมูลที่รับมา
         // กำหนดค่าทีละฟิลด์ แล้ว build() เพื่อสร้าง Object จริง
         MedicalRecord medicalRecord = MedicalRecord.builder()
@@ -102,6 +116,10 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "ไม่พบประวัติการรักษาที่มีรหัส: " + id));
+
+        // ตรวจว่านัดหมายเสร็จสิ้นแล้วก่อนแก้ไขประวัติ
+        appointmentService.requireCompletedForMedicalRecord(
+                requestDTO.getAppointmentId());
 
         medicalRecord.setAppointmentId(requestDTO.getAppointmentId());
         medicalRecord.setDiagnosis(requestDTO.getDiagnosis());
