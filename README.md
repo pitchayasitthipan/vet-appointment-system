@@ -9,10 +9,10 @@
 | ลำดับ | ชื่อ-นามสกุล | รหัสนักศึกษา | Section | Branch | หน้าที่รับผิดชอบ |
 | --- | --- | --- | --- | --- | --- |
 | 1 | นายสิทธิโชค มุขนาค | 673380428-6 | 04 | `sitthichok_6733804286_04` | โมดูลสัตวแพทย์ (Doctor) Doctor CRUD + หน้าเว็บ + Unit Test, Singleton, Docker |
-| 2 | นายณัฐภัทร ฉ่ำตะคุ | 673380583-4 | 04 | `Nathapat_6733805834_04` | โมดูลนัดหมาย (Appointment): ค้นแฟ้มด้วยเบอร์โทร ตรวจคิวว่าง จอง เลื่อน ยกเลิก ยืนยันและปิดนัด,+ Factory Method + Frontend Test |
-| 3 | นางสาวพิชยา สิทธิพันธ์ | 673380596-5 | 04 | `pitchaya_6733805965_04` | โมดูลเจ้าของสัตว์เลี้ยง (PetOwner, PetOwnerDetail) + DTO/Mapper, Global Exception Handler, การตรวจสิทธิ์, My Pets, README / Data Dictionary / Diagrams, Deploy |
+| 2 | นายณัฐภัทร ฉ่ำตะคุ | 673380583-4 | 04 | `Nathapat_6733805834_04` | โมดูลนัดหมาย (Appointment): ค้นแฟ้มด้วยเบอร์โทร ตรวจคิวว่าง จอง เลื่อน ยกเลิก ยืนยันและปิดนัด, Factory Method, Frontend Test |
+| 3 | นางสาวพิชยา สิทธิพันธ์ | 673380596-5 | 04 | `pitchaya_6733805965_04` | โมดูลเจ้าของสัตว์เลี้ยง (PetOwner, PetOwnerDetail) + DTO/Mapper, Global Exception Handler, การตรวจสิทธิ์, README / Data Dictionary / Diagrams, Deploy |
 | 4 | นายสรวิศ สุคงเจริญ | 673380606-8 | 04 | `soravit_6733806068_04` | โมดูลสัตว์เลี้ยง (Pet): Entity, Repository, Service, Validation และ Unit Test, หน้า My Pets เวอร์ชันแรก |
-| 5 | นางสาวอมลวรรณ พิมพิชัย | 673380608-4 | 04 | `amonwan_6733806084_04` | โมดูลประวัติการรักษาและวัคซีน (MedicalRecord) + Builder Pattern, ระบบรหัสเจ้าหน้าที่ (Staff Passcode) และล็อกเมื่อกรอกผิด, ย้ายหน้าสัตวแพทย์มาใช้ฐานข้อมูลและจำกัดสิทธิ์ API สัตวแพทย์, สไลด์นำเสนอ |
+| 5 | นางสาวอมลวรรณ พิมพิชัย | 673380608-4 | 04 | `amonwan_6733806084_04` | โมดูลประวัติการรักษาและวัคซีน (MedicalRecord) + Builder Pattern, ระบบรหัสเจ้าหน้าที่ (Staff Passcode) และล็อกเมื่อกรอกผิด, ย้ายหน้าสัตวแพทย์มาใช้ฐานข้อมูลและจำกัดสิทธิ์ API สัตวแพทย์, README, Diagrams, สไลด์นำเสนอ |
 
 ---
 
@@ -135,6 +135,8 @@ erDiagram
 | **Builder Pattern** | Creational | `MedicalRecord.Builder` ใช้ประกอบวัตถุประวัติการรักษาที่มีหลายฟิลด์ไม่บังคับ (การวินิจฉัย การรักษา วัคซีน วันนัดครั้งถัดไป หมายเหตุ) ให้อ่านง่ายและไม่ต้องใช้ Constructor ยาว ใช้ใน `MedicalRecordServiceImpl` |
 | **Singleton Pattern** | Creational | `ClinicConfigService` เก็บข้อมูลคลินิก เวลาเปิดทำการ และอัตราค่าบริการ เป็น Spring Bean แบบ Singleton มี Instance เดียวตลอดการทำงาน ตรวจสอบได้ที่ `GET /api/v1/config/singleton-check` (รายละเอียดใน [`doc/singleton-pattern.md`](doc/singleton-pattern.md)) |
 | **DTO + Mapper** | Enterprise | แยก Entity ออกจากข้อมูลที่รับ-ส่งผ่าน API เช่น `PetOwnerRequestDTO`, `PetOwnerResponseDTO` และ `PetOwnerMapper` ทำหน้าที่แปลงข้อมูลแยกจาก Service |
+
+รายละเอียดของแต่ละ Pattern (ปัญหา วิธีแก้ คลาสที่ใช้ และ test) อยู่ใน [`doc/design-patterns.md`](doc/design-patterns.md) และการวิเคราะห์หลัก SOLID อยู่ใน [`doc/solid-analysis.md`](doc/solid-analysis.md)
 
 ---
 
@@ -283,7 +285,7 @@ cd code
 ./mvnw test
 ```
 
-ผลล่าสุด: **251 tests ผ่านทั้งหมด** (Failures 0, Errors 0) ครอบคลุม Service, Controller (`@WebMvcTest`) และ Repository (`@DataJpaTest`) ของทุกโมดูล
+ผลล่าสุด: **250 tests ผ่านทั้งหมด** (Failures 0, Errors 0) ครอบคลุม Service, Controller (`@WebMvcTest`) และ Repository (`@DataJpaTest`) ของทุกโมดูล
 
 ทดสอบ JavaScript ของหน้านัดหมาย (ต้องมี Node.js 18 ขึ้นไป) ผล **12 tests ผ่านทั้งหมด**:
 
@@ -357,9 +359,9 @@ npm test
 │   ├── sql/                               # SQL อ้างอิง
 │   ├── img/                               # ภาพประกอบเอกสาร
 │   ├── diagrams/                          # ER, Use Case, Class, Sequence, State Diagrams (Mermaid)
-│   ├── solid-analysis.md                  # วิเคราะห์ SOLID Principles (กำลังจัดทำ)
-│   ├── design-patterns.md                 # วิเคราะห์ Design Patterns (กำลังจัดทำ)
-│   └── slide/                             # สไลด์นำเสนอ (กำลังจัดทำ)
+│   ├── solid-analysis.md                  # วิเคราะห์ SOLID Principles
+│   ├── design-patterns.md                 # วิเคราะห์ Design Patterns
+│   └── slide/                             # สไลด์นำเสนอ
 ├── test/                               # สคริปต์ทดสอบ HTTP ของโมดูลนัดหมาย
 ├── testresult/                         # ผลการทดสอบและภาพหน้าจอ Test Report
 ├── scripts/                            # สคริปต์รันระบบในเครื่อง (Windows PowerShell)

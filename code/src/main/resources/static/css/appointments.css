@@ -11,7 +11,7 @@
 
 .feedback { padding: 14px 18px; margin: 14px 0; border-radius: 10px; background: #fff5d8; color: #674c1f; overflow-wrap: anywhere; }
 .feedback.error { background: #fff0f0; color: #952b37; }
-.feedback.success { background: #e5f5ec; color: #3ca49b; }
+.feedback.success { background: #e5f5ec; color: #18695f; }
 .button-link { text-decoration: none; display: inline-block; }
 .secondary, .danger { font: inherit; font-size: 14px; border: 1px solid var(--border); background: white; border-radius: 10px; padding: 10px 16px; cursor: pointer; }
 .danger { border-color: #e8b9bf; color: #952b37; background: #fff4f5; }
@@ -22,7 +22,7 @@
 .appointment-card p { margin: 10px 0; overflow-wrap: anywhere; white-space: pre-wrap; }
 .appointment-date { font-weight: 600; color: var(--navy); }
 .status-badge { background: #fff1cc; border-radius: 20px; padding: 5px 12px; font-size: 12px; white-space: nowrap; }
-.status-badge.confirmed, .status-badge.completed { background: #e5f5ec; color: #3ca49b; }
+.status-badge.confirmed, .status-badge.completed { background: #e5f5ec; color: #18695f; }
 .status-badge.cancelled { background: #fff0f0; color: #952b37; }
 .appointment-actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
 .pager { margin: 20px 0; font-size: 13px; }
