@@ -1845,3 +1845,68 @@ button,
   color: #6b6d76;
   font-size: 13px;
 }
+
+
+/* ==========================================================
+   PawCare Mobile Navbar — Grid Layout
+   แสดงทุกเมนูในจอมือถือโดยไม่ต้องเลื่อนแนวนอน
+   ========================================================== */
+
+@media (max-width: 800px) {
+  .navbar {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    flex-wrap: nowrap;
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
+  .navbar .brand {
+    align-self: flex-start;
+    flex-shrink: 0;
+  }
+
+  .navbar .nav-links {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+    order: 3;
+    overflow: visible;
+  }
+
+  .navbar .nav-links a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 38px;
+    padding: 7px 2px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-surface);
+    font-size: 11px;
+    line-height: 1.25;
+    text-align: center;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .navbar .nav-links a.active {
+    background: #fce4ed;
+    color: var(--color-pink);
+    border-color: var(--color-pink);
+  }
+}
+
+@media (max-width: 380px) {
+  .navbar .nav-links {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .navbar .nav-links a {
+    font-size: 11px;
+  }
+}
