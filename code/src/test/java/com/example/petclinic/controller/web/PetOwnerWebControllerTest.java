@@ -110,6 +110,26 @@ class PetOwnerWebControllerTest {
     }
 
     @Test
+    @DisplayName("เจ้าหน้าที่: ค่า pagination และ sort ที่ผิดต้องไม่ทำให้หน้า error")
+    void testStaffPage_InvalidPaginationAndSortUseSafeDefaults() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("isStaff", true);
+        given(petOwnerService.getAllPetOwners(any(Pageable.class)))
+                .willReturn(new PageImpl<>(List.of(owner)));
+
+        mockMvc.perform(get("/owners/staff")
+                        .param("page", "-3")
+                        .param("size", "0")
+                        .param("sortBy", "doesNotExist")
+                        .param("sortDir", "unknown")
+                        .session(session))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("currentPage", 0))
+                .andExpect(model().attribute("sortBy", "firstName"))
+                .andExpect(model().attribute("sortDir", "asc"));
+    }
+
+    @Test
     @DisplayName("เจ้าหน้าที่: ออกจากระบบ -> กลับหน้ากรอกรหัส")
     void testLogoutStaff() throws Exception {
         MockHttpSession session = new MockHttpSession();

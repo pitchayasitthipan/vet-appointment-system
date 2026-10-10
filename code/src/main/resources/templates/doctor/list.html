@@ -111,11 +111,26 @@
                       data-email=${doc.email},
                       data-schedule=${doc.workSchedule}">
 
-          <!-- วงกลมตัวย่อชื่อ (ไม่มีรูปในฐานข้อมูล) -->
-          <div class="doc-avatar-wrap">
-            <span class="doc-avatar doc-initial"
-                  th:text="${doc.firstName.length() > 1 ? doc.firstName.substring(0, 2) : doc.firstName}">นั</span>
-          </div>
+     <div class="doc-avatar-wrap"
+     th:with="photo=${doc.firstName == 'นันทิดา' ? 'dr-nichapa.jpg' :
+                     doc.firstName == 'กิตติศักดิ์' ? 'dr-kittiphat.jpg' :
+                     doc.firstName == 'วรรณภา' ? 'dr-ohanong.jpg' :
+                     doc.firstName == 'ธนวัฒน์' ? 'dr-thanawat.jpg' :
+                     doc.firstName == 'ปรียาภรณ์' ? 'dr-preeyaporn.jpg' : null}">
+
+  <img th:if="${photo != null}"
+       th:src="@{/images/{filename}(filename=${photo})}"
+       th:alt="${'รูปสัตวแพทย์ ' + doc.firstName + ' ' + doc.lastName}"
+       class="doc-avatar"
+       loading="lazy"
+       onerror="this.style.display='none'; this.nextElementSibling.hidden=false;">
+
+  <span class="doc-avatar doc-initial"
+        th:hidden="${photo != null}"
+        th:text="${doc.firstName != null and !doc.firstName.isEmpty()
+                  ? doc.firstName.substring(0, 2) : '?'}">?</span>
+
+</div>
 
           <div class="doc-details">
             <div class="doc-header-row">
