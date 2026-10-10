@@ -80,6 +80,14 @@ body {
   display: none !important;
 }
 
+/* ปุ่มและช่องกรอกใช้ฟอนต์ Prompt ตามหน้า (เบราว์เซอร์ตั้งค่าเริ่มต้นเป็น Arial) */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
 /* ตัวหนาใช้น้ำหนัก 600 ทั้งเว็บ (ฟอนต์ Prompt หนา 700 ขึ้นไปอ่านภาษาไทยยาก) */
 b,
 strong {
@@ -1234,7 +1242,7 @@ footer {
 /* รายการ "หัวข้อ : ค่า" เช่น เบอร์โทร : 081-234-5678 */
 .kv {
   display: grid;
-  grid-template-columns: 130px 1fr;
+  grid-template-columns: 130px minmax(0, 1fr);
   gap: 10px 14px;
   font-size: 15px;
 }
@@ -1248,6 +1256,20 @@ footer {
 
 .kv .v {
   font-weight: 500;
+  /* อีเมลหรือที่อยู่ยาว ๆ ตัดขึ้นบรรทัดใหม่ ไม่ล้นจอมือถือ */
+  overflow-wrap: anywhere;
+}
+
+/* จอมือถือ: หัวข้อแคบลง ให้ค่ามีที่มากขึ้น
+   และหัวกล่องที่มีปุ่มหลายปุ่ม (เช่น แฟ้มเจ้าของในหน้า staff) ให้ปุ่มขึ้นบรรทัดใหม่ได้ */
+@media (max-width: 480px) {
+  .kv {
+    grid-template-columns: 96px minmax(0, 1fr);
+  }
+
+  .sec-h {
+    flex-wrap: wrap;
+  }
 }
 
 .muted-note {
