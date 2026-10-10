@@ -60,6 +60,11 @@ public class PetOwnerWebController {
     public String searchByPhone(@RequestParam(required = false) String phone, HttpSession session, Model model) {
         model.addAttribute("phone", phone);
 
+        // A new phone search must never retain access to the previous owner's record.
+        if (phone != null) {
+            session.removeAttribute(MY_OWNER_ID);
+        }
+
         if (phone != null && !phone.isBlank()) {
             try {
                 // เจอเบอร์ -> แสดงข้อมูลของเจ้าของคนนั้น
