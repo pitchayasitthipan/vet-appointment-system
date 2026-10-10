@@ -94,6 +94,7 @@
     } finally { saving = false; byId("owner-lookup-form").querySelector("fieldset").disabled = false; ready(); }
   });
   date.min = P.bangkokToday();
+  P.thaiDatePicker(date);
   const sessionVersion = lookupVersion;
   P.session().then(async current => {
     if (sessionVersion !== lookupVersion) return;

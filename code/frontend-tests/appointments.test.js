@@ -101,6 +101,9 @@ test("list renders names as text, scopes owner, and saves current version",async
     ui.el("appointment-list").querySelector("button").click();
     await until(()=>ui.el("edit-dialog").open&&!ui.el("save-edit").disabled);
     assert.equal(ui.el("edit-time").value,slot); // existing occupied slot must remain selectable
+      assert.equal(ui.el("edit-date").type,"hidden");
+      assert.equal(ui.el("edit-date-year").value,"2642");
+      assert.match(ui.el("appointment-list").querySelector(".appointment-date").textContent,/พ\.ศ\.\s*2642/);
     ui.el("edit-symptoms").value="ตรวจเพิ่ม";ui.submit("edit-form");
     await until(()=>ui.calls.some(c=>c.options.method==="PUT"));
     const update=ui.calls.find(c=>c.options.method==="PUT");assert.equal(JSON.parse(update.options.body).version,0);
@@ -181,5 +184,56 @@ test("staff loads clinic appointments and confirms with the current version",asy
     await until(()=>posted);
     assert.deepEqual(posted,{status:"CONFIRMED",version:0});
     await until(()=>ui.el("list-message").textContent.includes("เปลี่ยนสถานะนัดหมายแล้ว"));
+  }finally{ui.dom.window.close();}
+});
+
+test("Buddhist booking controls send Gregorian ISO dates to availability and booking",async()=>{
+  const ui=setup("appointment-create.html","appointment-create.js",bookHandler,false,{...owner,isStaff:false});
+  try{
+    await until(()=>!ui.el("pet-fields").disabled&&ui.el("doctor-id").options.length===2);
+    ui.change("pet-id","2");ui.change("doctor-id","3");
+    ui.el("appointment-date-year").value="2642";
+    ui.el("appointment-date-year").dispatchEvent(new ui.w.Event("input",{bubbles:true}));
+    ui.change("appointment-date-month","1");ui.change("appointment-date-day","5");
+    await until(()=>ui.el("appointment-time").options.length===2);
+    assert.equal(ui.el("appointment-date").type,"hidden");
+    assert.equal(ui.el("appointment-date").value,"2099-01-05");
+    assert.ok(ui.calls.some(c=>c.url.includes("date=2099-01-05")));
+    ui.change("appointment-time",slot);ui.w.document.querySelector('[name="serviceType"][value="VACCINE"]').checked=true;
+    ui.el("symptoms").value="ตรวจสุขภาพ";ui.submit("appointment-form");
+    await until(()=>ui.calls.some(c=>c.url==="/api/v1/appointments"));
+    assert.equal(JSON.parse(ui.calls.find(c=>c.url==="/api/v1/appointments").options.body).appointmentDateTime,slot);
+    await until(()=>!ui.el("booking-result-links").hidden);
+  }finally{ui.dom.window.close();}
+});
+
+test("Buddhist picker handles leap years and clamps the day when changing month",async()=>{
+  const ui=setup("appointment-create.html","appointment-create.js",bookHandler,false,{...owner,isStaff:false});
+  try{
+    await until(()=>!ui.el("time-fields").disabled);
+    ui.el("appointment-date").value="2028-02-29";
+    assert.equal(ui.el("appointment-date-year").value,"2571");
+    assert.equal(ui.el("appointment-date-day").options.length,30);
+    ui.el("appointment-date-year").value="2572";
+    ui.el("appointment-date-year").dispatchEvent(new ui.w.Event("input",{bubbles:true}));
+    assert.equal(ui.el("appointment-date").value,"2029-02-28");
+    ui.el("appointment-date").value="2029-01-31";ui.change("appointment-date-month","4");
+    assert.equal(ui.el("appointment-date").value,"2029-04-30");
+    ui.el("appointment-date-year").value="2572.5";
+    ui.el("appointment-date-year").dispatchEvent(new ui.w.Event("input",{bubbles:true}));
+    assert.equal(ui.el("appointment-date").value,"");
+    assert.equal(ui.el("appointment-date-year").checkValidity(),false);
+  }finally{ui.dom.window.close();}
+});
+
+test("Buddhist picker rejects dates earlier than the Bangkok minimum",async()=>{
+  const ui=setup("appointment-create.html","appointment-create.js",bookHandler,false,{...owner,isStaff:false});
+  try{
+    await until(()=>!ui.el("time-fields").disabled);
+    ui.el("appointment-date").value="2020-01-01";
+    assert.equal(ui.el("appointment-date-day").checkValidity(),false);
+    assert.match(ui.el("appointment-date-day").validationMessage,/ตั้งแต่วันนี้/);
+    ui.el("appointment-date").value=ui.w.PawAppointments.bangkokToday();
+    assert.equal(ui.el("appointment-date-day").checkValidity(),true);
   }finally{ui.dom.window.close();}
 });

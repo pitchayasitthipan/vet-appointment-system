@@ -109,6 +109,7 @@
       editDialog.showModal(); await editSlots();
     } catch(e){P.message(el("list-message"),e.message,"error");}
   }
+  P.thaiDatePicker(el("edit-date"));
   ["edit-doctor","edit-date"].forEach(id=>el(id).addEventListener("change",editSlots));
   el("edit-time").addEventListener("change",()=>{el("save-edit").disabled=saving||!el("edit-time").value;});
   el("close-edit").addEventListener("click",()=>{if(!saving){editVersion++;selected=null;editDialog.close();}});

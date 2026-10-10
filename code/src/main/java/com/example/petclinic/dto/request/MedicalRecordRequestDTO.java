@@ -1,8 +1,8 @@
 package com.example.petclinic.dto.request;
 
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
 public class MedicalRecordRequestDTO {
 
@@ -16,7 +16,7 @@ public class MedicalRecordRequestDTO {
     @Size(max = 2000, message = "การรักษาต้องมีความยาวไม่เกิน 2000 ตัวอักษร")
     private String treatment;
 
-    @Size(max = 255, message = "ชื่อวัคซีนต้องมีความยาวไม่เกิน 255 ตัวอักษร")
+    @Size(max = 150, message = "ชื่อวัคซีนต้องมีความยาวไม่เกิน 150 ตัวอักษร")
     private String vaccineName;
 
     private java.time.LocalDate vaccineDate;

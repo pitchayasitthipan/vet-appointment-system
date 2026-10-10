@@ -81,7 +81,7 @@ body {
 h1, .page-title {
   font-size: 32px;
   line-height: 40px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-navy);
   margin: 0 0 8px;
 }
@@ -172,7 +172,7 @@ small,
 .hero-content .page-title {
   font-size: 32px;
   line-height: 40px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-navy);
   margin-bottom: 8px;
 }
@@ -841,7 +841,7 @@ small,
 
 .day-number {
   font-size: 0.92rem;
-  font-weight: 700;
+  font-weight: 600;
   margin-top: 0.1rem;
   display: block;
 }
@@ -873,7 +873,7 @@ small,
 
 .slot-time {
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-navy);
   width: 65px;
   line-height: 1.2;
@@ -1167,7 +1167,7 @@ small,
   font-family: inherit;
   font-size: 15px;
   line-height: 22px;
-  font-weight: 700;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1217,7 +1217,7 @@ small,
 
 .footer-brand {
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-navy);
   display: flex;
   align-items: center;
@@ -1507,7 +1507,7 @@ small,
   place-items: center;
   background: var(--color-accent-soft);
   color: var(--color-accent);
-  font-weight: 700;
+  font-weight: 600;
   border: 2px solid var(--color-secondary);
 }
 

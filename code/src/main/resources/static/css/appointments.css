@@ -2,8 +2,8 @@
   --page:#fffbe9;
   --ink:#25262b;
   --navy:#17306b;
-  --accent:#bd537c;
-  --pink:#fbe1e8;
+  --accent:#1d7a72;
+  --pink:#dcf1ee;
   --border:#e5e1d6;
   --muted:#666b75;
   --surface:#fff
@@ -11,7 +11,7 @@
 
 .feedback { padding: 14px 18px; margin: 14px 0; border-radius: 10px; background: #fff5d8; color: #674c1f; overflow-wrap: anywhere; }
 .feedback.error { background: #fff0f0; color: #952b37; }
-.feedback.success { background: #e5f5ec; color: #205a3a; }
+.feedback.success { background: #e5f5ec; color: #18695f; }
 .button-link { text-decoration: none; display: inline-block; }
 .secondary, .danger { font: inherit; font-size: 14px; border: 1px solid var(--border); background: white; border-radius: 10px; padding: 10px 16px; cursor: pointer; }
 .danger { border-color: #e8b9bf; color: #952b37; background: #fff4f5; }
@@ -20,9 +20,9 @@
 .list-toolbar select { min-width: 170px; }
 .appointment-card-header, .pager, .dialog-title { display: flex; justify-content: space-between; align-items: center; gap: 15px; }
 .appointment-card p { margin: 10px 0; overflow-wrap: anywhere; white-space: pre-wrap; }
-.appointment-date { font-weight: bold; color: var(--navy); }
+.appointment-date { font-weight: 600; color: var(--navy); }
 .status-badge { background: #fff1cc; border-radius: 20px; padding: 5px 12px; font-size: 12px; white-space: nowrap; }
-.status-badge.confirmed, .status-badge.completed { background: #e5f5ec; color: #205a3a; }
+.status-badge.confirmed, .status-badge.completed { background: #e5f5ec; color: #18695f; }
 .status-badge.cancelled { background: #fff0f0; color: #952b37; }
 .appointment-actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
 .pager { margin: 20px 0; font-size: 13px; }
@@ -100,7 +100,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   text-decoration:none;
   color:var(--navy);
   font-size:25px;
-  font-weight:800;
+  font-weight:600;
   line-height:1.1
 }
 
@@ -138,7 +138,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .site-header nav a[aria-current] {
   color:var(--accent);
   border-bottom:2px solid var(--accent);
-  font-weight:700
+  font-weight:600
 }
 
 .page-shell {
@@ -158,7 +158,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .eyebrow {
   font-size:11px;
   letter-spacing:2px;
-  font-weight:700;
+  font-weight:600;
   color:var(--accent);
   margin:0 0 14px
 }
@@ -181,45 +181,6 @@ h2 {
 .hero p:not(.eyebrow) {
   color:var(--muted);
   margin:0
-}
-
-.hero-art {
-  background:#f9e7ba;
-  min-width:240px;
-  width:240px;
-  height:210px;
-  border-radius:46% 54% 44% 56%;
-  position:relative;
-  display:grid;
-  place-items:center;
-  transform:rotate(-5deg);
-  margin:0 38px
-}
-
-.paw {
-  font-size:75px;
-  transform:rotate(5deg)
-}
-
-.heart {
-  position:absolute;
-  top:-15px;
-  right:12px;
-  color:var(--accent);
-  font-size:58px;
-  line-height:1
-}
-
-.art-label {
-  position:absolute;
-  bottom:15px;
-  background:white;
-  border-radius:30px;
-  padding:8px 18px;
-  font-size:13px;
-  color:var(--navy);
-  transform:rotate(5deg);
-  box-shadow:0 8px 20px #c7799820
 }
 
 .notice {
@@ -267,12 +228,12 @@ h2 {
   height:28px;
   background:#ece8da;
   font-size:12px;
-  font-weight:700
+  font-weight:600
 }
 
 .steps .current {
   color:var(--accent);
-  font-weight:700
+  font-weight:600
 }
 
 .steps .current span {
@@ -316,7 +277,7 @@ h2 {
   border-radius:11px;
   padding:8px 10px;
   font-size:13px;
-  font-weight:700
+  font-weight:600
 }
 
 .section-number.muted {
@@ -386,7 +347,7 @@ textarea {
   color:white;
   padding:12px 20px;
   font-size:14px;
-  font-weight:700;
+  font-weight:600;
   white-space:nowrap
 }
 
@@ -496,7 +457,7 @@ textarea {
 .checklist li:before {
   content:"✓";
   color:#37775b;
-  font-weight:bold
+  font-weight:600
 }
 
 .surgery-note {
@@ -561,12 +522,6 @@ footer {
   .booking-layout {
     grid-template-columns:minmax(0,1fr) 260px
   }
-  .hero-art {
-    margin-right:0;
-    width:190px;
-    min-width:190px;
-    height:190px
-  }
   .service-options {
     grid-template-columns:1fr
   }
@@ -605,23 +560,6 @@ footer {
   }
   h1 {
     font-size:30px
-  }
-  .hero-art {
-    min-width:95px;
-    width:95px;
-    height:115px;
-    margin:0
-  }
-  .paw {
-    font-size:42px
-  }
-  .heart {
-    font-size:30px;
-    top:-9px;
-    right:0
-  }
-  .art-label {
-    display:none
   }
   .desktop-break {
     display:none
@@ -700,6 +638,9 @@ footer {
 }
 
 body { font-family: "Prompt", "Segoe UI", Tahoma, sans-serif; }
-.hero-art .icon { width: 100px; height: 100px; }
 #staff-tools { display: flex; align-items: center; gap: 16px; padding-bottom: 0; }
 #staff-tools[hidden] { display: none; }
+.thai-date-picker { display: grid; grid-template-columns: minmax(0, .75fr) minmax(0, 1.4fr) minmax(0, 1fr); gap: 8px; }
+.thai-date-picker > label { min-width: 0; font-size: .8rem; }
+.thai-date-picker select, .thai-date-picker input { width: 100%; min-width: 0; padding-left: 8px; padding-right: 8px; }
+input[type="hidden"] { display: none !important; }

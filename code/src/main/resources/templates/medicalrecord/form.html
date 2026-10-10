@@ -6,13 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เพิ่มประวัติการรักษา | PawCare</title>
 
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/pawcare.css}">
     <link rel="stylesheet" th:href="@{/css/icons.css}">
 
     <style>
         /* รูปแบบฟอร์มเบื้องต้น */
         body {
-            font-family: Arial, sans-serif;
+            font-family: "Prompt", sans-serif;
             background: #fffbeb;
             color: #263238;
             margin: 0;
@@ -32,7 +33,7 @@
         label {
             display: block;
             margin: 16px 0 6px;
-            font-weight: bold;
+            font-weight: 600;
         }
 
         input, textarea {
@@ -79,23 +80,23 @@
 
         /* ปุ่มบันทึกข้อมูลให้เข้ากับธีม PawCare */
         button[type="submit"] {
-            background: #df6697;
+            background: var(--gradient-brand);
             color: white;
             border: none;
             border-radius: 8px;
             padding: 12px 18px;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
         }
 
 button[type="submit"]:hover {
-    background: #c95787;
+    background: var(--color-accent);
 }
 
     </style>
 </head>
 
-<body>
+<body class="theme-staff">
     <nav th:replace="~{fragments/layout :: navbar('medical-records')}"></nav>
     <main class="container">
         <!-- เปลี่ยนหัวข้ออัตโนมัติตามโหมดเพิ่มหรือแก้ไข -->
