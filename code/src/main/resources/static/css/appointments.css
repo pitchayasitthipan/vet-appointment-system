@@ -640,3 +640,7 @@ footer {
 body { font-family: "Prompt", "Segoe UI", Tahoma, sans-serif; }
 #staff-tools { display: flex; align-items: center; gap: 16px; padding-bottom: 0; }
 #staff-tools[hidden] { display: none; }
+.thai-date-picker { display: grid; grid-template-columns: minmax(0, .75fr) minmax(0, 1.4fr) minmax(0, 1fr); gap: 8px; }
+.thai-date-picker > label { min-width: 0; font-size: .8rem; }
+.thai-date-picker select, .thai-date-picker input { width: 100%; min-width: 0; padding-left: 8px; padding-right: 8px; }
+input[type="hidden"] { display: none !important; }
