@@ -51,12 +51,12 @@ docker-compose down -v
 เมื่อสั่งรันด้วย Docker เรียบร้อยแล้ว สามารถเข้าใช้งานได้ที่:
 
 - **หน้า UI รายชื่อสัตวแพทย์และตารางเวร:**
-  👉 `http://localhost:8080/doctors.html` หรือ `http://localhost:8080/doctors`
+  👉 `http://localhost:8080/doctors`
 - **REST API ข้อมูลสัตวแพทย์ (CRUD):**
-  👉 `http://localhost:8080/api/doctors`
+  👉 `http://localhost:8080/api/v1/doctors`
 - **REST API Singleton Config (การตั้งค่าคลินิก):**
-  👉 `http://localhost:8080/api/config`
-  👉 `http://localhost:8080/api/config/singleton-check`
+  👉 `http://localhost:8080/api/v1/config`
+  👉 `http://localhost:8080/api/v1/config/singleton-check`
 - **ฐานข้อมูล PostgreSQL (เชื่อมต่อผ่าน DBeaver / pgAdmin / DataGrip):**
   - Host: `localhost`
   - Port: `5432`
@@ -74,9 +74,9 @@ docker-compose down -v
 ### 4.2 หน้าเว็บ UI รายชื่อสัตวแพทย์และตารางเวร (PawCare)
 ![Docker Web UI](img/docker-web-ui.png)
 
-### 4.3 ทดสอบการเรียก REST API สัตวแพทย์ (/api/doctors)
+### 4.3 ทดสอบการเรียก REST API สัตวแพทย์ (/api/v1/doctors)
 ![Docker API Doctors](img/docker-api-doctors.png)
 
-### 4.4 ทดสอบการเรียก REST API Singleton Check (/api/config/singleton-check)
+### 4.4 ทดสอบการเรียก REST API Singleton Check (/api/v1/config/singleton-check)
 ![Docker Singleton Check](img/docker-singleton-check.png)
 

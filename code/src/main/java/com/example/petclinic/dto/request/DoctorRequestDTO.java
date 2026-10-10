@@ -36,7 +36,7 @@ public class DoctorRequestDTO {
         this.firstName = firstName;
         this.lastName = lastName;
         this.specialization = specialization;
-        this.phone = phone;
+        setPhone(phone);
         this.email = email;
         this.workSchedule = workSchedule;
     }
@@ -69,8 +69,10 @@ public class DoctorRequestDTO {
         return phone;
     }
 
+    // ตัดขีดและช่องว่างออกก่อนตรวจรูปแบบ: 081-111-2233 -> 0811112233
+    // (ข้อมูลตัวอย่างเดิมเก็บเบอร์แบบมีขีด แก้ไขโดยไม่เปลี่ยนเบอร์จะได้ไม่ติด 400)
     public void setPhone(String phone) {
-        this.phone = phone;
+        this.phone = phone == null ? null : phone.replaceAll("[\\s-]", "");
     }
 
     public String getEmail() {

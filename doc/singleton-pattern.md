@@ -54,7 +54,7 @@ public class ClinicConfigService {
 ## 4. การทดสอบและพิสูจน์ความเป็น Singleton
 
 1. **ผ่าน REST API:**
-   - เรียก Endpoint: `GET /api/config/singleton-check`
+   - เรียก Endpoint: `GET /api/v1/config/singleton-check`
    - จะแสดงผล `instanceIdentityHashCode` ที่คงเดิมเสมอไม่ว่าจะเรียกกี่ครั้ง ยืนยันว่าเป็น Object เดียวกันในหน่วยความจำ
 
 2. **ผ่าน Unit Test (`ClinicConfigServiceTest`):**

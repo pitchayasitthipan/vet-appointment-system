@@ -108,7 +108,7 @@
     P.clearOwner();
     P.message(byId("booking-notice"), e.message, e.status === 403 ? "info" : "error");
   });
-  P.request("/api/doctors").then(doctors => {
+  P.request("/api/v1/doctors/all").then(doctors => {
     P.options(doctor, doctors.map(d => [d.doctorId, `${d.firstName} ${d.lastName} · ${d.specialization || "สัตวแพทย์"}`]), doctors.length ? "เลือกสัตวแพทย์" : "ยังไม่มีสัตวแพทย์ในระบบ");
     doctorsReady = doctors.length > 0;
     if (selectedDoctor && Array.from(doctor.options).some(o => o.value === selectedDoctor)) doctor.value = selectedDoctor;

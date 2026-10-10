@@ -10,6 +10,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 @Table(name = "medical_record")
@@ -20,8 +24,20 @@ public class MedicalRecord {
     @Column(name = "medical_record_id")
     private Long medicalRecordId;
 
+    // รหัสนัดหมายที่ประวัติการรักษานี้อ้างอิง
     @Column(name = "appointment_id", nullable = false)
     private Long appointmentId;
+
+    // เชื่อมกับตาราง Appointment โดยใช้ appointment_id เป็น Foreign Key
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "appointment_id",
+        referencedColumnName = "appointment_id",
+        insertable = false,
+        updatable = false,
+        foreignKey = @ForeignKey(name = "fk_medical_record_appointment")
+    )
+    private Appointment appointment;
 
     @Column(name = "diagnosis", columnDefinition = "TEXT")
     private String diagnosis;

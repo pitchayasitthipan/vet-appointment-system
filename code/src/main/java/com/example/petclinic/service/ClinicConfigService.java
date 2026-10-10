@@ -74,6 +74,12 @@ public class ClinicConfigService {
     }
 
     public synchronized void updatePricePolicy(BigDecimal consultation, BigDecimal vaccine, BigDecimal surgery) {
+        // ค่าบริการติดลบไม่ได้ -> IllegalArgumentException (400 ผ่าน GlobalExceptionHandler)
+        for (BigDecimal fee : new BigDecimal[] { consultation, vaccine, surgery }) {
+            if (fee != null && fee.signum() < 0) {
+                throw new IllegalArgumentException("ค่าบริการต้องไม่ติดลบ");
+            }
+        }
         if (consultation != null) this.baseConsultationFee = consultation;
         if (vaccine != null) this.vaccineServiceFee = vaccine;
         if (surgery != null) this.surgeryServiceFee = surgery;
