@@ -1587,7 +1587,8 @@ footer {
   .split,
   .layout-2,
   .fields-2 {
-    grid-template-columns: 1fr;
+    /* minmax(0, 1fr) ให้คอลัมน์หดตามจอได้ (1fr เฉยๆ จะกว้างเท่าเนื้อหา ทำให้ล้นจอมือถือ) */
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
