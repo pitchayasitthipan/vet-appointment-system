@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Pets | PawCare Pet Clinic</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/pawcare.css}">
+    <link rel="stylesheet" th:href="@{/css/icons.css}">
+    <link rel="stylesheet" th:href="@{/css/pets.css}">
+</head>
+<!-- ข้อมูลให้ pets.js
+     data-owner-id: เจ้าของที่กำลังดู (ลูกค้ามาจาก session, เจ้าหน้าที่เลือกจาก ?ownerId=) ว่าง = เจ้าหน้าที่ดูสัตว์ทั้งหมด
+     data-staff: เป็นเจ้าหน้าที่หรือไม่ (isStaff มาจาก WebModelAdvice)
+     data-open-add: มาจาก /pets/new -> เปิดฟอร์มเพิ่มสัตว์ทันที
+     data-return-to-appointment: มาจากหน้าจองนัด -> เพิ่มเสร็จแล้วกลับไปจองนัดต่อ -->
+<body th:attr="data-owner-id=${owner != null ? owner.ownerId : ''},
+               data-staff=${isStaff},
+               data-open-add=${openAddForm},
+               data-return-to-appointment=${returnToAppointment == true}">
+
+    <nav th:replace="~{fragments/layout :: navbar('pets')}"></nav>
+
+    <main class="pets-page">
+
+        <!-- Hero: หัวข้อ ตัวเลขสรุป และปุ่มหลัก -->
+        <section class="pets-hero">
+            <div class="pets-hero-content">
+
+                <!-- เจ้าหน้าที่ดูของเจ้าของคนเดียว: ลิงก์กลับแฟ้ม -->
+                <a th:if="${isStaff and owner != null}" class="pets-backlink"
+                   th:href="@{/owners/{id}(id=${owner.ownerId})}">
+                    <span class="icon i-arrow-left icon-sm"></span>
+                    <span th:text="'กลับไปแฟ้ม #' + ${#numbers.formatInteger(owner.ownerId, 4)}">กลับไปแฟ้ม #0036</span>
+                </a>
+
+                <span th:if="${isStaff}" class="staff-badge">
+                    <span class="icon i-identification-card icon-sm"></span> สำหรับเจ้าหน้าที่คลินิก
+                </span>
+                <span th:unless="${isStaff}" class="eyebrow">
+                    <span class="icon i-paw-print icon-sm"></span> MY PETS
+                </span>
+
+                <h1 th:if="${allPets}">สัตว์เลี้ยงทั้งหมดในคลินิก</h1>
+                <h1 th:if="${!allPets and isStaff}" th:text="'สัตว์เลี้ยงของ ' + ${owner.firstName + ' ' + owner.lastName}">สัตว์เลี้ยงของ John Doe</h1>
+                <h1 th:if="${!allPets and !isStaff}" th:text="'สัตว์เลี้ยงของคุณ ' + ${owner.firstName + ' ' + owner.lastName}">สัตว์เลี้ยงของคุณ John Doe</h1>
+
+                <p th:if="${allPets}">ดูสัตว์เลี้ยงของทุกแฟ้ม กดชื่อเจ้าของเพื่อเปิดแฟ้ม หรือจองนัดให้ได้ทันที</p>
+                <p th:if="${!allPets and isStaff}">
+                    แฟ้ม #<span th:text="${#numbers.formatInteger(owner.ownerId, 4)}">0036</span> ·
+                    <span th:replace="~{fragments/layout :: phone(${owner.phone})}"></span>
+                </p>
+                <p th:if="${!allPets and !isStaff}">ดูข้อมูล แก้ไข และจองนัดให้เพื่อนตัวน้อยได้จากหน้านี้</p>
+
+                <!-- ตัวเลขสรุป: pets.js เติมจากข้อมูลจริง -->
+                <div id="petStats" class="pet-stats"></div>
+            </div>
+
+            <div class="hero-actions">
+                <a th:if="${allPets}" th:href="@{/owners/staff}" class="btn-primary">
+                    <span class="icon i-users icon-white"></span> รายชื่อเจ้าของ</a>
+                <button th:unless="${allPets}" type="button" class="btn-primary" onclick="openAddPetModal()">
+                    <span class="icon i-plus icon-white"></span> เพิ่มสัตว์เลี้ยง</button>
+
+                <a th:if="${allPets}" th:href="@{/appointments/new}" class="btn-secondary">
+                    <span class="icon i-calendar-plus"></span> จองนัดหมาย</a>
+                <a th:unless="${allPets}" th:href="@{/appointments/new(ownerId=${owner.ownerId})}" class="btn-secondary">
+                    <span class="icon i-calendar-plus"></span> จองนัดหมาย</a>
+            </div>
+        </section>
+
+        <!-- Pet list -->
+        <section class="pets-content">
+
+            <div class="pets-toolbar">
+                <label class="pet-search-box" for="petSearchInput">
+                    <span class="icon i-magnifying-glass icon-sm" aria-hidden="true"></span>
+                    <input
+                        type="search"
+                        id="petSearchInput"
+                        placeholder="ค้นหาชื่อ ประเภท หรือสายพันธุ์..."
+                        autocomplete="off">
+                </label>
+
+                <!-- ปุ่มกรองตามประเภท (data-filter ตรงกับค่า species ในฐานข้อมูล) -->
+                <div class="pet-filters" id="petFilters">
+                    <button type="button" class="pet-filter active" data-filter="all">ทั้งหมด</button>
+                    <button type="button" class="pet-filter" data-filter="Dog">
+                        <span class="icon i-dog icon-sm"></span> สุนัข</button>
+                    <button type="button" class="pet-filter" data-filter="Cat">
+                        <span class="icon i-cat icon-sm"></span> แมว</button>
+                    <button type="button" class="pet-filter" data-filter="Other">
+                        <span class="icon i-paw-print icon-sm"></span> อื่น ๆ</button>
+                </div>
+            </div>
+
+            <p id="petCountText" class="pets-count">กำลังโหลด...</p>
+
+            <div id="petCardsContainer" class="pet-grid">
+                <div class="pets-loading">
+                    <span class="icon i-paw-print icon-lg loading-paw"></span>
+                    <p>กำลังโหลดข้อมูลสัตว์เลี้ยง...</p>
+                </div>
+            </div>
+
+            <!-- แบ่งหน้า: ใช้เฉพาะเจ้าหน้าที่ดูสัตว์ทั้งหมด (GET /api/v1/pets?page=) -->
+            <div id="petPager" class="pets-pager" hidden></div>
+
+            <div class="pets-bottom-note">
+                <span class="icon i-heart icon-sm"></span>
+                <p>เพื่อนตัวน้อยทุกตัวสมควรได้รับการดูแลอย่างดีที่สุด</p>
+                <span class="icon i-heart icon-sm"></span>
+            </div>
+        </section>
+    </main>
+
+    <!-- Pet detail modal -->
+    <div id="petDetailModal" class="pet-modal" aria-hidden="true">
+        <div class="pet-modal-backdrop" onclick="closeModal('petDetailModal')"></div>
+
+        <section class="pet-modal-dialog" role="dialog" aria-modal="true"
+                 aria-labelledby="petDetailTitle">
+            <button class="modal-close" type="button"
+                    onclick="closeModal('petDetailModal')" aria-label="ปิด"><span class="icon i-x icon-sm icon-pink"></span></button>
+
+            <div class="modal-heading">
+                <span class="modal-icon" id="detailPetIcon"><span class="icon i-paw-print icon-lg icon-pink"></span></span>
+                <div>
+                    <span class="eyebrow">PET PROFILE</span>
+                    <h2 id="petDetailTitle">รายละเอียดสัตว์เลี้ยง</h2>
+                    <p>ข้อมูลพื้นฐานของเพื่อนตัวน้อยของคุณ</p>
+                </div>
+            </div>
+
+            <div class="pet-detail-grid">
+                <div class="detail-item">
+                    <span>ชื่อสัตว์เลี้ยง</span>
+                    <strong id="detailPetName">-</strong>
+                </div>
+                <div class="detail-item">
+                    <span>ประเภท</span>
+                    <strong id="detailPetSpecies">-</strong>
+                </div>
+                <div class="detail-item">
+                    <span>สายพันธุ์</span>
+                    <strong id="detailPetBreed">-</strong>
+                </div>
+                <div class="detail-item">
+                    <span>เพศ</span>
+                    <strong id="detailPetGender">-</strong>
+                </div>
+                <div class="detail-item">
+                    <span>วันเกิด</span>
+                    <strong id="detailPetBirthDate">-</strong>
+                </div>
+                <div class="detail-item">
+                    <span>น้ำหนัก</span>
+                    <strong id="detailPetWeight">-</strong>
+                </div>
+                <div class="detail-item detail-full">
+                    <span>หมายเลขไมโครชิป</span>
+                    <strong id="detailPetMicrochip">-</strong>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="secondary-button" type="button"
+                        onclick="closeModal('petDetailModal')">ปิด</button>
+                <button class="primary-button" type="button"
+                        onclick="editPet(currentPetId)">แก้ไขข้อมูล</button>
+                <button class="danger-button" type="button"
+                        onclick="deletePet(currentPetId)">ลบข้อมูล</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Add pet modal -->
+    <div id="addPetModal" class="pet-modal" aria-hidden="true">
+        <div class="pet-modal-backdrop" onclick="closeModal('addPetModal')"></div>
+
+        <section class="pet-modal-dialog" role="dialog" aria-modal="true"
+                 aria-labelledby="addPetTitle">
+            <button class="modal-close" type="button"
+                    onclick="closeModal('addPetModal')" aria-label="ปิด"><span class="icon i-x icon-sm icon-pink"></span></button>
+
+            <div class="modal-heading">
+                <span class="modal-icon"><span class="icon i-dog icon-lg icon-pink"></span></span>
+                <div>
+                    <span class="eyebrow" id="addPetEyebrow">NEW COMPANION</span>
+                    <h2 id="addPetTitle">เพิ่มสัตว์เลี้ยง</h2>
+                    <p id="addPetSubtitle">กรอกข้อมูลพื้นฐานของสัตว์เลี้ยงของคุณ</p>
+                </div>
+            </div>
+
+            <form id="addPetForm" class="pet-form">
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label for="petName">ชื่อสัตว์เลี้ยง *</label>
+                        <input id="petName" name="name" type="text"
+                               placeholder="เช่น Milo" required>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="petSpecies">ประเภทสัตว์ *</label>
+                        <select id="petSpecies" name="species" required>
+                            <option value="">เลือกประเภทสัตว์</option>
+                            <option value="Dog">สุนัข (Dog)</option>
+                            <option value="Cat">แมว (Cat)</option>
+                            <option value="Other">อื่น ๆ (Other)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="petBreed">สายพันธุ์</label>
+                        <input id="petBreed" name="breed" type="text"
+                               placeholder="ระบุสายพันธุ์">
+                    </div>
+
+                    <div class="form-field">
+                        <label for="petGender">เพศ</label>
+                        <select id="petGender" name="gender">
+                            <option value="">เลือกเพศ</option>
+                            <option value="Male">เพศผู้</option>
+                            <option value="Female">เพศเมีย</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="petBirthDate">วันเกิด</label>
+                        <input id="petBirthDate" name="birthDate" type="date">
+                    </div>
+
+                    <div class="form-field">
+                        <label for="petWeight">น้ำหนัก (กก.)</label>
+                        <input id="petWeight" name="weight" type="number"
+                               min="0.01" step="0.01" placeholder="เช่น 4.5">
+                    </div>
+
+                    <div class="form-field form-full">
+                        <label for="petMicrochipNumber">หมายเลขไมโครชิป</label>
+                        <input id="petMicrochipNumber" name="microchipNumber"
+                               type="text" placeholder="ถ้ามี">
+                    </div>
+
+                </div>
+
+                <div class="modal-actions">
+                    <button class="secondary-button" type="button"
+                            onclick="closeModal('addPetModal')">ยกเลิก</button>
+                    <button class="primary-button" type="submit" id="addPetSubmit">
+                        บันทึกข้อมูล
+                    </button>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <footer class="pets-footer">
+        <span class="icon i-paw-print icon-sm"></span> PawCare Pet Clinic &amp; Vaccination
+        <span>Made with love for your pets <span class="icon i-heart icon-sm icon-pink"></span></span>
+    </footer>
+
+    <script th:src="@{/js/pets.js}"></script>
+</body>
+</html>

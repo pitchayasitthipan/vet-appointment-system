@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="th">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>นัดหมายของฉัน | PawCare</title><link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/pawcare.css">
+  <link rel="stylesheet" href="/css/icons.css">
+  <link rel="stylesheet" href="/css/appointments.css">
+  <script src="/js/appointment-common.js" defer></script><script src="/js/appointments.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">ข้ามไปยังเนื้อหา</a>
+  <nav th:replace="~{fragments/layout :: navbar('appointments')}"></nav>
+  <div id="staff-tools" class="page-shell" hidden><button type="button" class="secondary" id="clinic-list">ดูนัดทั้งคลินิก</button><a href="/owners/staff">จัดการสิทธิ์เจ้าหน้าที่</a></div>
+  <main id="main" class="page-shell">
+    <section class="hero"><div><p class="eyebrow">MY APPOINTMENTS</p><h1>นัดหมายของฉัน</h1><p>ติดตามวันนัด เลื่อนเวลา และจัดการนัดของเพื่อนตัวโปรด</p></div><a class="primary button-link" href="/appointments/new">+ จองนัดใหม่</a></section>
+    <section class="card" aria-labelledby="lookup-heading"><h2 id="lookup-heading">ค้นหาแฟ้มด้วยเบอร์โทร</h2><form id="list-lookup-form"><fieldset><legend class="visually-hidden">ค้นหาเจ้าของ</legend><label for="list-phone">เบอร์โทรที่ลงทะเบียน</label><div class="phone-row"><input id="list-phone" type="tel" autocomplete="tel" maxlength="20" required placeholder="081-234-5678"><button class="primary" type="submit">ค้นหานัดหมาย</button></div></fieldset></form><p id="selected-owner" class="field-hint"></p></section>
+    <div id="list-message" role="status" hidden></div>
+    <section id="list-section" hidden aria-label="รายการนัดหมาย">
+      <div class="list-toolbar"><div><label for="status-filter">สถานะ</label><select id="status-filter"><option value="">ทุกสถานะ</option><option value="PENDING">รอยืนยัน</option><option value="CONFIRMED">ยืนยันแล้ว</option><option value="COMPLETED">เสร็จสิ้น</option><option value="CANCELLED">ยกเลิกแล้ว</option></select></div><div><label for="sort-direction">เรียงตามเวลานัด</label><select id="sort-direction"><option value="asc">เก่าสุดก่อน</option><option value="desc">ล่าสุดก่อน</option></select></div><button id="refresh-list" type="button" class="secondary">โหลดใหม่</button></div>
+      <div id="appointment-list" aria-live="polite"></div>
+      <div class="pager"><button id="previous-page" class="secondary" type="button">ก่อนหน้า</button><span id="page-info"></span><button id="next-page" class="secondary" type="button">ถัดไป</button></div>
+    </section>
+  </main>
+  <dialog id="edit-dialog" aria-labelledby="edit-heading"><form id="edit-form"><div class="dialog-title"><h2 id="edit-heading">แก้ไขนัดหมาย</h2><button type="button" class="secondary" id="close-edit" aria-label="ปิดหน้าต่างแก้ไข">ปิด</button></div><p id="edit-pet"></p><fieldset id="edit-fields"><legend class="visually-hidden">ข้อมูลสำหรับเลื่อนนัด</legend><label for="edit-doctor">สัตวแพทย์</label><select id="edit-doctor" required></select><div class="two-fields"><div><label for="edit-date">วันนัด</label><input id="edit-date" type="date" required></div><div><label for="edit-time">เวลานัด</label><select id="edit-time" required></select></div></div><label for="edit-service">ประเภทบริการ</label><select id="edit-service" required><option value="CONSULTATION">ตรวจทั่วไป</option><option value="VACCINE">ฉีดวัคซีน</option><option value="SURGERY">ผ่าตัด</option></select><label for="edit-symptoms">รายละเอียด</label><textarea id="edit-symptoms" rows="4" maxlength="1000" required></textarea></fieldset><div id="edit-message" role="status" hidden></div><button id="save-edit" class="primary" type="submit">บันทึกการแก้ไข</button></form></dialog>
+  <dialog id="cancel-dialog" aria-labelledby="cancel-heading"><h2 id="cancel-heading">ยืนยันยกเลิกนัด</h2><p id="cancel-description"></p><div id="cancel-message" role="status" hidden></div><div class="form-actions"><button type="button" class="secondary" id="close-cancel">กลับ</button><button type="button" class="danger" id="confirm-cancel">ยืนยันยกเลิกนัดนี้</button></div></dialog>
+  <noscript><p class="notice">กรุณาเปิด JavaScript เพื่อดูและจัดการนัดหมาย</p></noscript>
+  <footer>PawCare Pet Clinic &amp; Vaccination <span>ดูแลทุกชีวิต ด้วยความใส่ใจ</span></footer>
+</body>
+</html>

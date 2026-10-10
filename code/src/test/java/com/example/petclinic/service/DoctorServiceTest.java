@@ -14,10 +14,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import com.example.petclinic.domain.entity.Doctor;
 import com.example.petclinic.dto.request.DoctorRequestDTO;
@@ -78,6 +83,21 @@ class DoctorServiceTest {
             assertThat(result.get(0).getFirstName()).isEqualTo("นันทิดา");
             assertThat(result.get(1).getFirstName()).isEqualTo("กิตติศักดิ์");
             verify(doctorRepository).findAll();
+        }
+
+        @Test
+        @DisplayName("getDoctors ควรคืนรายชื่อแบบแบ่งหน้าตามที่ขอ")
+        void getDoctors_ShouldReturnPage() {
+            // Arrange
+            PageRequest pageable = PageRequest.of(0, 10);
+            when(doctorRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(sampleDoctor), pageable, 1));
+
+            // Act
+            Page<DoctorResponseDTO> result = doctorService.getDoctors(pageable);
+
+            // Assert
+            assertThat(result.getTotalElements()).isEqualTo(1);
+            assertThat(result.getContent().get(0).getEmail()).isEqualTo("nantida.r@vetclinic.com");
         }
 
         @Test
@@ -236,6 +256,19 @@ class DoctorServiceTest {
 
             verify(doctorRepository).existsById(99L);
             verify(doctorRepository, never()).deleteById(any());
+        }
+
+        @Test
+        @DisplayName("deleteDoctor เมื่อยังมีนัดหมายอ้างถึง ควรโยน DuplicateResourceException (409)")
+        void deleteDoctor_WhenHasAppointments_ShouldThrowConflict() {
+            // Arrange: ฐานข้อมูลไม่ยอมลบเพราะ FK จากตาราง appointment
+            when(doctorRepository.existsById(1L)).thenReturn(true);
+            doThrow(new DataIntegrityViolationException("fk")).when(doctorRepository).flush();
+
+            // Act & Assert
+            assertThatThrownBy(() -> doctorService.deleteDoctor(1L))
+                    .isInstanceOf(DuplicateResourceException.class)
+                    .hasMessageContaining("ยังมีนัดหมาย");
         }
     }
 }

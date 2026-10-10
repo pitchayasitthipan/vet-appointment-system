@@ -1,0 +1,150 @@
+
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายละเอียดประวัติการรักษา | PawCare</title>
+
+    <link rel="stylesheet" th:href="@{/css/pawcare.css}">
+    <link rel="stylesheet" th:href="@{/css/icons.css}">
+
+    <style>
+        /* จัดรูปแบบหน้ารายละเอียด */
+        body {
+            font-family: Arial, sans-serif;
+            background: #fffbeb;
+            color: #263238;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 760px;
+            margin: 32px auto;
+            background: white;
+            padding: 28px;
+            border-radius: 16px;
+        }
+
+        h1 { margin-top: 0; }
+
+        .item {
+            padding: 14px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #667085;
+            margin-bottom: 6px;
+        }
+
+        .value {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 24px;
+            padding: 12px 20px;
+            background: #e5e7eb;
+            border-radius: 8px;
+            color: #263238;
+            text-decoration: none;
+        }
+
+        /* PawCare shared color theme */
+        h1 {
+            color: #18336b;
+        }
+
+        a {
+            color: #d85e91;
+        }
+
+        a:hover {
+            color: #bd477a;
+        }
+
+    </style>
+</head>
+
+<body>
+    <nav th:replace="~{fragments/layout :: navbar('medical-records')}"></nav>
+    <main class="container">
+        <h1>รายละเอียดประวัติการรักษา</h1>
+        <p>PawCare | Medical Record Details</p>
+
+        <!-- แสดงข้อมูลรายการที่ Controller ส่งมา -->
+        <div class="item">
+            <div class="label">รหัสประวัติ</div>
+            <div class="value" th:text="${record.medicalRecordId}"></div>
+        </div>
+
+        <div class="item">
+            <div class="label">รหัสนัดหมาย</div>
+            <div class="value" th:text="${record.appointmentId}"></div>
+        </div>
+
+        <div class="item">
+            <div class="label">การวินิจฉัย</div>
+            <div class="value" th:text="${record.diagnosis} ?: '-'"></div>
+        </div>
+
+        <div class="item">
+            <div class="label">การรักษา</div>
+            <div class="value" th:text="${record.treatment} ?: '-'"></div>
+        </div>
+
+        <div class="item">
+            <div class="label">ชื่อวัคซีน</div>
+            <div class="value" th:text="${record.vaccineName} ?: '-'"></div>
+        </div>
+
+        <div class="item">
+            <div class="label">วันที่ฉีดวัคซีน</div>
+            <div class="value" th:text="${record.vaccineDate} ?: '-'"></div>
+        </div>
+
+        <div class="item">
+            <div class="label">นัดวัคซีนครั้งถัดไป</div>
+            <div class="value" th:text="${record.nextVaccineDate} ?: '-'"></div>
+        </div>
+
+        <div class="item">
+            <div class="label">หมายเหตุ</div>
+            <div class="value" th:text="${record.notes} ?: '-'"></div>
+        </div>
+
+        <!-- เปิดฟอร์มแก้ไขประวัติการรักษารายการนี้ -->
+        <a class="back"
+                th:href="@{/medical-records/{id}/edit(id=${record.medicalRecordId})}">
+            แก้ไขข้อมูล
+        </a>
+
+        <!-- ส่งคำขอลบด้วย POST และให้ผู้ใช้ยืนยันก่อน -->
+        <form th:action="@{/medical-records/{id}/delete(id=${record.medicalRecordId})}"
+                method="post"
+                onsubmit="return confirm('ยืนยันการลบประวัติการรักษานี้หรือไม่?');"
+                style="display: inline-block;">
+
+            <button type="submit"
+                    style="padding: 12px 20px;
+                    background: #dc3545;
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;">
+                ลบข้อมูล
+            </button>
+        </form>
+
+        <!-- กลับไปหน้ารายการ -->
+        <a class="back" th:href="@{/medical-records}">
+            กลับหน้ารายการ
+        </a>
+    </main>
+</body>
+</html>

@@ -1,0 +1,1847 @@
+/* ==========================================================
+   1. ตัวแปรสี/ขนาด
+   ค่ากลางของระบบ แก้ที่นี่ที่เดียว ทุกหน้าเปลี่ยนตาม ห้ามใส่ค่า hex ในที่อื่น ให้ใช้ var(--ชื่อ)
+   ========================================================== */
+
+:root {
+  --color-primary: #fbe3a5; /* เหลืองอ่อน: พื้นหัวตาราง แบนเนอร์ */
+  --color-secondary: #e6a0b3; /* ชมพูอ่อน: ขอบปุ่มรอง */
+  --color-accent: #c77998; /* ชมพูอมม่วง: ลิงก์ ไอคอนเน้น */
+  --color-muted: #25262b; /* เทาเข้ม: สีตัวอักษรหลัก */
+  --color-background: #fffbe9; /* ครีม: พื้นหลังทั้งหน้า */
+  --color-surface: #ffffff; /* ขาว: พื้นการ์ด navbar ช่องกรอก */
+  --color-success: #4caf7f; /* เขียว: สถานะสำเร็จ */
+  --color-warning: #f5c568; /* เหลืองส้ม: สถานะเตือน */
+  --color-border: #e5e1d6; /* เทาอ่อน: เส้นขอบ */
+  --color-navy: #17306b; /* กรมท่า: หัวข้อ */
+  --color-pink: #e8689d; /* ชมพูสด: ปุ่มหลัก เมนูที่เลือก */
+  --color-accent-soft: #fbe1e8; /* ชมพูอ่อนมาก: พื้นรองไอคอน ป้ายยกเลิก */
+  --color-warning-soft: #fdf0cf; /* เหลืองอ่อนมาก: ป้ายรอยืนยัน */
+  --color-success-soft: #ddf3e8; /* เขียวอ่อนมาก: กล่องแจ้งสำเร็จ */
+  --gradient-brand: linear-gradient(
+    135deg,
+    var(--color-pink),
+    var(--color-accent)
+  ); /* ไล่เฉดชมพู: ปุ่มหลัก และสถานะ active */
+  --radius-sm: 6px; /* ความโค้งมุมเล็ก */
+  --radius-md: 12px; /* ความโค้งมุมกลาง (ช่องกรอก กล่องเล็ก) */
+  --radius-lg: 20px; /* ความโค้งมุมใหญ่ (การ์ด) */
+  --radius-pill: 999px; /* โค้งสุด (ปุ่ม ป้าย แคปซูล) */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05); /* เงาบาง (การ์ด) */
+  --shadow-md: 0 8px 24px rgba(199, 121, 152, 0.18); /* เงาชมพู (ปุ่ม การ์ดที่เลือก) */
+}
+
+/* ==========================================================
+   2. BASE (พื้นฐานทั้งหน้า)
+   รีเซ็ตค่าเริ่มต้นของเบราว์เซอร์ ฟอนต์ พื้นหลัง และลิงก์
+   ========================================================== */
+
+/* ทุก element คิดขนาดรวม padding+border (ทำให้คำนวณความกว้างง่าย) */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* เลื่อนหน้าแบบนุ่มนวลเมื่อคลิกลิงก์ # (anchor) */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ฟอนต์ Prompt (รองรับไทย) สีพื้นหลังครีม สีตัวอักษรเทาเข้ม */
+body {
+  font-family: "Prompt", sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  background: var(--color-background);
+  color: var(--color-muted);
+  margin: 0;
+}
+
+/* กรอบสีชมพูตอนกด Tab ไปที่ปุ่ม/ลิงก์ (เพื่อการเข้าถึง) */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ทำให้ attribute hidden ซ่อน element จริง */
+[hidden] {
+  display: none !important;
+}
+
+/* สีลิงก์ทั่วไป */
+a {
+  color: var(--color-accent);
+}
+
+/* ==========================================================
+   3. TYPOGRAPHY (ตัวอักษร)
+   หัวข้อ h1-h3 ข้อความ p และ class ช่วยจัดสี/ขนาดข้อความ
+   ========================================================== */
+
+/* หัวข้อใหญ่ 32px ตัวหนา สีกรมท่า */
+h1 {
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 700;
+  color: var(--color-navy);
+  margin: 0 0 8px;
+}
+
+/* หัวข้อรอง 24px */
+h2 {
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 600;
+  color: var(--color-navy);
+  margin: 0 0 12px;
+}
+
+/* หัวข้อย่อย 18px (ชื่อการ์ด) */
+h3 {
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 600;
+  color: var(--color-navy);
+  margin: 0 0 6px;
+}
+
+/* ข้อความเนื้อหา 16px */
+p {
+  font-size: 16px;
+  font-weight: 400;
+  margin: 0 0 12px;
+}
+
+/* ข้อความเล็ก 14px (คำอธิบายเสริม) ใช้ได้ทั้งแท็ก <small> และ class .text-small */
+small,
+.text-small {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+}
+
+/* ข้อความจางลง (ข้อมูลรอง) */
+.text-muted {
+  opacity: 0.7;
+}
+
+/* ข้อความสีชมพูอมม่วง */
+.text-accent {
+  color: var(--color-accent);
+}
+
+/* ข้อความสีกรมท่า */
+.text-navy {
+  color: var(--color-navy);
+}
+
+/* ข้อความหัวเล็กสีชมพูเหนือหัวข้อใหญ่ */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-pink);
+  font-weight: 600;
+}
+
+/* ==========================================================
+   4. LAYOUT (การจัดวาง)
+   กรอบเนื้อหา แถว (flex) และตาราง grid สำหรับวางของเป็นช่อง ๆ
+   ========================================================== */
+
+/* กรอบเนื้อหา กว้างสุด 1100px จัดกึ่งกลางหน้า */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ระยะห่างบน-ล่างของแต่ละส่วนในหน้า */
+.section {
+  padding: 28px 0;
+}
+
+/* จัดของเรียงแนวนอน ขึ้นบรรทัดใหม่เมื่อไม่พอ เช่น กลุ่มปุ่ม */
+.row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* ใช้คู่กับ .row ดันของไปซ้าย-ขวาสุด */
+.row-between {
+  justify-content: space-between;
+}
+
+/* ตารางช่อง (ต้องใช้คู่กับ .grid-3 หรือ .grid-4) */
+.grid {
+  display: grid;
+  gap: 16px;
+}
+
+/* grid ช่องกว้างอย่างน้อย 200px (เหมาะกับการ์ดบริการ) เรียงอัตโนมัติ */
+.grid-4 {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+/* grid ช่องกว้างอย่างน้อย 150px (เหมาะกับการ์ดสัตว์เลี้ยง) */
+.grid-3 {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+/* grid ช่องกว้างอย่างน้อย 260px (เหมาะกับฟอร์มกรอกข้อมูล) */
+.grid-form {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+/* ==========================================================
+   5. ICONS (วงกลมรองไอคอน)
+   ตัวไอคอนเองอยู่ใน icons.css ส่วนนี้มีแค่วงกลมพื้นหลังไอคอน
+   ========================================================== */
+
+/* วงกลมสีชมพูอ่อนรองไอคอน (ใส่ <span class="icon-bubble">...</span> ครอบไอคอน) */
+.icon-bubble {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-accent-soft);
+  display: grid;
+  place-items: center;
+  margin: 0 auto 10px;
+}
+
+/* วงกลมรองไอคอนสีเหลือง */
+.icon-bubble.warm {
+  background: var(--color-primary);
+}
+
+/* ==========================================================
+   6. BUTTONS (ปุ่ม)
+   ปุ่มหลัก (ชมพู) ปุ่มรอง (ขอบชมพู) ปุ่มข้อความ และขนาดเล็ก
+   ========================================================== */
+
+/* สไตล์ร่วมของปุ่มทุกแบบ (จัดไอคอน+ข้อความให้อยู่แนวเดียวกัน) */
+.btn-primary,
+.btn-secondary,
+.btn-text {
+  font: inherit;
+  text-decoration: none; /* ปุ่มที่เป็นลิงก์ <a> ไม่ต้องมีขีดเส้นใต้ */
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition:
+    transform 0.15s,
+    filter 0.15s,
+    background 0.15s;
+}
+
+/* ปุ่มหลัก: ชมพูไล่เฉด ขอบมน ใช้กับ action สำคัญ เช่น "จองนัดหมาย" */
+.btn-primary {
+  background: var(--gradient-brand);
+  color: #fff;
+  padding: 12px 28px;
+  border-radius: var(--radius-pill);
+  border: none;
+  box-shadow: var(--shadow-md);
+}
+
+/* ไอคอนในปุ่มใช้สีเดียวกับตัวอักษรในปุ่ม */
+.btn-primary .icon,
+.btn-secondary .icon {
+  color: inherit;
+}
+
+/* ตอนเอาเมาส์ชี้: สว่างขึ้นและลอยขึ้นเล็กน้อย */
+.btn-primary:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+/* ปุ่มรอง: พื้นขาว ขอบชมพู ใช้กับ action รอง เช่น "ดูบริการของเรา" */
+.btn-secondary {
+  background: var(--color-surface);
+  color: var(--color-accent);
+  padding: 11px 27px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--color-secondary);
+}
+
+/* ตอนเอาเมาส์ชี้: พื้นชมพูอ่อน */
+.btn-secondary:hover {
+  background: var(--color-accent-soft);
+}
+
+/* ปุ่มข้อความ: ไม่มีพื้น/ขอบ ใช้กับ action เบา ๆ เช่น "ดูเพิ่มเติม" */
+.btn-text {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  padding: 8px;
+}
+
+/* ตอนเอาเมาส์ชี้: ขีดเส้นใต้ */
+.btn-text:hover {
+  text-decoration: underline;
+}
+
+/* ปุ่มขนาดเล็ก ใช้ร่วมกับปุ่มอื่น เช่น class="btn-primary btn-sm" */
+.btn-sm {
+  padding: 6px 16px;
+  font-size: 14px;
+}
+
+/* ปุ่มที่ปิดใช้งาน (disabled): จางลงและกดไม่ได้ */
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ==========================================================
+   7. NAVBAR (แถบเมนูด้านบน)
+   โลโก้ ลิงก์เมนู และปุ่มฝั่งขวา ใช้ใน fragments/navbar.html
+   ========================================================== */
+
+/* แถบเมนูบนสุด ติดขอบบนเมื่อเลื่อนหน้า (sticky) */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--color-surface);
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* กลุ่มโลโก้ + ชื่อ PawCare */
+.brand {
+  text-decoration: none; /* โลโก้เป็นลิงก์ ไม่ต้องมีขีดเส้นใต้ */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-navy);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 20px;
+}
+
+/* ข้อความเล็กใต้ชื่อ (Pet Clinic & Vaccination) */
+.brand small {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+/* วงกลมชมพูที่ใส่ไอคอนอุ้งเท้า */
+.brand-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--gradient-brand);
+  display: grid;
+  place-items: center;
+}
+
+/* ไอคอนในโลโก้เป็นสีขาว */
+.brand-logo .icon {
+  color: #fff;
+}
+
+/* กลุ่มลิงก์เมนู (Home, My Pets, ...) */
+.nav-links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ลิงก์เมนูแต่ละอัน */
+.nav-links a {
+  color: var(--color-muted);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+  padding: 6px 12px;
+  border-bottom: 2px solid transparent;
+}
+
+/* เมาส์ชี้: เปลี่ยนเป็นสีม่วงชมพู */
+.nav-links a:hover {
+  color: var(--color-accent);
+}
+
+/* เมนูของหน้าปัจจุบัน: สีชมพู + ขีดเส้นใต้ */
+.nav-links a.active {
+  color: var(--color-pink);
+  border-bottom-color: var(--color-pink);
+}
+
+/* กลุ่มด้านขวา (ไอคอนค้นหา + ปุ่ม Login) */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ==========================================================
+   8. SEARCH & FORMS (ค้นหาและฟอร์ม)
+   ช่องค้นหา ช่องกรอกข้อมูล dropdown textarea และรูปโปรไฟล์
+   ========================================================== */
+
+/* กล่องค้นหาทรงแคปซูล ใส่ไอคอนแว่นขยาย + input */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 8px 16px;
+  background: var(--color-surface);
+}
+
+/* ช่องพิมพ์ในกล่องค้นหา (ไม่มีขอบของตัวเอง) */
+.search-bar input {
+  border: none;
+  outline: none;
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  background: none;
+}
+
+/* กลุ่มฟอร์ม 1 ช่อง = label + input */
+.field {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+/* ป้ายชื่อช่องกรอก */
+.field label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-navy);
+}
+
+/* ช่องกรอก / dropdown / textarea ใช้สไตล์เดียวกัน (class="input", "select", "textarea") */
+.input,
+.select,
+.textarea {
+  font: inherit;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  width: 100%; /* ยืดเต็มความกว้างของช่อง ไม่ล้นทับช่องข้าง ๆ */
+}
+
+/* ตอนคลิกพิมพ์: ขอบชมพู + เงาวงนอก */
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+/* วงกลมโปรไฟล์ขนาดเล็ก (ใส่อีโมจิหรือรูป) */
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  flex: none;
+}
+
+/* โปรไฟล์ขนาดใหญ่ ใช้ในหน้าข้อมูลสัตว์เลี้ยง */
+.avatar-lg {
+  width: 96px;
+  height: 96px;
+  font-size: 52px;
+  border: 4px solid var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ==========================================================
+   9. CARD (การ์ด)
+   กล่องสีขาวขอบบาง ใช้ห่อเนื้อหาแต่ละก้อน
+   ========================================================== */
+
+/* การ์ดมาตรฐาน: พื้นขาว ขอบบาง มุมโค้ง เงาอ่อน */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin: 10px 0;
+  box-shadow: var(--shadow-sm);
+}
+
+/* การ์ดที่อยู่ใน grid ไม่ต้องมี margin (grid จัดช่องไฟเอง) */
+.grid > .card {
+  margin: 0;
+}
+
+/* การ์ดจัดข้อความกึ่งกลาง (การ์ดบริการหน้าแรก) */
+.card-center {
+  text-align: center;
+}
+
+/* การ์ดพื้นสีเหลืองอ่อน */
+.card-soft {
+  background: var(--color-primary);
+  border-color: transparent;
+}
+
+/* ==========================================================
+   10. HERO / HOME (หน้าแรก)
+   ส่วนต้อนรับด้านบน ชิปบริการ และแบนเนอร์ข้อความ
+   ========================================================== */
+
+/* ส่วนต้อนรับหน้าแรก: 2 คอลัมน์ (ข้อความซ้าย / รูปขวา) */
+.hero {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 24px;
+  align-items: center;
+  background: var(--color-background);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+}
+
+/* หัวข้อใน hero ใหญ่กว่าปกติ (40px) */
+.hero h1 {
+  font-size: 40px;
+  line-height: 48px;
+}
+
+/* กรอบรูปประกอบฝั่งขวาของ hero */
+.hero-art {
+  position: relative;
+  min-height: 280px;
+  display: grid;
+  place-items: center;
+}
+
+/* วงกลมสีชมพูเป็นพื้นหลังรูปสัตว์ */
+.hero-blob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(300px, 90%);
+  aspect-ratio: 1; /* กว้าง = สูง จึงเป็นวงกลม */
+  transform: translate(-50%, -50%); /* จัดให้อยู่กึ่งกลาง */
+  background: linear-gradient(135deg, var(--color-secondary), var(--color-accent));
+  border-radius: 50%;
+  opacity: 0.85;
+}
+
+/* กลุ่มรูปสัตว์ (อีโมจิหมา/แมว) วางทับก้อนสี */
+.hero-pets {
+  position: relative;
+  font-size: 110px;
+  line-height: 1;
+  display: flex;
+  align-items: flex-end;
+}
+
+/* ตัวสุดท้าย (แมว) เล็กกว่าและซ้อนเข้าไปหน่อย */
+.hero-pets span:last-child {
+  font-size: 76px;
+  margin-left: -16px;
+}
+
+/* แถวชิปจุดเด่นบริการใต้ hero */
+.feature-chips {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+/* ชิปหนึ่งอัน: วงกลมไอคอน + ข้อความ 2 บรรทัด */
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-warning-soft);
+  border-radius: var(--radius-pill);
+  padding: 6px 16px 6px 6px;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 600;
+}
+
+/* วงกลมไอคอนในชิปให้เล็กลง */
+.chip .icon-bubble {
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  background: var(--color-surface);
+}
+
+/* แบนเนอร์สีเหลืองพร้อมประโยคเด่น (ท้ายหน้าแรก) */
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: var(--color-primary);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+}
+
+/* ตัวอักษรของประโยคในแบนเนอร์ */
+.banner q {
+  font-weight: 600;
+  color: var(--color-navy);
+  font-size: 18px;
+}
+
+/* ==========================================================
+   11. STEPPER (ขั้นตอนการจอง)
+   แถบวงกลม 1-2-3-4 บนหน้า Appointment แต่ละขั้นมีสถานะ active/done
+   ========================================================== */
+
+/* แถวขั้นตอนทั้ง 4 ขั้น */
+.stepper {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0 28px;
+}
+
+/* ขั้นตอนหนึ่งขั้น (ค่าเริ่มต้น = ยังไม่ถึง จึงจาง) */
+.step {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-muted);
+  opacity: 0.6;
+}
+
+/* เส้นเชื่อมระหว่างวงกลมแต่ละขั้น */
+.step::before {
+  content: "";
+  position: absolute;
+  top: 18px;
+  left: -50%;
+  width: 100%;
+  height: 2px;
+  background: var(--color-border);
+  z-index: 0;
+}
+
+/* ขั้นแรกไม่ต้องมีเส้นเชื่อมด้านซ้าย */
+.step:first-child::before {
+  display: none;
+}
+
+/* วงกลมไอคอนของแต่ละขั้น */
+.step-dot {
+  position: relative;
+  z-index: 1;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  display: grid;
+  place-items: center;
+  margin: 0 auto 6px;
+}
+
+/* ขั้นที่กำลังทำ/ทำเสร็จแล้ว: แสดงเต็มสี */
+.step.active,
+.step.done {
+  opacity: 1;
+}
+
+/* ขั้นปัจจุบัน: วงกลมชมพูไล่เฉด */
+.step.active .step-dot {
+  background: var(--gradient-brand);
+  border-color: transparent;
+}
+
+/* ไอคอนในขั้นปัจจุบันเป็นสีขาว */
+.step.active .step-dot .icon {
+  color: #fff;
+}
+
+/* ขั้นที่เสร็จแล้ว: วงกลมสีเขียว */
+.step.done .step-dot {
+  background: var(--color-success);
+  border-color: transparent;
+}
+
+/* ไอคอนในขั้นที่เสร็จแล้วเป็นสีขาว */
+.step.done .step-dot .icon {
+  color: #fff;
+}
+
+/* เส้นเชื่อมเป็นสีชมพูเมื่อขั้นนั้นเสร็จหรือกำลังทำ */
+.step.done::before,
+.step.active::before {
+  background: var(--color-pink);
+}
+
+/* ==========================================================
+   12. SELECTABLE & PETS (ตัวเลือกที่กดได้/การ์ดสัตว์เลี้ยง)
+   การ์ดสัตว์เลี้ยง ปุ่มเลือกบริการ ใช้คู่กับ JS สลับคลาส .selected
+   ========================================================== */
+
+/* ใส่ class นี้กับสิ่งที่กดเลือกได้ (JS จะสลับ .selected) */
+.sel {
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s,
+    background 0.15s;
+}
+
+/* การ์ดสัตว์เลี้ยงแต่ละตัว จัดกึ่งกลาง */
+.pet-card {
+  text-align: center;
+  padding: 16px;
+}
+
+/* รูปสัตว์ในการ์ดใหญ่กว่า avatar ปกติ */
+.pet-card .avatar {
+  width: 84px;
+  height: 84px;
+  font-size: 46px;
+  margin: 0 auto 8px;
+}
+
+/* การ์ดที่ถูกเลือก: ขอบชมพู + เงาวงนอก */
+.pet-card.selected {
+  border-color: var(--color-pink);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+/* ปุ่มการ์ด "เพิ่มสัตว์เลี้ยง" ขอบประ */
+.pet-add {
+  border: 2px dashed var(--color-secondary);
+  background: transparent;
+  display: grid;
+  place-items: center;
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+/* ปุ่มเลือกบริการ (ตรวจสุขภาพ, ฉีดวัคซีน ฯลฯ) */
+.pill-select {
+  padding: 10px 20px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-weight: 600;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* เมาส์ชี้: ขอบชมพูอ่อน */
+.pill-select:hover {
+  border-color: var(--color-secondary);
+}
+
+/* ตัวที่ถูกเลือก: พื้นชมพูไล่เฉด ตัวอักษรขาว */
+.pill-select.selected {
+  background: var(--gradient-brand);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: var(--shadow-md);
+}
+
+/* ไอคอนของตัวที่ถูกเลือกเป็นสีขาว */
+.pill-select.selected .icon {
+  color: #fff;
+}
+
+/* ==========================================================
+   13. PROFILE & SIDEBAR (ข้อมูลสัตว์เลี้ยง)
+   เลย์เอาต์เมนูซ้าย + เนื้อหาขวา และการ์ดโปรไฟล์ในหน้า My Pets
+   ========================================================== */
+
+/* เลย์เอาต์ 2 ช่อง: เมนูซ้าย 220px / เนื้อหาขวา */
+.layout-side {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* กล่องเมนูด้านซ้าย */
+.sidebar {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 10px;
+  display: grid;
+  gap: 4px;
+}
+
+/* รายการเมนูข้าง (ไอคอน + ข้อความ) */
+.sidebar a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  color: var(--color-muted);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+/* เมาส์ชี้: พื้นครีม */
+.sidebar a:hover {
+  background: var(--color-background);
+}
+
+/* เมนูที่เลือกอยู่: พื้นชมพูอ่อน ตัวอักษรชมพูอมม่วง */
+.sidebar a.active {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+/* แถวรูปสัตว์ + ชื่อ ในการ์ดโปรไฟล์ */
+.profile {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* รายการข้อมูลแบบ "หัวข้อ : ค่า" (สายพันธุ์, น้ำหนัก, วันเกิด) ใช้กับ <dl><dt><dd> */
+.dl {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 8px 12px;
+  margin: 16px 0;
+}
+
+/* ฝั่งหัวข้อ (ซ้าย) */
+.dl dt {
+  font-weight: 600;
+  color: var(--color-navy);
+}
+
+/* ฝั่งค่า (ขวา) */
+.dl dd {
+  margin: 0;
+}
+
+/* ==========================================================
+   14. TABS (แท็บ)
+   แท็บแบบขีดเส้นใต้ (.tabs) และแบบแคปซูล (.segmented)
+   ========================================================== */
+
+/* แท็บแบบขีดเส้นใต้ (หน้า My Pets) */
+.tabs {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 12px;
+}
+
+/* ปุ่มแท็บหนึ่งปุ่ม */
+.tab {
+  background: none;
+  border: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-muted);
+  padding: 10px 4px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+}
+
+/* แท็บที่เลือกอยู่: ตัวอักษรชมพู + เส้นใต้ชมพู */
+.tab.active {
+  color: var(--color-pink);
+  border-bottom-color: var(--color-pink);
+}
+
+/* แท็บแบบแคปซูลต่อกัน (Upcoming / History / Cancelled) */
+.segmented {
+  display: flex;
+  background: var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 4px;
+  gap: 4px;
+  margin: 16px 0;
+}
+
+/* ปุ่มแท็บในแคปซูลแบ่งความกว้างเท่ากัน */
+.segmented .tab {
+  flex: 1;
+  border: none;
+  margin: 0;
+  border-radius: var(--radius-pill);
+  padding: 10px 16px;
+  text-align: center;
+}
+
+/* แท็บที่เลือกในแคปซูล: พื้นชมพูไล่เฉด */
+.segmented .tab.active {
+  background: var(--gradient-brand);
+  color: #fff;
+  box-shadow: var(--shadow-md);
+}
+
+/* ==========================================================
+   15. BADGES (ป้ายสถานะ)
+   ป้ายเล็ก ๆ บอกสถานะ เช่น ยืนยันแล้ว / รอการยืนยัน / ยกเลิก
+   ========================================================== */
+
+/* ป้ายสถานะทรงแคปซูล (ใช้คู่กับ badge-success / badge-warning / badge-danger) */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 2px 12px;
+  border-radius: var(--radius-pill);
+}
+
+/* เขียว: ยืนยันแล้ว / สำเร็จ */
+.badge-success {
+  background: var(--color-success);
+  color: #fff;
+}
+
+/* เหลือง: รอการยืนยัน */
+.badge-warning {
+  background: var(--color-warning-soft);
+  color: #9a6b00;
+}
+
+/* ชมพู: ยกเลิก / มีปัญหา */
+.badge-danger {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+/* ==========================================================
+   16. APPOINTMENT CARD (การ์ดนัดหมาย)
+   การ์ดหนึ่งรายการนัดหมาย มีกล่องวันที่ รายละเอียด และป้ายสถานะ
+   ========================================================== */
+
+/* การ์ดนัดหมาย: กล่องวันที่ซ้าย / รายละเอียดกลาง / สถานะขวา (ใช้คู่กับ .card) */
+.appt {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+/* กล่องวันที่สีชมพูอ่อน (วัน/เดือน/ปี) */
+.date-box {
+  flex: none;
+  width: 76px;
+  text-align: center;
+  background: var(--color-accent-soft);
+  border-radius: var(--radius-md);
+  padding: 8px 4px;
+  color: var(--color-accent);
+  line-height: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* เลขวันที่ตัวใหญ่ */
+.date-box b {
+  display: block;
+  font-size: 28px;
+  line-height: 32px;
+  color: var(--color-navy);
+}
+
+/* ส่วนรายละเอียดนัดหมายตรงกลาง */
+.appt-body {
+  flex: 1;
+}
+
+/* แถวข้อมูลเล็ก ๆ (ชื่อสัตว์ / หมอ / เวลา) มีไอคอนนำหน้า */
+.appt-body .meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--color-muted);
+}
+
+/* ส่วนขวา: ป้ายสถานะ + ปุ่มดูรายละเอียด */
+.appt-side {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+}
+
+/* ==========================================================
+   17. TABLE (ตาราง)
+   ตารางข้อมูล หัวตารางสีเหลืองอ่อน
+   ========================================================== */
+
+/* ตารางเต็มความกว้าง ขอบบางต่อกัน */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+/* ช่องในตารางมีขอบและระยะห่างภายใน */
+table th,
+table td {
+  border: 1px solid var(--color-border);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+/* หัวตารางพื้นเหลืองอ่อน */
+table th {
+  background: var(--color-primary);
+  color: var(--color-muted);
+}
+
+/* ครอบตารางให้เลื่อนซ้าย-ขวาได้บนจอเล็ก */
+.table-wrap {
+  overflow-x: auto;
+}
+
+/* ==========================================================
+   18. ALERT & FOOTER (กล่องแจ้งเตือนและท้ายหน้า)
+   กล่องข้อความเตือน/สำเร็จ และส่วนท้ายเว็บ
+   ========================================================== */
+
+/* กล่องแจ้งเตือนสีเขียว (สำเร็จ) มีแถบสีด้านซ้าย */
+.alert {
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border-left: 6px solid var(--color-success);
+  background: var(--color-success-soft);
+}
+
+/* กล่องแจ้งเตือนสีเหลือง (คำเตือน) ใช้คู่กับ .alert */
+.alert-warning {
+  border-left-color: var(--color-warning);
+  background: var(--color-warning-soft);
+}
+
+/* ส่วนท้ายเว็บ */
+footer {
+  text-align: center;
+  padding: 28px;
+  color: var(--color-accent);
+  font-size: 14px;
+}
+
+/* ==========================================================
+   19. RESPONSIVE (จอเล็ก/มือถือ)
+   เมื่อหน้าจอกว้างไม่เกิน 800px ให้ปรับเลย์เอาต์เป็นแนวตั้ง
+   ========================================================== */
+
+@media (max-width: 800px) {
+  .hero {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+  .hero h1 {
+    font-size: 30px;
+    line-height: 38px;
+  }
+  .layout-side {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    grid-auto-flow: column;
+    overflow-x: auto;
+  }
+  .appt {
+    flex-wrap: wrap;
+  }
+  .appt-side {
+    justify-items: start;
+    grid-auto-flow: column;
+  }
+  .navbar {
+    padding: 10px 14px;
+  }
+  .nav-links {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+  .step span.lbl {
+    font-size: 12px;
+  }
+}
+
+/* ==========================================================
+   20. หน้าเจ้าของสัตว์เลี้ยง (Owner Pages)
+   ใช้กับ templates/petowner/ : รายชื่อ, แฟ้มเจ้าของ, ฟอร์ม, กล่องยืนยันลบ
+   ========================================================== */
+
+/* ----- 20.1 หัวหน้า: ปุ่มกลับ + breadcrumb + ชื่อหน้า + ปุ่มด้านขวา ----- */
+.page-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 22px 0 18px;
+  flex-wrap: wrap;
+}
+
+.page-bar .titles {
+  flex: 1;
+  min-width: 240px;
+}
+
+.page-bar h1 {
+  margin: 2px 0 0;
+  font-size: 26px;
+  line-height: 34px;
+}
+
+.page-bar .actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* breadcrumb: เจ้าของสัตว์เลี้ยง > สมชาย ใจดี */
+.crumbs {
+  font-size: 13px;
+  color: #6b6d76;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.crumbs a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+/* ปุ่ม "← กลับ" */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-navy);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.back-btn:hover {
+  background: var(--color-accent-soft);
+}
+
+/* ----- 20.2 กล่องหมวดข้อมูล (มีเลขหมวด) ----- */
+.sec {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 16px;
+}
+
+.sec-h {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sec-h h2 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--color-navy);
+  flex: 1;
+}
+
+/* วงกลมเลขหมวด 1, 2, 3 */
+.sec-h .no {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-navy);
+  font-size: 13px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+
+.sec-b {
+  padding: 16px 18px;
+}
+
+/* หมวดผู้ติดต่อฉุกเฉิน: โทนแดงให้เห็นชัด */
+.sec.danger .sec-h {
+  background: #fff6f4;
+  border-bottom-color: #f6d3cb;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.sec.danger .sec-h h2 {
+  color: #b23b2a;
+}
+
+.sec.danger .sec-h .no {
+  background: #fde2df;
+  color: #b23b2a;
+}
+
+/* รายการ "หัวข้อ : ค่า" เช่น เบอร์โทร : 081-234-5678 */
+.kv {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 10px 14px;
+  font-size: 15px;
+}
+
+.kv .k {
+  color: #6b6d76;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.kv .v {
+  font-weight: 500;
+}
+
+.muted-note {
+  font-size: 13px;
+  color: #8a8c94;
+}
+
+/* แบ่งหน้าเป็น 2 คอลัมน์ (หน้าแฟ้มเจ้าของ) */
+.layout-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+/* ----- 20.3 ตัวย่อชื่อในวงกลม (แทนรูปโปรไฟล์) ----- */
+.initials {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  flex: none;
+}
+
+.initials.lg {
+  width: 88px;
+  height: 88px;
+  font-size: 30px;
+  border: 4px solid var(--color-surface);
+  box-shadow: var(--shadow-md);
+}
+
+/* ปุ่มเล็กแบบแคปซูล เช่น ปุ่มโทร, เพิ่มสัตว์เลี้ยง */
+.btn-mini {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-muted);
+  background: var(--color-surface);
+  white-space: nowrap;
+}
+
+.btn-mini.pink {
+  background: var(--color-accent-soft);
+  border-color: transparent;
+  color: var(--color-accent);
+}
+
+.contact-strip {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* กล่องผู้ติดต่อฉุกเฉินแบบย่อ (ฝั่งขวาของหน้ารายชื่อ) */
+.emer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: #fff3f0;
+  border: 1px solid #f6c9bf;
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+}
+
+.emer b {
+  color: #b23b2a;
+}
+
+/* กล่องว่าง เช่น "ยังไม่มีสัตว์เลี้ยง" */
+.empty {
+  text-align: center;
+  padding: 24px;
+  color: #6b6d76;
+}
+
+/* ----- 20.4 หน้ารายชื่อ: รายชื่อซ้าย + ข้อมูลย่อขวา ----- */
+.split {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.list-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.list-panel .search-bar {
+  margin: 12px;
+}
+
+.list-panel .search-bar input {
+  border: none;
+  outline: none;
+  font: inherit;
+  width: 100%;
+  background: transparent;
+}
+
+/* แถวรายชื่อ 1 คน */
+.li {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+  border-top: 1px solid var(--color-border);
+  text-decoration: none;
+  color: inherit;
+}
+
+.li:hover {
+  background: #fffdf5;
+}
+
+/* แถวที่กำลังเลือกอยู่ */
+.li.sel {
+  background: var(--color-accent-soft);
+  box-shadow: inset 4px 0 0 var(--color-pink);
+}
+
+.li b {
+  color: var(--color-navy);
+  display: block;
+  font-size: 15px;
+}
+
+.li small {
+  color: #6b6d76;
+}
+
+/* ปุ่มเลขหน้า */
+.pager {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin: 12px;
+}
+
+/* ใช้ > เฉพาะลูกชั้นแรก ไม่ให้ไปโดนไอคอนลูกศรข้างใน */
+.pager > a,
+.pager > span {
+  min-width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0 10px;
+}
+
+.pager .active {
+  background: var(--gradient-brand);
+  color: #fff;
+  border-color: transparent;
+}
+
+/* ----- 20.5 ฟอร์มโทนสงบ (เพิ่ม/แก้ไขเจ้าของ) ----- */
+.form-calm .sec-h {
+  background: #fafaf7;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.form-calm .sec-h .no {
+  background: #eef0f4;
+  color: #45474f;
+}
+
+.form-calm .input,
+.form-calm .textarea {
+  border-color: #dcdcd6;
+  border-radius: 10px;
+}
+
+.form-calm .input:focus,
+.form-calm .textarea:focus {
+  border-color: var(--color-navy);
+  box-shadow: 0 0 0 3px rgba(23, 48, 107, 0.12);
+}
+
+/* ช่องที่กรอกผิด */
+.form-calm .input.is-invalid {
+  border-color: #d9776a;
+}
+
+/* ฟอร์ม 2 คอลัมน์, .full = กินเต็มแถว */
+.fields-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 16px;
+  align-items: start;
+}
+
+.fields-2 .full {
+  grid-column: 1 / -1;
+}
+
+.req {
+  color: #b23b2a;
+}
+
+.hint {
+  color: #8a8c94;
+  font-size: 13px;
+}
+
+.err {
+  color: #b23b2a;
+  font-size: 13px;
+}
+
+/* ข้อมูลที่แก้ไม่ได้ในหน้าแก้ไข (เลขแฟ้ม, วันลงทะเบียน) */
+.readonly-box {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  background: #fafaf7;
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #5b5d66;
+  margin-bottom: 16px;
+}
+
+.readonly-box b {
+  color: var(--color-navy);
+}
+
+/* แถบปุ่มท้ายฟอร์ม */
+.action-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--color-border);
+  padding: 14px 0;
+}
+
+/* ปุ่มหลักสีกรมท่า / ปุ่มรองสีขาว (ใช้ในฟอร์มและกล่องยืนยัน) */
+.btn-solid,
+.btn-ghost,
+.btn-danger {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-solid {
+  background: var(--color-navy);
+  color: #fff;
+  border: none;
+}
+
+.btn-ghost {
+  background: var(--color-surface);
+  color: #2f3138;
+  border: 1px solid #dcdcd6;
+}
+
+.btn-danger {
+  background: #c0392b;
+  color: #fff;
+  border: none;
+}
+
+/* ----- 20.6 กล่องยืนยันการลบ (<dialog>) ----- */
+.confirm-dialog {
+  width: 400px;
+  max-width: calc(100% - 32px);
+  border: none;
+  border-radius: 18px;
+  padding: 0;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+}
+
+/* พื้นหลังมืดตอนกล่องเปิด */
+.confirm-dialog::backdrop {
+  background: rgba(23, 30, 48, 0.45);
+}
+
+.confirm-dialog .body {
+  padding: 26px 24px 18px;
+  text-align: center;
+}
+
+.confirm-dialog .icon-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #fde2df;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 12px;
+}
+
+.confirm-dialog h2 {
+  margin: 0 0 6px;
+  color: #2f3138;
+  font-size: 20px;
+}
+
+.confirm-dialog p {
+  margin: 0;
+  color: #5b5d66;
+}
+
+/* พรีวิวเจ้าของที่จะลบ */
+.who-box {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  text-align: left;
+  background: #fafaf7;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 16px;
+}
+
+.confirm-dialog .footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 14px 24px;
+  background: #fafaf7;
+  border-top: 1px solid var(--color-border);
+}
+
+/* ----- 20.7 จอเล็ก: เรียงเป็นคอลัมน์เดียว ----- */
+@media (max-width: 800px) {
+  .split,
+  .layout-2,
+  .fields-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================
+   21. ส่วนเสริมหน้าเจ้าของ + หน้าแรก (Home / About)
+   ========================================================== */
+
+/* หัวการ์ดแฟ้มเจ้าของ: รูป | ชื่อ+ติดต่อ | ปุ่มนัดหมาย */
+.owner-head {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.owner-head .info {
+  flex: 1;
+  min-width: 220px;
+}
+
+.owner-head h2 {
+  margin: 0 0 8px;
+}
+
+/* ปุ่ม "ลบ" แบบตัวอักษรสีแดง */
+.delete-link {
+  color: #b23b2a;
+}
+
+/* คำอธิบายใต้ช่องค้นหาเบอร์ (หน้าค้นหาของลูกค้า) */
+.lookup-help {
+  padding: 4px 16px 16px;
+}
+
+/* "ทั้งหมด 24 คน · เรียงตามชื่อ" ใต้ช่องค้นหา */
+.list-count {
+  font-size: 13px;
+  color: #6b6d76;
+  margin: 0 16px 10px;
+}
+
+/* ระยะห่างด้านบนของหัวข้อหมวดในกล่องขวา */
+.gap-top {
+  margin-top: 16px;
+}
+
+/* ไอคอนในข้อความ error ใช้สีแดงตามตัวอักษร */
+.err .icon {
+  color: inherit;
+}
+
+/* กล่องแจ้งเบอร์ซ้ำ + ลิงก์ "เปิดแฟ้มเดิม" */
+.dup-box {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: #f1f5fb;
+  border: 1px solid #dbe4f1;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 14px;
+}
+
+.dup-box a {
+  margin-left: auto;
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+/* การ์ดทางเข้าหน้าแรกเป็นลิงก์ทั้งใบ */
+.home-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.home-link:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* ไอคอนแมว + สุนัขในหน้าแรก: วางข้างกันบนก้อนสีชมพู */
+.hero-icons {
+  position: relative;
+  display: flex;
+  gap: 2px;
+}
+
+.hero-icons .icon {
+  width: 104px;
+  height: 104px;
+}
+
+@media (max-width: 800px) {
+  .hero-icons .icon {
+    width: 96px;
+    height: 96px;
+  }
+}
+
+/* กล่อง About Us: ข้อความซ้าย / ข้อมูลคลินิกขวา */
+.about {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 24px;
+  align-items: center;
+}
+
+@media (max-width: 800px) {
+  .about {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* หน้ากรอกรหัสเจ้าหน้าที่: กล่องกลางจอ */
+.staff-lock {
+  max-width: 420px;
+  margin: 48px auto;
+  text-align: center;
+  display: grid;
+  gap: 12px;
+}
+
+.staff-lock form {
+  display: grid;
+  gap: 12px;
+}
+
+.staff-lock .input {
+  text-align: center;
+  font-size: 22px;
+  letter-spacing: 6px;
+}
+
+/* ==========================================================
+   22. SOFT CLICK (ปุ่มและลิงก์ที่กดได้ทั้งเว็บ)
+   ========================================================== */
+
+/* การเคลื่อนไหวนุ่ม ๆ ของทุกอย่างที่กดได้ */
+button,
+[class*="btn"],
+.pager > a,
+.nav-links a,
+.home-link {
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    filter 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+/* ชี้เมาส์ที่ปุ่ม: ลอยขึ้น 1px (ปุ่มแบบข้อความไม่ลอย) */
+/* (:not รวมเงื่อนไขไว้ในวงเล็บเดียว ให้น้ำหนัก selector เท่ากับตอนกดค้าง ตอนกดจึงชนะ) */
+:is(button, [class*="btn"], .pager > a):hover:not(:disabled, .btn-text) {
+  transform: translateY(-1px);
+}
+
+/* กดค้าง: ยุบลงเหลือ 97% สีเข้มขึ้นนิดหนึ่ง เงาจางลง */
+:is(button, [class*="btn"], .pager > a):active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+  filter: brightness(0.96);
+  box-shadow: var(--shadow-sm);
+  transition-duration: 0.08s;
+}
+
+/* เมนู navbar: ไม่ลอย แต่กดแล้วยุบเล็กน้อย */
+.nav-links a:active {
+  transform: scale(0.96);
+}
+
+/* การ์ดทางเข้าหน้าแรก: ชี้แล้วลอยขึ้น กดแล้วยุบ */
+.home-link:hover {
+  transform: translateY(-3px);
+}
+
+.home-link:active {
+  transform: translateY(0) scale(0.99);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ผู้ใช้ที่ตั้งค่าเครื่องให้ลดการเคลื่อนไหว: ไม่ขยับ */
+@media (prefers-reduced-motion: reduce) {
+  button,
+  [class*="btn"],
+  .pager > a,
+  .nav-links a,
+  .home-link {
+    transition: none;
+  }
+
+  :is(button, [class*="btn"], .pager > a, .nav-links a, .home-link):is(:hover, :active) {
+    transform: none;
+  }
+}
+
+/* ----- รายการสัตว์เลี้ยงในแฟ้มเจ้าของ (fragments/owner-pets.html) ----- */
+.owner-pets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+/* แถวสัตว์แต่ละตัว: กดทั้งแถวไปหน้า My Pets */
+.owner-pet {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: inherit;
+  text-decoration: none;
+}
+
+.owner-pet:hover {
+  border-color: var(--color-secondary);
+}
+
+.owner-pet > .icon:last-child {
+  margin-left: auto;
+  color: var(--color-muted);
+}
+
+/* วงไอคอนสัตว์ สีตามประเภท: สุนัขส้มน้ำตาล แมวฟ้า อื่นๆ เขียว (เหมือนหน้า My Pets) */
+.owner-pet-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+
+.owner-pet-icon.dog { background: #fdf1e4; }
+.owner-pet-icon.dog .icon { color: #c9814a; }
+.owner-pet-icon.cat { background: #eaf0fb; }
+.owner-pet-icon.cat .icon { color: #5b7bd5; }
+.owner-pet-icon.other { background: #eef6ea; }
+.owner-pet-icon.other .icon { color: #5f9a57; }
+
+.owner-pet-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.owner-pet-text b {
+  color: var(--color-navy);
+}
+
+.owner-pet-text small {
+  color: #6b6d76;
+  font-size: 13px;
+}
