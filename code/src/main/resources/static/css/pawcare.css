@@ -31,6 +31,17 @@
   --shadow-md: 0 8px 24px rgba(199, 121, 152, 0.18); /* เงาชมพู (ปุ่ม การ์ดที่เลือก) */
 }
 
+/* ธีมหน้าเจ้าหน้าที่ (<body class="theme-staff">): ปุ่มและสีเน้นในเนื้อหาเป็นสีน้ำเงินคราม
+   ให้รู้ว่าอยู่ในส่วนเจ้าหน้าที่ ส่วน navbar ยังเป็นสีชมพูเหมือนทุกหน้า */
+.theme-staff main {
+  --color-pink: #4a63c9; /* น้ำเงินคราม: ปุ่มหลัก */
+  --color-accent: #3b4fa8; /* น้ำเงินเข้ม: ลิงก์ ไอคอนเน้น */
+  --color-accent-soft: #e4e9fb; /* น้ำเงินอ่อนมาก: พื้นรองไอคอน แถวที่เลือก */
+  --color-secondary: #a9b6e8; /* น้ำเงินอ่อน: ขอบปุ่มรอง */
+  --shadow-md: 0 8px 24px rgba(74, 99, 201, 0.18);
+  --gradient-brand: linear-gradient(135deg, var(--color-pink), var(--color-accent));
+}
+
 /* ==========================================================
    2. BASE (พื้นฐานทั้งหน้า)
    รีเซ็ตค่าเริ่มต้นของเบราว์เซอร์ ฟอนต์ พื้นหลัง และลิงก์
@@ -69,6 +80,12 @@ body {
   display: none !important;
 }
 
+/* ตัวหนาใช้น้ำหนัก 600 ทั้งเว็บ (ฟอนต์ Prompt หนา 700 ขึ้นไปอ่านภาษาไทยยาก) */
+b,
+strong {
+  font-weight: 600;
+}
+
 /* สีลิงก์ทั่วไป */
 a {
   color: var(--color-accent);
@@ -83,7 +100,7 @@ a {
 h1 {
   font-size: 32px;
   line-height: 40px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-navy);
   margin: 0 0 8px;
 }
@@ -328,7 +345,7 @@ button:disabled {
   align-items: center;
   gap: 10px;
   color: var(--color-navy);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 20px;
   line-height: 20px;
 }
@@ -1189,7 +1206,7 @@ footer {
   background: var(--color-primary);
   color: var(--color-navy);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   display: grid;
   place-items: center;
 }
@@ -1253,7 +1270,7 @@ footer {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-accent);
   background: var(--color-accent-soft);
   flex: none;

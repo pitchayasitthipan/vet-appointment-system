@@ -89,7 +89,7 @@ button {
 .brand-text strong {
     color: var(--pet-navy);
     font-size: 17px;
-    font-weight: 800;
+    font-weight: 600;
 }
 
 .brand-text small {
@@ -148,7 +148,7 @@ button {
     background: var(--pet-pink);
     color: white;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
     box-shadow: 0 4px 10px rgba(227, 107, 154, 0.17);
 }
 
@@ -203,7 +203,7 @@ button {
     margin-bottom: 10px;
     color: var(--pet-pink);
     font-size: 11px;
-    font-weight: 800;
+    font-weight: 600;
     letter-spacing: 1.2px;
 }
 
@@ -211,7 +211,7 @@ button {
     margin: 0 0 10px;
     color: var(--pet-navy);
     font-size: clamp(27px, 3vw, 36px);
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1.35;
 }
 
@@ -261,7 +261,7 @@ button {
     margin: 0 0 5px;
     color: var(--pet-navy);
     font-size: 23px;
-    font-weight: 800;
+    font-weight: 600;
 }
 
 .pets-section-heading p {
@@ -282,7 +282,7 @@ button {
     border: 1px solid transparent;
     border-radius: 30px;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
     transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
@@ -446,7 +446,7 @@ button {
     margin: 0 0 5px;
     color: var(--pet-navy);
     font-size: 17px;
-    font-weight: 800;
+    font-weight: 600;
     overflow-wrap: anywhere;
 }
 
@@ -466,7 +466,7 @@ button {
     background: #fff0f5;
     color: #c45c86;
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .pet-card-details {
@@ -516,7 +516,7 @@ button {
     background: #fff4f8;
     color: #bf5a83;
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .pet-card-actions button:hover {
@@ -741,7 +741,7 @@ button {
 .form-field label {
     color: var(--pet-text);
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .form-field input,
@@ -1004,7 +1004,7 @@ button {
     background: #f7f1e8;
     color: var(--pet-muted);
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .pet-card-details {
@@ -1064,7 +1064,7 @@ button {
     background: var(--pet-navy);
     color: #fff;
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 0.5px;
 }
 
@@ -1218,7 +1218,7 @@ button {
     background: rgba(255, 255, 255, 0.85);
     color: var(--pet-muted);
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .pet-avatar {
