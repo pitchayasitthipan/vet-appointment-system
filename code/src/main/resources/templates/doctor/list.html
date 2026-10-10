@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>รายชื่อสัตวแพทย์และตารางเวร | PawCare Pet Clinic</title>
+  <meta name="description" content="รายชื่อสัตวแพทย์และตารางเวรของคลินิก PawCare">
+  <link rel="stylesheet" th:href="@{/css/pawcare.css}">
+  <link rel="stylesheet" th:href="@{/css/icons.css}">
+  <link rel="stylesheet" th:href="@{/css/doctors.css}">
+</head>
+<!-- data-staff: เจ้าหน้าที่ (ใส่รหัสแล้ว) -> doctors.js แสดงปุ่มแก้ไข/ลบ -->
+<body th:attr="data-staff=${isStaff}">
+
+  <!-- แถบเมนูกลาง (เหมือนทุกหน้า) -->
+  <nav th:replace="~{fragments/layout :: navbar('doctors')}"></nav>
+
+  <!-- ==================== HERO BANNER ==================== -->
+  <section class="hero-section">
+    <div class="hero-banner">
+      <div class="hero-content">
+        <div class="badge-tag">
+          <span class="icon i-paw-print icon-accent icon-sm"></span> Our Veterinarians
+        </div>
+        <h1 class="page-title">รายชื่อสัตวแพทย์</h1>
+        <p>ทีมสัตวแพทย์ผู้เชี่ยวชาญ ดูแลด้วยความใส่ใจ เพื่อสุขภาพที่ดีของสัตว์เลี้ยงที่คุณรัก</p>
+      </div>
+
+      <div class="hero-image-wrap">
+        <div class="hero-image-circle"></div>
+        <img th:src="@{/images/hero-vet.jpg}" alt="สัตวแพทย์กับสัตว์เลี้ยง" class="hero-img">
+        <span class="floating-paw paw-1"><span class="icon i-paw-print icon-accent"></span></span>
+        <span class="floating-paw paw-2"><span class="icon i-heart icon-pink"></span></span>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon-circle"><span class="icon i-stethoscope icon-accent"></span></div>
+          <p>ทีมสัตวแพทย์<br>ผู้เชี่ยวชาญ</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-circle"><span class="icon i-calendar-blank icon-accent"></span></div>
+          <p>ตารางเวรชัดเจน<br>ตรวจสอบได้</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-circle"><span class="icon i-heart icon-accent"></span></div>
+          <p>จองนัดหมายง่าย<br>เลือกแพทย์ได้</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-circle"><span class="icon i-shield-check icon-accent"></span></div>
+          <p>มั่นใจ<br>ในคุณภาพการรักษา</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="main-container">
+
+    <!-- LEFT COLUMN: ค้นหา + การ์ดสัตวแพทย์ -->
+    <section class="left-col">
+
+      <!-- ค้นหาและกรอง (กรองในหน้า ไม่ต้องโหลดใหม่) -->
+      <div class="search-toolbar">
+        <div class="search-input-wrap">
+          <span class="icon i-magnifying-glass icon-accent"></span>
+          <input type="text" id="searchInput" placeholder="ค้นหาชื่อสัตวแพทย์ หรือความเชี่ยวชาญ..." autocomplete="off">
+        </div>
+        <!-- ตัวเลือกความเชี่ยวชาญสร้างจากข้อมูลจริงใน doctors.js -->
+        <select id="specFilter" class="filter-select">
+          <option value="">ทุกความเชี่ยวชาญ</option>
+        </select>
+        <select id="dayFilter" class="filter-select">
+          <option value="">ทุกวัน</option>
+          <option value="จันทร์">จันทร์</option>
+          <option value="อังคาร">อังคาร</option>
+          <option value="พุธ">พุธ</option>
+          <option value="พฤหัสบดี">พฤหัสบดี</option>
+          <option value="ศุกร์">ศุกร์</option>
+          <option value="เสาร์">เสาร์</option>
+          <option value="อาทิตย์">อาทิตย์</option>
+        </select>
+      </div>
+
+      <div class="action-bar-top">
+        <span class="doctor-count" id="doctorCount"
+              th:text="'พบสัตวแพทย์ทั้งหมด ' + ${#lists.size(doctors)} + ' ท่าน'">พบสัตวแพทย์ทั้งหมด 3 ท่าน</span>
+        <!-- เพิ่มสัตวแพทย์: เฉพาะเจ้าหน้าที่ -->
+        <button th:if="${isStaff}" class="btn-add-doctor" type="button" onclick="openDoctorForm()">
+          <span class="icon i-plus icon-sm"></span> เพิ่มข้อมูลสัตวแพทย์
+        </button>
+      </div>
+
+      <!-- ยังไม่มีสัตวแพทย์ในระบบ -->
+      <div th:if="${#lists.isEmpty(doctors)}" class="doctor-empty">
+        <span class="icon i-stethoscope icon-accent icon-lg"></span>
+        <h4>ยังไม่มีข้อมูลสัตวแพทย์</h4>
+        <p th:if="${isStaff}">กดปุ่ม "เพิ่มข้อมูลสัตวแพทย์" เพื่อเริ่มต้น</p>
+        <p th:unless="${isStaff}">กรุณาติดต่อคลินิกเพื่อสอบถามตารางแพทย์</p>
+      </div>
+
+      <!-- การ์ดสัตวแพทย์ (ข้อมูลจริงจากฐานข้อมูล)
+           data-* ให้ doctors.js ใช้กรอง คำนวณสถานะวันนี้ และสร้างตารางเวรฝั่งขวา -->
+      <div class="doctor-cards-list" id="doctorCardsContainer">
+        <div th:each="doc : ${doctors}" class="doctor-card"
+             th:attr="data-id=${doc.doctorId},
+                      data-first-name=${doc.firstName},
+                      data-last-name=${doc.lastName},
+                      data-spec=${doc.specialization},
+                      data-phone=${doc.phone},
+                      data-email=${doc.email},
+                      data-schedule=${doc.workSchedule}">
+
+     <div class="doc-avatar-wrap"
+     th:with="photo=${doc.firstName == 'นันทิดา' ? 'dr-nichapa.jpg' :
+                     doc.firstName == 'กิตติศักดิ์' ? 'dr-kittiphat.jpg' :
+                     doc.firstName == 'วรรณภา' ? 'dr-ohanong.jpg' :
+                     doc.firstName == 'ธนวัฒน์' ? 'dr-thanawat.jpg' :
+                     doc.firstName == 'ปรียาภรณ์' ? 'dr-preeyaporn.jpg' : null}">
+
+  <img th:if="${photo != null}"
+       th:src="@{/images/{filename}(filename=${photo})}"
+       th:alt="${'รูปสัตวแพทย์ ' + doc.firstName + ' ' + doc.lastName}"
+       class="doc-avatar"
+       loading="lazy"
+       onerror="this.style.display='none'; this.nextElementSibling.hidden=false;">
+
+  <span class="doc-avatar doc-initial"
+        th:hidden="${photo != null}"
+        th:text="${doc.firstName != null and !doc.firstName.isEmpty()
+                  ? doc.firstName.substring(0, 2) : '?'}">?</span>
+
+</div>
+
+          <div class="doc-details">
+            <div class="doc-header-row">
+              <h3 class="doc-name" th:text="${doc.firstName + ' ' + doc.lastName}">นันทิดา รักษ์สัตว์</h3>
+            </div>
+
+            <!-- ความเชี่ยวชาญ: แยกเป็นป้ายด้วย , หรือ / ใน doctors.js -->
+            <div class="doc-tags" th:text="${doc.specialization} ?: 'สัตวแพทย์ทั่วไป'">อายุรกรรมทั่วไป</div>
+
+            <div class="doc-meta-row">
+              <span class="meta-item doc-room" hidden><span class="icon i-hospital icon-accent icon-sm"></span> <span></span></span>
+              <span class="meta-item"><span class="icon i-clock icon-accent icon-sm"></span>
+                <span th:text="${doc.workSchedule} ?: 'ยังไม่ระบุตารางเวร'">จันทร์ - ศุกร์: 09:00 - 17:00</span></span>
+              <span class="meta-item"><span class="icon i-phone icon-accent icon-sm"></span>
+                <!-- ข้อมูลเก่าอาจเก็บเบอร์แบบมีขีด ตัดขีดก่อนจัดรูปแบบ -->
+                <span th:replace="~{fragments/layout :: phone(${#strings.replace(doc.phone, '-', '')})}"></span></span>
+              <span class="meta-item"><span class="icon i-envelope icon-accent icon-sm"></span>
+                <span th:text="${doc.email}">doctor@pawcare.com</span></span>
+            </div>
+          </div>
+
+          <div class="doc-card-right">
+            <div>
+              <!-- สถานะวันนี้คำนวณจากตารางเวรใน doctors.js -->
+              <div class="status-badge off">
+                <span class="status-dot"></span>
+                <span class="status-text">หยุดวันนี้</span>
+              </div>
+              <div class="doc-time-text">-</div>
+            </div>
+
+            <!-- จองนัด: ไปหน้าจองนัดหมายจริง พร้อมเลือกหมอคนนี้ไว้ -->
+            <a th:href="@{/appointments/new(doctorId=${doc.doctorId})}" class="btn-schedule btn-book-doc">
+              <span class="icon i-calendar-plus icon-sm"></span> จองนัด
+            </a>
+            <button class="btn-schedule btn-outline" type="button" th:attr="onclick='viewDoctorSchedule(' + ${doc.doctorId} + ')'">
+              <span class="icon i-calendar-blank icon-sm"></span> ดูตารางเวร
+            </button>
+
+            <!-- แก้ไข/ลบ: เฉพาะเจ้าหน้าที่ -->
+            <div th:if="${isStaff}" class="doc-staff-actions">
+              <button class="btn-icon" type="button" title="แก้ไข"
+                      th:attr="onclick='openDoctorForm(' + ${doc.doctorId} + ')'">
+                <span class="icon i-pencil-simple icon-sm"></span>
+              </button>
+              <button class="btn-icon danger" type="button" title="ลบ"
+                      th:attr="onclick='deleteDoctor(' + ${doc.doctorId} + ')'">
+                <span class="icon i-trash icon-sm"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- กรองแล้วไม่เจอ -->
+      <div id="noMatch" class="doctor-empty" hidden>
+        <span class="icon i-magnifying-glass icon-accent icon-lg"></span>
+        <h4>ไม่พบข้อมูลสัตวแพทย์ที่ค้นหา</h4>
+        <p>กรุณาลองเปลี่ยนคำค้นหาหรือเลือกตัวกรองใหม่</p>
+      </div>
+    </section>
+
+    <!-- RIGHT COLUMN: ตารางเวร + ข้อมูลคลินิก -->
+    <aside class="right-col">
+
+      <div class="schedule-panel">
+        <div class="tab-switch-row">
+          <button class="btn-tab active" id="tabSchedule" type="button" onclick="switchScheduleView('daily')">
+            <span class="icon i-calendar-blank icon-sm"></span> ตารางเวรรายวัน
+          </button>
+          <button class="btn-tab" id="tabList" type="button" onclick="switchScheduleView('weekly')">
+            <span class="icon i-list icon-sm"></span> ภาพรวมสัปดาห์
+          </button>
+        </div>
+
+        <!-- View 1: รายวัน -->
+        <div id="dailyScheduleView">
+          <div class="date-nav-bar">
+            <div class="date-nav-controls">
+              <button class="btn-arrow" type="button" title="สัปดาห์ก่อนหน้า" onclick="changeWeek(-1)">
+                <span class="icon i-caret-left icon-sm"></span></button>
+              <span class="current-date-range" id="currentDateRange">-</span>
+              <button class="btn-arrow" type="button" title="สัปดาห์ถัดไป" onclick="changeWeek(1)">
+                <span class="icon i-caret-right icon-sm"></span></button>
+            </div>
+            <button class="btn-today" type="button" onclick="goToCurrentWeekAndToday()">วันนี้</button>
+          </div>
+          <div class="days-strip" id="daysStrip"></div>
+          <div class="time-slots-list" id="timeSlotsContainer"></div>
+        </div>
+
+        <!-- View 2: ภาพรวมทั้งสัปดาห์ -->
+        <div id="weeklyScheduleView" class="weekly-schedule-container" hidden>
+          <div class="weekly-table-header">
+            <h4 class="weekly-table-title">ภาพรวมตารางเวรประจำสัปดาห์</h4>
+            <span class="weekly-table-subtitle">วันปฏิบัติงานของทีมสัตวแพทย์</span>
+          </div>
+          <div class="weekly-table-wrap">
+            <table class="weekly-matrix-table">
+              <thead>
+                <tr>
+                  <th>สัตวแพทย์</th>
+                  <th>จ.</th><th>อ.</th><th>พ.</th><th>พฤ.</th><th>ศ.</th><th>ส.</th><th>อา.</th>
+                </tr>
+              </thead>
+              <tbody id="weeklyTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ข้อมูลคลินิก: มาจาก ClinicConfigService (Singleton Pattern) -->
+      <div class="clinic-info-card">
+        <div>
+          <h3 class="info-box-title">
+            <span class="icon i-clock icon-accent icon-sm"></span> ช่วงเวลาการให้บริการ
+          </h3>
+          <ul class="opening-hours-list">
+            <li><span class="hours-day">วันจันทร์ - ศุกร์</span>
+                <span class="hours-time" th:text="${clinic.openingHoursWeekdays}">09:00 - 20:00 น.</span></li>
+            <li><span class="hours-day">วันเสาร์</span>
+                <span class="hours-time" th:text="${clinic.openingHoursSaturday}">09:00 - 18:00 น.</span></li>
+            <li><span class="hours-day">วันอาทิตย์</span>
+                <span class="hours-time" th:text="${clinic.openingHoursSunday}">09:00 - 17:00 น.</span></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="info-box-title">
+            <span class="icon i-paw-print icon-accent icon-sm"></span> อัตราค่าบริการเริ่มต้น
+          </h3>
+          <ul class="opening-hours-list">
+            <li><span class="hours-day">ตรวจรักษาทั่วไป</span>
+                <span class="hours-time" th:text="${#numbers.formatDecimal(clinic.baseConsultationFee, 1, 'COMMA', 0, 'POINT')} + ' บาท'">300 บาท</span></li>
+            <li><span class="hours-day">ฉีดวัคซีน</span>
+                <span class="hours-time" th:text="${#numbers.formatDecimal(clinic.vaccineServiceFee, 1, 'COMMA', 0, 'POINT')} + ' บาท'">150 บาท</span></li>
+            <li><span class="hours-day">ผ่าตัด</span>
+                <span class="hours-time" th:text="${#numbers.formatDecimal(clinic.surgeryServiceFee, 1, 'COMMA', 0, 'POINT')} + ' บาท'">1,500 บาท</span></li>
+          </ul>
+          <ul class="notes-list">
+            <li>ตารางเวรอาจมีการเปลี่ยนแปลง กรุณาจองคิวล่วงหน้า</li>
+          </ul>
+          <a class="btn-emergency" th:href="'tel:' + ${#strings.replace(clinic.contactPhone, '-', '')}">
+            <span class="icon i-phone icon-sm"></span> <span th:text="${clinic.contactPhone}">02-123-4567</span>
+          </a>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-quote">
+        <span class="icon i-paw-print icon-accent icon-sm"></span> Healthy Pets • Happy Lives
+      </div>
+      <div class="footer-brand">
+        <span class="icon i-paw-print icon-pink icon-sm"></span> PawCare
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== MODAL: ดูตารางเวร ==================== -->
+  <div class="modal-overlay" id="scheduleModal">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalDocName">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          <span class="icon i-calendar-blank icon-accent"></span> ข้อมูลตารางเวรสัตวแพทย์
+        </h2>
+        <button class="modal-close" type="button" onclick="closeModal('scheduleModal')" aria-label="ปิด">&times;</button>
+      </div>
+      <div class="modal-doctor-profile">
+        <h3 id="modalDocName" class="modal-doc-name">-</h3>
+        <p id="modalDocSpec" class="modal-doc-spec">-</p>
+        <div class="modal-doc-details">
+          <div class="modal-doc-field">
+            <span class="icon i-clock icon-accent icon-sm"></span> ตารางเวร: <span id="modalDocSchedule" class="modal-doc-value">-</span>
+          </div>
+          <div class="modal-doc-field">
+            <span class="icon i-phone icon-accent icon-sm"></span> เบอร์โทรศัพท์: <span id="modalDocPhone" class="modal-doc-value">-</span>
+          </div>
+          <div class="modal-doc-field">
+            <span class="icon i-envelope icon-accent icon-sm"></span> อีเมล: <span id="modalDocEmail" class="modal-doc-value">-</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-secondary" type="button" onclick="closeModal('scheduleModal')">ปิด</button>
+        <a class="btn-primary" id="modalBookLink" th:href="@{/appointments/new}">จองนัดหมายกับแพทย์ท่านนี้</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: เพิ่ม/แก้ไขสัตวแพทย์ (เฉพาะเจ้าหน้าที่) ==================== -->
+  <div th:if="${isStaff}" class="modal-overlay" id="doctorFormModal">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="doctorFormTitle">
+      <div class="modal-header">
+        <h2 class="modal-title" id="doctorFormTitle">
+          <span class="icon i-plus icon-accent"></span> <span>เพิ่มข้อมูลสัตวแพทย์ใหม่</span>
+        </h2>
+        <button class="modal-close" type="button" onclick="closeModal('doctorFormModal')" aria-label="ปิด">&times;</button>
+      </div>
+      <form id="doctorForm" novalidate>
+        <input type="hidden" name="doctorId">
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label" for="docFirstName">ชื่อ *</label>
+            <input type="text" id="docFirstName" name="firstName" class="form-input" maxlength="100" placeholder="เช่น นันทิดา" required>
+            <small class="field-error" data-for="firstName"></small>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="docLastName">นามสกุล *</label>
+            <input type="text" id="docLastName" name="lastName" class="form-input" maxlength="100" placeholder="เช่น รักษ์สัตว์" required>
+            <small class="field-error" data-for="lastName"></small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="docSpec">ความเชี่ยวชาญ</label>
+          <input type="text" id="docSpec" name="specialization" class="form-input" maxlength="100" placeholder="เช่น อายุรกรรม, โรคผิวหนัง">
+          <small class="field-error" data-for="specialization"></small>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label" for="docPhone">เบอร์โทรศัพท์ *</label>
+            <input type="tel" id="docPhone" name="phone" class="form-input" placeholder="0812345678" required>
+            <small class="field-error" data-for="phone"></small>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="docEmail">อีเมล *</label>
+            <input type="email" id="docEmail" name="email" class="form-input" placeholder="doctor@pawcare.com" required>
+            <small class="field-error" data-for="email"></small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="docSchedule">ตารางเวร</label>
+          <input type="text" id="docSchedule" name="workSchedule" class="form-input"
+                 placeholder="เช่น จันทร์ - ศุกร์: 09:00 - 17:00 น. (ห้องตรวจ 1)">
+          <small class="muted-note">รูปแบบ "วันเริ่ม - วันสุดท้าย: เวลา (ห้อง)" เพื่อให้ตารางเวรคำนวณวันออกตรวจได้</small>
+        </div>
+        <p class="form-message" id="doctorFormMessage" role="alert"></p>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" onclick="closeModal('doctorFormModal')">ยกเลิก</button>
+          <button type="submit" class="btn-primary" id="doctorFormSubmit">บันทึกข้อมูล</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script th:src="@{/js/doctors.js}"></script>
+</body>
+</html>

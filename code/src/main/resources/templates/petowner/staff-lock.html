@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>สำหรับเจ้าหน้าที่ - PawCare</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/pawcare.css}">
+  <link rel="stylesheet" th:href="@{/css/icons.css}">
+</head>
+<body class="theme-staff">
+<nav th:replace="~{fragments/layout :: navbar('staff')}"></nav>
+
+<main class="container">
+  <!-- หน้ากรอกรหัสเจ้าหน้าที่ ก่อนเข้าหน้ารายชื่อเจ้าของทั้งหมด -->
+  <div class="card staff-lock">
+    <span class="icon-bubble"><span class="icon i-lock icon-lg icon-accent"></span></span>
+    <h1>สำหรับเจ้าหน้าที่</h1>
+    <p class="muted-note">กรอกรหัสสำหรับเจ้าหน้าที่ 8 หลัก เพื่อจัดการรายชื่อเจ้าของสัตว์เลี้ยงทั้งหมด</p>
+
+    <div th:if="${errorMessage}" class="alert alert-warning" th:text="${errorMessage}"></div>
+
+    <form method="post" th:action="@{/owners/staff/unlock}">
+      <input type="password" name="passcode" class="input" inputmode="numeric" maxlength="8"
+             placeholder="••••••••" required autofocus>
+      <button type="submit" class="btn-primary"><span class="icon i-sign-in"></span> เข้าสู่หน้าเจ้าหน้าที่</button>
+    </form>
+
+    <a th:href="@{/}" class="btn-text">ไม่ใช่เจ้าหน้าที่? กลับหน้าแรก</a>
+  </div>
+</main>
+</body>
+</html>

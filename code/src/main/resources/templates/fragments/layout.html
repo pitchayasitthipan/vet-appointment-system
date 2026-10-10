@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="th">
+<body>
+
+<!-- 1. แถบเมนูด้านบน: active = ชื่อเมนูที่เปิดอยู่ (home, owners, pets, appointments, doctors, medical-records, staff) -->
+<nav th:fragment="navbar(active)" class="navbar">
+  <a th:href="@{/}" class="brand">
+    <span class="brand-logo"><span class="icon i-paw-print icon-white"></span></span>
+    <span>PawCare<small>Pet Clinic &amp; Vaccination</small></span>
+  </a>
+  <div class="nav-links">
+    <a th:href="@{/}" th:classappend="${active == 'home'} ? 'active'">Home</a>
+    <a th:href="@{/owners}" th:classappend="${active == 'owners'} ? 'active'">Owners</a>
+    <a th:href="@{/pets}" th:classappend="${active == 'pets'} ? 'active'">My Pets</a>
+    <a th:href="@{/appointments}" th:classappend="${active == 'appointments'} ? 'active'">Appointments</a>
+    <a th:href="@{/doctors}" th:classappend="${active == 'doctors'} ? 'active'">Veterinarians</a>
+    <!-- ประวัติการรักษาเป็นข้อมูลอ่อนไหว แสดงเมนูเฉพาะเจ้าหน้าที่ (isStaff มาจาก WebModelAdvice) -->
+    <a th:if="${isStaff}" th:href="@{/medical-records}" th:classappend="${active == 'medical-records'} ? 'active'">Medical Records</a>
+    <!-- หน้าจัดการรายชื่อเจ้าของทั้งหมด สำหรับเจ้าหน้าที่คลินิก (ต้องใส่รหัส) -->
+    <a th:href="@{/owners/staff}" th:classappend="${active == 'staff'} ? 'active'">Staff Only</a>
+  </div>
+</nav>
+
+<!-- 2. ตัวย่อชื่อในวงกลม: ชื่อไทยใช้ 2 ตัวแรก (พิชยา -> พิช), ชื่ออังกฤษใช้ตัวแรกของชื่อ+นามสกุล (John Doe -> JD) -->
+<span th:fragment="initials(owner)" th:remove="tag"
+      th:text="${owner.firstName.matches('[A-Za-z].*')}
+               ? ${(owner.firstName.substring(0, 1) + owner.lastName.substring(0, 1)).toUpperCase()}
+               : ${owner.firstName.length() > 1 ? owner.firstName.substring(0, 2) : owner.firstName}">พิช</span>
+
+<!-- 3. เบอร์โทรแบบมีขีด: 0812345678 -> 081-234-5678, 021234567 -> 02-123-4567 -->
+<span th:fragment="phone(p)" th:remove="tag"
+      th:text="${p == null} ? '-' : (${p.length() == 10}
+               ? ${p.substring(0, 3) + '-' + p.substring(3, 6) + '-' + p.substring(6)}
+               : ${p.substring(0, 2) + '-' + p.substring(2, 5) + '-' + p.substring(5)})">081-234-5678</span>
+
+<!-- 4. วันที่แบบไทย: 2026-10-12 -> 12 ต.ค. 2569 (ปี พ.ศ. = ค.ศ. + 543) -->
+<span th:fragment="thaiDate(d)" th:remove="tag"
+      th:text="${#temporals.day(d) + ' '
+               + {'ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'}[#temporals.month(d) - 1]
+               + ' ' + (#temporals.year(d) + 543)}">12 ต.ค. 2569</span>
+</body>
+</html>
