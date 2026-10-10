@@ -38,12 +38,61 @@ window.PawAppointments = (() => {
     rows.forEach(([value, label]) => select.add(new Option(label, String(value))));
   }
   function bangkokToday() {
-    const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());
+    const parts = new Intl.DateTimeFormat("en-CA-u-ca-gregory", { timeZone: "Asia/Bangkok", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());
     const part = name => parts.find(p => p.type === name).value;
     return `${part("year")}-${part("month")}-${part("day")}`;
   }
   function formatDate(value) {
-    return new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", dateStyle: "medium", timeStyle: "short" }).format(new Date(`${value}+07:00`));
+    return new Intl.DateTimeFormat("th-TH-u-ca-buddhist", { timeZone: "Asia/Bangkok", day: "numeric", month: "short",
+      year: "numeric", era: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(`${value}+07:00`));
+  }
+  function thaiDatePicker(input) {
+    const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+      "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+    const original = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
+    const fields = document.createElement("div"); fields.className = "thai-date-picker";
+    function field(tag, suffix, caption) {
+      const label = document.createElement("label"); label.textContent = caption;
+      const control = document.createElement(tag); control.id = `${input.id}-${suffix}`;
+      control.required = input.required; label.htmlFor = control.id; label.append(control); fields.append(label);
+      return control;
+    }
+    const day = field("select", "day", "วัน"), month = field("select", "month", "เดือน");
+    const year = field("input", "year", "ปี พ.ศ.");
+    year.type = "number"; year.min = "544"; year.max = "10542"; year.step = "1"; year.inputMode = "numeric";
+    options(month, months.map((name, i) => [i + 1, name]), "เลือกเดือน");
+    function sync() {
+      const value = original.get.call(input);
+      const [y, m, d] = value ? value.split("-").map(Number) : [Number(bangkokToday().slice(0, 4)), 0, 0];
+      year.value = String(y + 543); month.value = m ? String(m) : "";
+      days(d); validate();
+    }
+    function days(selected) {
+      const y = Number(year.value) - 543, m = Number(month.value);
+      const leap = y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0);
+      const count = m ? [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m - 1] : 31;
+      options(day, Array.from({length: count}, (_, i) => [i + 1, i + 1]), "เลือกวัน");
+      day.value = selected ? String(Math.min(selected, count)) : "";
+    }
+    function validate() {
+      day.setCustomValidity(input.value && input.min && input.value < input.min ? "กรุณาเลือกวันที่ตั้งแต่วันนี้เป็นต้นไป" : "");
+    }
+    function update(rebuild) {
+      if (rebuild) days(Number(day.value));
+      const y = Number(year.value) - 543;
+      const value = day.value && month.value && year.validity.valid && Number.isInteger(y)
+        ? `${String(y).padStart(4, "0")}-${month.value.padStart(2, "0")}-${day.value.padStart(2, "0")}` : "";
+      original.set.call(input, value); validate(); input.dispatchEvent(new Event("change", {bubbles: true}));
+    }
+    // Keep the existing ISO value/API contract while all visible controls use Buddhist years.
+    input.type = "hidden"; input.after(fields);
+    Object.defineProperty(input, "value", {get() { return original.get.call(input); },
+      set(value) { original.set.call(input, value); sync(); }});
+    const dateLabel = document.querySelector(`label[for="${input.id}"]`);
+    if (dateLabel) { dateLabel.htmlFor = day.id; }
+    day.addEventListener("change", () => update(false));
+    month.addEventListener("change", () => update(true)); year.addEventListener("input", () => update(true));
+    sync();
   }
   async function lookup(phone) {
     return request("/api/v1/appointment-guests/lookup", { method: "POST", body: JSON.stringify({phone}) });
@@ -68,5 +117,5 @@ window.PawAppointments = (() => {
     url.searchParams.set("returnTo", "appointment");
     return url.pathname + url.search;
   }
-  return { request, query, owner, setOwner, clearOwner, message, options, bangkokToday, formatDate, services, statuses, lookup, session, registration };
+  return { request, query, owner, setOwner, clearOwner, message, options, bangkokToday, formatDate, thaiDatePicker, services, statuses, lookup, session, registration };
 })();
