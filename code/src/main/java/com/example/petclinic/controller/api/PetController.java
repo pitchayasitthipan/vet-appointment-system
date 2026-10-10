@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.petclinic.controller.StaffAccess;
@@ -42,13 +43,16 @@ public class PetController {
     }
 
     // 1. ดูสัตว์เลี้ยงทั้งหมดในคลินิก (แบ่งหน้า) เช่น GET /api/v1/pets?page=0&size=10
-    @Operation(summary = "ดึงข้อมูลสัตว์เลี้ยงทั้งหมด (แบ่งหน้า + เรียงลำดับ) [เฉพาะเจ้าหน้าที่]")
+    //    ค้นหาทั้งคลินิกได้ด้วย ?keyword=โมจิ และกรองประเภทด้วย ?species=Dog|Cat|Other
+    @Operation(summary = "ดึงข้อมูลสัตว์เลี้ยงทั้งหมด (แบ่งหน้า + เรียงลำดับ + ค้นหา/กรองประเภท) [เฉพาะเจ้าหน้าที่]")
     @GetMapping
     public ResponseEntity<Page<PetResponseDTO>> getAllPets(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String species,
             @PageableDefault(size = 10, sort = "petId", direction = Sort.Direction.ASC) Pageable pageable,
             HttpSession session) {
         StaffAccess.requireStaff(session);
-        return ResponseEntity.ok(petService.getAllPets(pageable));
+        return ResponseEntity.ok(petService.searchPets(keyword, species, pageable));
     }
 
     // 2. ดูข้อมูลสัตว์เลี้ยงตาม ID

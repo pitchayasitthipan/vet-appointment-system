@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="th">
+<body>
+
+<!-- รายการสัตว์เลี้ยงของเจ้าของคนหนึ่ง ใช้ร่วมกันในแฟ้มเจ้าของ หน้าค้นหาของลูกค้า และหน้ารายชื่อของเจ้าหน้าที่
+     pets = รายการจาก PetService (โมดูล Pet), ownerId = เจ้าของคนนี้
+     กดแต่ละตัว -> หน้า My Pets (ลูกค้า: /pets ใช้เจ้าของจาก session, เจ้าหน้าที่: /pets?ownerId=) -->
+<th:block th:fragment="list(pets, ownerId)">
+
+  <div th:if="${#lists.isEmpty(pets)}" class="empty">
+    <span class="icon-bubble warm"><span class="icon i-paw-print icon-navy"></span></span>
+    <p>ยังไม่มีข้อมูลสัตว์เลี้ยง</p>
+  </div>
+
+  <ul th:unless="${#lists.isEmpty(pets)}" class="owner-pets">
+    <li th:each="pet : ${pets}">
+      <a class="owner-pet" th:href="${isStaff} ? @{/pets(ownerId=${ownerId})} : @{/pets}">
+
+        <!-- ไอคอนตามประเภทสัตว์ -->
+        <span class="owner-pet-icon"
+              th:classappend="${pet.species == 'Dog'} ? 'dog' : (${pet.species == 'Cat'} ? 'cat' : 'other')">
+          <span class="icon"
+                th:classappend="${pet.species == 'Dog'} ? 'i-dog' : (${pet.species == 'Cat'} ? 'i-cat' : 'i-paw-print')"></span>
+        </span>
+
+        <!-- ชื่อ + ประเภท, สายพันธุ์, เพศ, น้ำหนัก -->
+        <span class="owner-pet-text">
+          <b th:text="${pet.name}">โมจิ</b>
+          <small>
+            <span th:text="${pet.species == 'Dog'} ? 'สุนัข' : (${pet.species == 'Cat'} ? 'แมว' : 'อื่น ๆ')">สุนัข</span>
+            <th:block th:unless="${#strings.isEmpty(pet.breed)}"> · <span th:text="${pet.breed}">ชิบะ อินุ</span></th:block>
+            <th:block th:unless="${#strings.isEmpty(pet.gender)}"> · <span
+                th:text="${pet.gender == 'Male'} ? 'เพศผู้' : (${pet.gender == 'Female'} ? 'เพศเมีย' : ${pet.gender})">เพศผู้</span></th:block>
+            <th:block th:if="${pet.weight != null}"> · <span th:text="${pet.weight} + ' กก.'">8.2 กก.</span></th:block>
+          </small>
+        </span>
+
+        <span class="icon i-caret-right icon-sm"></span>
+      </a>
+    </li>
+  </ul>
+
+</th:block>
+
+</body>
+</html>

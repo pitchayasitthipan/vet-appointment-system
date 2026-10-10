@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -22,16 +23,19 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.example.petclinic.dto.response.PetOwnerResponseDTO;
+import com.example.petclinic.dto.response.PetResponseDTO;
 import com.example.petclinic.exception.DuplicateResourceException;
 import com.example.petclinic.service.PetOwnerService;
+import com.example.petclinic.service.PetService;
 import com.example.petclinic.service.StaffPasscodeService;
-import static org.mockito.ArgumentMatchers.anyString;
 
 // ทดสอบการแบ่งสิทธิ์ 2 ฝั่ง: ลูกค้า (ค้นด้วยเบอร์ตัวเอง) และ เจ้าหน้าที่ (รหัส 8 หลัก)
 @WebMvcTest(PetOwnerWebController.class)
@@ -45,6 +49,10 @@ class PetOwnerWebControllerTest {
 
     @MockitoBean
     private StaffPasscodeService staffPasscodeService;
+
+    // แฟ้มเจ้าของดึงรายการสัตว์เลี้ยงจากโมดูล Pet
+    @MockitoBean
+    private PetService petService;
 
     private PetOwnerResponseDTO owner;
 
@@ -179,5 +187,72 @@ class PetOwnerWebControllerTest {
         mockMvc.perform(post("/owners/1/delete").session(session))
                 .andExpect(redirectedUrl("/owners/staff"))
                 .andExpect(flash().attribute("errorMessage", "ไม่สามารถลบเจ้าของที่ยังมีสัตว์เลี้ยงในระบบได้"));
+    }
+
+    // รายการสัตว์เลี้ยงในแฟ้มเจ้าของ (ข้อมูลจากโมดูล Pet)
+
+    private PetResponseDTO pet(Long id, String name, String species) {
+        PetResponseDTO pet = new PetResponseDTO();
+        pet.setPetId(id);
+        pet.setName(name);
+        pet.setSpecies(species);
+        pet.setGender("Male");
+        pet.setOwnerId(1L);
+        return pet;
+    }
+
+    @Test
+    @DisplayName("แฟ้มเจ้าของ: แสดงสัตว์เลี้ยงจริงของเจ้าของคนนั้น")
+    void testDetail_ShowsOwnerPets() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("isStaff", true);
+        given(petOwnerService.getPetOwnerById(1L)).willReturn(owner);
+        given(petService.getPetsByOwnerId(1L)).willReturn(List.of(pet(10L, "Milo", "Dog"), pet(11L, "Luna", "Cat")));
+
+        mockMvc.perform(get("/owners/1").session(session))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("pets", org.hamcrest.Matchers.hasSize(2)))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Milo")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("สุนัข")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("(2 ตัว)")));
+    }
+
+    @Test
+    @DisplayName("แฟ้มเจ้าของ: ยังไม่มีสัตว์ -> ขึ้นกล่องว่าง")
+    void testDetail_NoPets_ShowsEmpty() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("isStaff", true);
+        given(petOwnerService.getPetOwnerById(1L)).willReturn(owner);
+        given(petService.getPetsByOwnerId(1L)).willReturn(List.of());
+
+        mockMvc.perform(get("/owners/1").session(session))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("ยังไม่มีข้อมูลสัตว์เลี้ยง")));
+    }
+
+    @Test
+    @DisplayName("ลูกค้าค้นหาเบอร์เจอ: แสดงสัตว์เลี้ยงของตัวเอง")
+    void testSearch_ShowsOwnerPets() throws Exception {
+        given(petOwnerService.getPetOwnerByPhone("0876543210")).willReturn(owner);
+        given(petService.getPetsByOwnerId(1L)).willReturn(List.of(pet(10L, "Milo", "Dog")));
+
+        mockMvc.perform(get("/owners").param("phone", "0876543210"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("pets", org.hamcrest.Matchers.hasSize(1)))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Milo")));
+    }
+
+    @Test
+    @DisplayName("เจ้าหน้าที่: กล่องข้อมูลย่อของคนที่เลือก แสดงสัตว์เลี้ยงของคนนั้น")
+    void testStaffList_ShowsSelectedOwnerPets() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("isStaff", true);
+        given(petOwnerService.getAllPetOwners(any(Pageable.class))).willReturn(new PageImpl<>(List.of(owner)));
+        given(petService.getPetsByOwnerId(1L)).willReturn(List.of(pet(10L, "Milo", "Dog")));
+
+        mockMvc.perform(get("/owners/staff").session(session))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("pets", org.hamcrest.Matchers.hasSize(1)))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("/pets?ownerId=1")));
     }
 }

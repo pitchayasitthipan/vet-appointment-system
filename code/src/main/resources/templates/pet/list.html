@@ -10,43 +10,68 @@
     <link rel="stylesheet" th:href="@{/css/icons.css}">
     <link rel="stylesheet" th:href="@{/css/pets.css}">
 </head>
-<!-- data-owner-id: เจ้าของที่กำลังดู (ลูกค้ามาจาก session, เจ้าหน้าที่เลือกจาก ownerId=) ให้ pets.js ใช้เรียก API -->
-<!-- data-open-add: มาจาก /pets/new -> เปิดฟอร์มเพิ่มสัตว์ทันที -->
-<body th:attr="data-owner-id=${owner.ownerId},data-open-add=${openAddForm}">
+<!-- ข้อมูลให้ pets.js
+     data-owner-id: เจ้าของที่กำลังดู (ลูกค้ามาจาก session, เจ้าหน้าที่เลือกจาก ?ownerId=) ว่าง = เจ้าหน้าที่ดูสัตว์ทั้งหมด
+     data-staff: เป็นเจ้าหน้าที่หรือไม่ (isStaff มาจาก WebModelAdvice)
+     data-open-add: มาจาก /pets/new -> เปิดฟอร์มเพิ่มสัตว์ทันที
+     data-return-to-appointment: มาจากหน้าจองนัด -> เพิ่มเสร็จแล้วกลับไปจองนัดต่อ -->
+<body th:attr="data-owner-id=${owner != null ? owner.ownerId : ''},
+               data-staff=${isStaff},
+               data-open-add=${openAddForm},
+               data-return-to-appointment=${returnToAppointment == true}">
 
     <nav th:replace="~{fragments/layout :: navbar('pets')}"></nav>
 
     <main class="pets-page">
 
-        <!-- Hero -->
+        <!-- Hero: หัวข้อ ตัวเลขสรุป และปุ่มหลัก -->
         <section class="pets-hero">
             <div class="pets-hero-content">
-                <span class="eyebrow"><span class="icon i-paw-print icon-sm icon-pink"></span> MY PETS</span>
-                <h1>สัตว์เลี้ยงของฉัน</h1>
-                <p class="pets-owner-name">ของคุณ <strong th:text="${owner.firstName + ' ' + owner.lastName}">John Doe</strong></p>
-                <p>จัดการข้อมูลสัตว์เลี้ยงของคุณ ดูรายละเอียดและข้อมูลสุขภาพเบื้องต้นได้ในที่เดียว</p>
 
-                <div class="hero-highlights">
-                    <span><i class="icon i-paw-print icon-sm icon-pink"></i> ข้อมูลสัตว์เลี้ยง</span>
-                    <span><i class="icon i-eye icon-sm icon-pink"></i> ดูรายละเอียดได้ง่าย</span>
-                    <span><i class="icon i-note-pencil icon-sm icon-pink"></i> จัดการข้อมูลได้สะดวก</span>
-                </div>
+                <!-- เจ้าหน้าที่ดูของเจ้าของคนเดียว: ลิงก์กลับแฟ้ม -->
+                <a th:if="${isStaff and owner != null}" class="pets-backlink"
+                   th:href="@{/owners/{id}(id=${owner.ownerId})}">
+                    <span class="icon i-arrow-left icon-sm"></span>
+                    <span th:text="'กลับไปแฟ้ม #' + ${#numbers.formatInteger(owner.ownerId, 4)}">กลับไปแฟ้ม #0036</span>
+                </a>
+
+                <span th:if="${isStaff}" class="staff-badge">
+                    <span class="icon i-identification-card icon-sm"></span> สำหรับเจ้าหน้าที่คลินิก
+                </span>
+                <span th:unless="${isStaff}" class="eyebrow">
+                    <span class="icon i-paw-print icon-sm"></span> MY PETS
+                </span>
+
+                <h1 th:if="${allPets}">สัตว์เลี้ยงทั้งหมดในคลินิก</h1>
+                <h1 th:if="${!allPets and isStaff}" th:text="'สัตว์เลี้ยงของ ' + ${owner.firstName + ' ' + owner.lastName}">สัตว์เลี้ยงของ John Doe</h1>
+                <h1 th:if="${!allPets and !isStaff}" th:text="'สัตว์เลี้ยงของคุณ ' + ${owner.firstName + ' ' + owner.lastName}">สัตว์เลี้ยงของคุณ John Doe</h1>
+
+                <p th:if="${allPets}">ดูสัตว์เลี้ยงของทุกแฟ้ม กดชื่อเจ้าของเพื่อเปิดแฟ้ม หรือจองนัดให้ได้ทันที</p>
+                <p th:if="${!allPets and isStaff}">
+                    แฟ้ม #<span th:text="${#numbers.formatInteger(owner.ownerId, 4)}">0036</span> ·
+                    <span th:replace="~{fragments/layout :: phone(${owner.phone})}"></span>
+                </p>
+                <p th:if="${!allPets and !isStaff}">ดูข้อมูล แก้ไข และจองนัดให้เพื่อนตัวน้อยได้จากหน้านี้</p>
+
+                <!-- ตัวเลขสรุป: pets.js เติมจากข้อมูลจริง -->
+                <div id="petStats" class="pet-stats"></div>
+            </div>
+
+            <div class="hero-actions">
+                <a th:if="${allPets}" th:href="@{/owners/staff}" class="btn-primary">
+                    <span class="icon i-users icon-white"></span> รายชื่อเจ้าของ</a>
+                <button th:unless="${allPets}" type="button" class="btn-primary" onclick="openAddPetModal()">
+                    <span class="icon i-plus icon-white"></span> เพิ่มสัตว์เลี้ยง</button>
+
+                <a th:if="${allPets}" th:href="@{/appointments/new}" class="btn-secondary">
+                    <span class="icon i-calendar-plus"></span> จองนัดหมาย</a>
+                <a th:unless="${allPets}" th:href="@{/appointments/new(ownerId=${owner.ownerId})}" class="btn-secondary">
+                    <span class="icon i-calendar-plus"></span> จองนัดหมาย</a>
             </div>
         </section>
 
         <!-- Pet list -->
         <section class="pets-content">
-            <div class="pets-section-heading">
-                <div>
-                    <span class="eyebrow">YOUR LOVELY COMPANIONS</span>
-                    <h2>รายการสัตว์เลี้ยง</h2>
-                    <p id="petCountText">ดูแลข้อมูลเพื่อนตัวน้อยของคุณ</p>
-                </div>
-
-                <button class="primary-button" type="button" onclick="openAddPetModal()">
-                    <span class="icon i-plus icon-sm icon-white"></span> เพิ่มสัตว์เลี้ยง
-                </button>
-            </div>
 
             <div class="pets-toolbar">
                 <label class="pet-search-box" for="petSearchInput">
@@ -54,22 +79,33 @@
                     <input
                         type="search"
                         id="petSearchInput"
-                        placeholder="ค้นหาชื่อสัตว์เลี้ยง หรือสายพันธุ์..."
+                        placeholder="ค้นหาชื่อ ประเภท หรือสายพันธุ์..."
                         autocomplete="off">
                 </label>
 
-                <div class="pet-toolbar-note">
-                    <span class="status-dot"></span>
-                    จัดการข้อมูลสัตว์เลี้ยงของคุณ
+                <!-- ปุ่มกรองตามประเภท (data-filter ตรงกับค่า species ในฐานข้อมูล) -->
+                <div class="pet-filters" id="petFilters">
+                    <button type="button" class="pet-filter active" data-filter="all">ทั้งหมด</button>
+                    <button type="button" class="pet-filter" data-filter="Dog">
+                        <span class="icon i-dog icon-sm"></span> สุนัข</button>
+                    <button type="button" class="pet-filter" data-filter="Cat">
+                        <span class="icon i-cat icon-sm"></span> แมว</button>
+                    <button type="button" class="pet-filter" data-filter="Other">
+                        <span class="icon i-paw-print icon-sm"></span> อื่น ๆ</button>
                 </div>
             </div>
 
-            <div id="petCardsContainer" class="pet-cards-container">
+            <p id="petCountText" class="pets-count">กำลังโหลด...</p>
+
+            <div id="petCardsContainer" class="pet-grid">
                 <div class="pets-loading">
-                    <span class="icon i-paw-print icon-lg icon-pink loading-paw"></span>
+                    <span class="icon i-paw-print icon-lg loading-paw"></span>
                     <p>กำลังโหลดข้อมูลสัตว์เลี้ยง...</p>
                 </div>
             </div>
+
+            <!-- แบ่งหน้า: ใช้เฉพาะเจ้าหน้าที่ดูสัตว์ทั้งหมด (GET /api/v1/pets?page=) -->
+            <div id="petPager" class="pets-pager" hidden></div>
 
             <div class="pets-bottom-note">
                 <span class="icon i-heart icon-sm"></span>

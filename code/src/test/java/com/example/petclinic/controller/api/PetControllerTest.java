@@ -126,11 +126,25 @@ class PetControllerTest {
     @Test
     @DisplayName("GET /api/v1/pets: เจ้าหน้าที่ดูทั้งหมดแบบแบ่งหน้าได้ 200")
     void getAllPets_staff_returns200() throws Exception {
-        given(petService.getAllPets(any(Pageable.class))).willReturn(new PageImpl<>(List.of(responseDTO)));
+        given(petService.searchPets(any(), any(), any(Pageable.class))).willReturn(new PageImpl<>(List.of(responseDTO)));
 
         mockMvc.perform(get("/api/v1/pets").session(staffSession))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].name").value("Milo"));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/pets?keyword=&species=: ส่งคำค้นและประเภทไปค้นทั้งคลินิกที่ Service")
+    void getAllPets_withKeywordAndSpecies_passesToService() throws Exception {
+        given(petService.searchPets(eq("Milo"), eq("Dog"), any(Pageable.class)))
+                .willReturn(new PageImpl<>(List.of(responseDTO)));
+
+        mockMvc.perform(get("/api/v1/pets").param("keyword", "Milo").param("species", "Dog")
+                .param("page", "2").session(staffSession))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].name").value("Milo"));
+
+        verify(petService).searchPets(eq("Milo"), eq("Dog"), any(Pageable.class));
     }
 
     @Test

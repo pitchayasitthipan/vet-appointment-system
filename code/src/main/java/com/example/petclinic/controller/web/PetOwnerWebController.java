@@ -1,6 +1,4 @@
 package com.example.petclinic.controller.web;
-import com.example.petclinic.service.StaffPasscodeService;
-
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -24,6 +22,8 @@ import com.example.petclinic.dto.response.PetOwnerResponseDTO;
 import com.example.petclinic.exception.DuplicateResourceException;
 import com.example.petclinic.exception.ResourceNotFoundException;
 import com.example.petclinic.service.PetOwnerService;
+import com.example.petclinic.service.PetService;
+import com.example.petclinic.service.StaffPasscodeService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -40,13 +40,18 @@ public class PetOwnerWebController {
 
     private final PetOwnerService petOwnerService;
 
+    // ใช้ดึงรายการสัตว์เลี้ยงของเจ้าของมาแสดงในแฟ้ม (โมดูล Pet)
+    private final PetService petService;
+
     // รหัสเจ้าหน้าที่ 8 หลัก (ใช้รหัสเดียวทั้งคลินิก)
     // อ่านรหัสจาก clinic.staff-passcode ซึ่งกำหนดผ่าน Environment Variable
     private final StaffPasscodeService staffPasscodeService;
 
     public PetOwnerWebController(PetOwnerService petOwnerService,
+            PetService petService,
             StaffPasscodeService staffPasscodeService) {
         this.petOwnerService = petOwnerService;
+        this.petService = petService;
         this.staffPasscodeService = staffPasscodeService;
     }
 
@@ -61,6 +66,7 @@ public class PetOwnerWebController {
                 PetOwnerResponseDTO owner = petOwnerService.getPetOwnerByPhone(phone.trim());
                 session.setAttribute(MY_OWNER_ID, owner.getOwnerId());
                 model.addAttribute("owner", owner);
+                model.addAttribute("pets", petService.getPetsByOwnerId(owner.getOwnerId()));
             } catch (ResourceNotFoundException e) {
                 // ไม่เจอเบอร์ -> แสดงปุ่มไปหน้าลงทะเบียนใหม่
                 model.addAttribute("notFound", true);
@@ -121,6 +127,10 @@ public class PetOwnerWebController {
 
         model.addAttribute("owners", owners);
         model.addAttribute("selectedOwner", selectedOwner);
+        // สัตว์เลี้ยงของคนที่เลือก (แสดงในกล่องข้อมูลย่อฝั่งขวา)
+        if (selectedOwner != null) {
+            model.addAttribute("pets", petService.getPetsByOwnerId(selectedOwner.getOwnerId()));
+        }
         model.addAttribute("phone", phone);
         model.addAttribute("currentPage", page);
         model.addAttribute("sortBy", sortBy);
@@ -178,6 +188,7 @@ public class PetOwnerWebController {
         try {
             PetOwnerResponseDTO owner = petOwnerService.getPetOwnerById(id);
             model.addAttribute("owner", owner);
+            model.addAttribute("pets", petService.getPetsByOwnerId(id));
             return "petowner/detail";
         } catch (ResourceNotFoundException e) {
             // ไม่พบข้อมูล -> กลับไปหน้ารายชื่อ พร้อมแจ้งเตือน

@@ -100,16 +100,16 @@
     </div>
 
     <div>
-    <!-- 3. สัตว์เลี้ยง: ข้อมูลมาจากโมดูล Pet -->
+    <!-- 3. สัตว์เลี้ยง: ข้อมูลมาจากโมดูล Pet (รายการจริงจาก PetService) -->
     <div class="sec">
       <div class="sec-h">
-        <span class="no" th:text="${isStaff} ? 3 : 2">3</span><h2>สัตว์เลี้ยง</h2>
+        <span class="no" th:text="${isStaff} ? 3 : 2">3</span>
+        <h2>สัตว์เลี้ยง <small class="muted-note" th:text="'(' + ${#lists.size(pets)} + ' ตัว)'">(2 ตัว)</small></h2>
         <a th:href="@{/pets/new(ownerId=${owner.ownerId})}" class="btn-mini">
           <span class="icon i-plus icon-sm"></span> เพิ่มสัตว์เลี้ยง</a>
       </div>
-      <div class="empty">
-        <span class="icon-bubble warm"><span class="icon i-paw-print icon-navy"></span></span>
-        <p>ยังไม่มีข้อมูลสัตว์เลี้ยง</p>
+      <div class="sec-b">
+        <div th:replace="~{fragments/owner-pets :: list(${pets}, ${owner.ownerId})}"></div>
       </div>
     </div>
 
