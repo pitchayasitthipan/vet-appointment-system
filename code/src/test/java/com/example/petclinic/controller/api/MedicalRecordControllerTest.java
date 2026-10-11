@@ -3,13 +3,12 @@ package com.example.petclinic.controller.api;
 
 import java.util.List;
 
-import com.example.petclinic.dto.request.MedicalRecordRequestDTO;
-import com.example.petclinic.dto.response.MedicalRecordResponseDTO;
-import com.example.petclinic.exception.ResourceNotFoundException;
-import com.example.petclinic.service.MedicalRecordService;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.PageImpl;
@@ -17,18 +16,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.example.petclinic.dto.request.MedicalRecordRequestDTO;
+import com.example.petclinic.dto.response.MedicalRecordResponseDTO;
+import com.example.petclinic.exception.ResourceNotFoundException;
+import com.example.petclinic.service.MedicalRecordService;
 
 @WebMvcTest(MedicalRecordController.class)
 class MedicalRecordControllerTest {
@@ -283,5 +281,26 @@ class MedicalRecordControllerTest {
 
         verify(medicalRecordService, never())
                 .deleteMedicalRecord(1L);
+    }
+
+    @Test
+    @DisplayName("POST - ชื่อวัคซีนยาวเกิน 150 ตัว (ความยาวคอลัมน์ vaccine_name) ต้องคืน 400")
+    void createMedicalRecord_vaccineNameTooLong() throws Exception {
+        String invalidJson = """
+                {
+                    "appointmentId": 1,
+                    "vaccineName": "%s"
+                }
+                """.formatted("ว".repeat(151));
+
+        mockMvc.perform(post("/api/v1/medical-records")
+                        .sessionAttr("isStaff", true)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.vaccineName").exists());
+
+        verify(medicalRecordService, never())
+                .createMedicalRecord(any(MedicalRecordRequestDTO.class));
     }
 }

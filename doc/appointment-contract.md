@@ -9,6 +9,8 @@ tests และเอกสาร ไม่รวม merge commit, Pet CRUD, Pet
 
 ## ข้อมูลและกฎ
 - appointment: appointment_id, pet_id, doctor_id, appointment_date_time, service_type, status, symptoms, preparation_instructions, version
+- หน้า Appointment แสดงและเลือกปี พ.ศ. ทั้งหน้าจอง/เลื่อนนัด/รายการ/ข้อความยืนยัน; ช่องวันและเดือนเป็นภาษาไทยและปีระบุ พ.ศ. ชัดเจน
+- ข้อมูลส่ง API และเก็บฐานข้อมูลยังเป็น ISO ค.ศ. โดยแปลง พ.ศ. ลบ 543; การคำนวณคิว/วันอธิกสุรทิน/min date ใช้ปฏิทิน Gregorian และเวลา Bangkok
 - บริการ CONSULTATION/VACCINE/SURGERY; สถานะ PENDING/CONFIRMED/COMPLETED/CANCELLED
 - วันเวลา ISO ใน Asia/Bangkok; ช่อง 30 นาทีตรงนาที 00/30 อยู่ในเวลาคลินิกและเวรหมอ
 - PENDING/CONFIRMED จองคิว; CANCELLED คืนคิว; COMPLETED แก้ไขไม่ได้

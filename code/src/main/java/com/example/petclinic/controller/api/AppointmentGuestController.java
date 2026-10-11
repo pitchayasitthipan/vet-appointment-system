@@ -20,7 +20,7 @@ public class AppointmentGuestController {
     private final String registrationPath;
     @Value("${appointments.owner-registration-enabled:true}")
     private boolean registrationEnabled;
-    @Value("${appointments.pet-registration-enabled:false}")
+    @Value("${appointments.pet-registration-enabled:true}")
     private boolean petRegistrationEnabled;
     public AppointmentGuestController(AppointmentGuestService service,
             @Value("${appointments.owner-registration-path:/owners/new}") String registrationPath) {

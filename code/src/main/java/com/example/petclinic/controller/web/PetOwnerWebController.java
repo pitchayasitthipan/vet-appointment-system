@@ -1,5 +1,6 @@
 package com.example.petclinic.controller.web;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,6 +38,8 @@ import jakarta.validation.Valid;
 public class PetOwnerWebController {
 
     private static final String MY_OWNER_ID = "myOwnerId"; // session: ลูกค้าค้นเจอเบอร์ตัวเองแล้ว
+    private static final Set<String> ALLOWED_OWNER_SORTS = Set.of(
+            "ownerId", "firstName", "lastName", "phone", "email", "createdAt");
 
     private final PetOwnerService petOwnerService;
 
@@ -59,6 +62,11 @@ public class PetOwnerWebController {
     @GetMapping
     public String searchByPhone(@RequestParam(required = false) String phone, HttpSession session, Model model) {
         model.addAttribute("phone", phone);
+
+        // A new phone search must never retain access to the previous owner's record.
+        if (phone != null) {
+            session.removeAttribute(MY_OWNER_ID);
+        }
 
         if (phone != null && !phone.isBlank()) {
             try {
@@ -106,7 +114,12 @@ public class PetOwnerWebController {
             model.addAttribute("totalPages", 0);
             model.addAttribute("totalItems", owners.size());
         } else {
-            Sort sort = sortDir.equalsIgnoreCase("asc")
+            // Never pass untrusted sort names or invalid page sizes to Spring Data.
+            sortBy = ALLOWED_OWNER_SORTS.contains(sortBy) ? sortBy : "firstName";
+            sortDir = "desc".equalsIgnoreCase(sortDir) ? "desc" : "asc";
+            page = Math.max(0, page);
+            size = Math.max(1, Math.min(size, 100));
+            Sort sort = "asc".equals(sortDir)
                     ? Sort.by(sortBy).ascending()
                     : Sort.by(sortBy).descending();
             Pageable pageable = PageRequest.of(page, size, sort);
